@@ -10,5 +10,10 @@ import pandas as pd
 """Process the AOS spaces billet export Pandas DF(s)"""
 def process_aos_billet_export(aos_billet_export):
     aos_billet_export["stage_matched"] = 0
+    aos_billet_export.rename(columns = {
+                        "PARENT_UIC" : "UIC",
+                        "PARENT_PARNO" : "PARNO",
+                        "PERLN" : "LN"
+            })
     return aos_billet_export
 

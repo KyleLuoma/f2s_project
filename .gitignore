@@ -5,4 +5,5 @@
 #directories
 /data/*
 /export/*
+/output/*
 /__pycache__/*

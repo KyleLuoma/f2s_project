@@ -14,14 +14,16 @@ def load_drrsa_file():
 
 """ Retrieve AOS Billet Export for Army Commands """
 def load_army_command_aos_billets():
-    return pd.read_csv()
+    return pd.read_csv("./data/AOS_ARMY_COMMANDS_FY21.csv")
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
-    return pd.read_csv("./data/emilpo_assigned_excess_01142020.csv").append(
-            pd.read_csv("./data/rcms_assigned_excess_01132020.csv")
-            )
+    return pd.read_csv("./data/emilpo_assigned_excess_01142020.csv")
 
 """ Retreive match phases file """
 def load_match_phases():
-    return pd.read_csv("./data/match_phases.csv")
+    return pd.read_csv("./data/match_phases.csv").set_index("STAGE")
+
+""" Retrieve rank grade crosswalk file """
+def load_rank_grade_xwalk():
+    return pd.read_csv("./data/rank_grade_xwalk.csv").set_index("RANK")

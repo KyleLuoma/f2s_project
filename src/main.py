@@ -8,15 +8,17 @@ import pandas as pd
 import numpy as np
 import math
 import load_data
+import process_data
 import utility
 
 def main():
     print("You need to write some code here")
-    criteria = pd.Series(data = ["UIC", "PARA", "LN"])
     
-    drrsa = load_drrsa_file()
-    acom_spaces = load_army_command_aos_billets()
-    faces = load_emilpo()
+    drrsa = load_data.load_drrsa_file()
+    acom_spaces = load_data.load_army_command_aos_billets()
+    faces = load_data.load_emilpo()
+    match_phases = load_data.load_match_phases()
+    rank_grade_xwalk = load_data.load_rank_grade_xwalk()
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -28,7 +30,7 @@ def main():
 " Returns: updated spaces and faces DFs with matched faces removed from faces
 " and matching SSN mask added to spaces DF
 """
-def match(criteria, spaces, faces, step):
+def match(criteria, spaces, faces, stage):
     #Iterate through every person in faces file
     #Attempt to locate a matching vacant position based on provided criteria
     #If match: pop row from faces, add SSN mask to space match
