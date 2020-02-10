@@ -17,3 +17,10 @@ def process_aos_billet_export(aos_billet_export):
             })
     return aos_billet_export
 
+"""Process the EMILPO faces assignment file Pandas DF"""
+def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
+    print("Mapping grade to rank in the eMILPO assignments file")
+    emilpo_assignments["GRADE"] = emilpo_assignments.apply(
+            lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, axis = 1
+            )
+    return emilpo_assignments
