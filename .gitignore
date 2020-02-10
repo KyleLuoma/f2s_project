@@ -1,0 +1,8 @@
+# Spyer project settings
+.spyderproject
+.spyproject
+
+#directories
+/data/*
+/export/*
+/__pycache__/*
