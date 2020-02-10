@@ -22,3 +22,6 @@ def load_emilpo():
             pd.read_csv("./data/rcms_assigned_excess_01132020.csv")
             )
 
+""" Retreive match phases file """
+def load_match_phases():
+    return pd.read_csv("./data/match_phases.csv")
