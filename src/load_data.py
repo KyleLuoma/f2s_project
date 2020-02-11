@@ -7,6 +7,7 @@ Sources include DRRSA UIC file and AOS tree export
 """
 
 import pandas as pd
+import numpy as np
 
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
@@ -14,11 +15,82 @@ def load_drrsa_file():
 
 """ Retrieve AOS Billet Export for Army Commands """
 def load_army_command_aos_billets():
-    return pd.read_csv("../data/AOS_ARMY_COMMANDS_FY21.csv")
+    return pd.read_csv(
+            "../data/AOS_ARMY_COMMANDS_FY21.csv", 
+            dtype = {
+                    'PARENT_PARNO': str,    
+                    'FMID': np.int64,
+                    'PERLN': str,
+                    'GRADE': str,
+                    'POSCO': str,
+                    'ASI1': str,
+                    'ASI2': str,
+                    'ASI3': str,
+                    'ASI4': str,
+                    'SQI1': str,
+                    'RMK1': str,
+                    'RMK2': str,
+                    'RMK3': str,
+                    'RMK4': str,
+                    'AMSCO': str,
+                    'MDEP': str,
+                    'BRANCH': str,
+                    'CTYPE': str
+                    })
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
-    return pd.read_csv("../data/EMILPO_ASI_SQI_MOSAOC_ASSIGNMENTS_9FEB2020_WITH_KEY_MASK_NO_SSN.csv")
+    return pd.read_csv(
+            "../data/EMILPO_ASI_SQI_MOSAOC_ASSIGNMENTS_9FEB2020_WITH_KEY_MASK_NO_SSN.csv",
+            dtype = {
+                    "PARNO": str,
+                    "LN": str,
+                    "MIL_POSN_RPT_NR": str,
+                    "MOS_AOC1": str,
+                    "MOS_AOC2": str,
+                    "MOS_AOC3": str,
+                    "MOS_AOC4": str,
+                    "MOS_AOC5": str,
+                    "MOS_AOC6": str,
+                    "MOS_AOC7": str,
+                    "MOS_AOC8": str,
+                    "MOS_AOC9": str,
+                    "MOS_AOC10": str,
+                    "MOS_AOC11": str,
+                    "MOS_AOC12": str,
+                    "MOS_AOC13": str,
+                    "SQI1": str,
+                    "SQI2": str,
+                    "SQI3": str,
+                    "SQI4": str,
+                    "SQI5": str,
+                    "SQI6": str,
+                    "SQI7": str,
+                    "SQI8": str,
+                    "SQI9": str,
+                    "SQI10": str,
+                    "SQI11": str,
+                    "SQI12": str,
+                    "SQI13": str,
+                    "SQI14": str,
+                    "SQI15": str,
+                    "SQI16": str,
+                    "ASI1": str,
+                    "ASI2": str,
+                    "ASI3": str,
+                    "ASI4": str,
+                    "ASI5": str,
+                    "ASI6": str,
+                    "ASI7": str,
+                    "ASI8": str,
+                    "ASI9": str,
+                    "ASI10": str,
+                    "ASI11": str,
+                    "ASI12": str,
+                    "ASI13": str,
+                    "ASI14": str
+                    }
+            )
 
 """ Retreive match phases file """
 def load_match_phases():
@@ -27,3 +99,6 @@ def load_match_phases():
 """ Retrieve rank grade crosswalk file """
 def load_rank_grade_xwalk():
     return pd.read_csv("../data/rank_grade_xwalk.csv").set_index("RANK")
+
+#emilpo: (17,29,30,31,32,46,47,48,49,50,51)
+    
