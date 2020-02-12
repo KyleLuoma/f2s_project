@@ -81,6 +81,8 @@ def match(criteria, spaces, faces, stage):
         spaces_index_labels.append("SQI1")
         
     #Set the multi index for spaces and faces files
+    faces = faces.reset_index(drop = True)
+    spaces = spaces.reset_index(drop = True)    
     
     print("Spaces multi-index set to: ", end = "")
     for i in range (0 , len(spaces_index_labels)):
@@ -97,7 +99,16 @@ def match(criteria, spaces, faces, stage):
     spaces = spaces.set_index(pd.MultiIndex.from_frame(spaces_index))
     
     #Iterate through every person in faces file
-    
+    for row in faces.itertuples():
+        try:
+            #Index matching:
+            sub_spaces = spaces.loc[row.Index]
+            #Drop already matched positions:
+            sub_spaces = sub_spaces.where(sub_spaces.SSN_MASK == 0)
+            print(row.Index, str(sub_spaces.shape))
+            
+        except Exception:
+            print(Exception)
             
         
     #Attempt to locate a matching vacant position based on provided criteria

@@ -74,6 +74,7 @@ def process_aos_billet_export(aos_billet_export):
     print("Processing AOS billet export file")
     print("  - Renaming columns")
     aos_billet_export["stage_matched"] = 0
+    aos_billet_export["SSN_MASK"] = 0
     aos_billet_export = aos_billet_export.rename(columns = {
                         "PARENT_UIC" : "UIC",
                         "PARENT_PARNO" : "PARNO",
