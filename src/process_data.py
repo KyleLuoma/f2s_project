@@ -183,5 +183,5 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
                     ]).dropna().to_list(),
                     axis = 1
             )
-    
+        
     return emilpo_assignments

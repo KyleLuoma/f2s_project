@@ -13,6 +13,7 @@ import process_data
 import utility
 
 LOAD_AND_PROCESS = False
+VERBOSE = False
 
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk
@@ -35,7 +36,9 @@ def main():
         faces = process_data.categorical_faces(faces)
     
     for i in range(1, match_phases.shape[0] + 1):
-        match(match_phases, acom_spaces, faces, i)
+        match(match_phases, 
+              acom_spaces.where(acom_spaces.UIC == "WJKCAA").dropna(how = "all"), 
+              faces.where(faces.UIC == "WJKCAA").dropna(how = "all"), i)
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -80,35 +83,57 @@ def match(criteria, spaces, faces, stage):
     if(criteria.SQI.loc[stage]):
         spaces_index_labels.append("SQI1")
         
+    spaces_index_labels.append("FMID")
+        
     #Set the multi index for spaces and faces files
     faces = faces.reset_index(drop = True)
     spaces = spaces.reset_index(drop = True)    
-    
-    print("Spaces multi-index set to: ", end = "")
-    for i in range (0 , len(spaces_index_labels)):
-        print(spaces_index_labels[i] + " ", end = "")
-    print("\nFaces multi-index set to: ", end = "")
-    for i in range (0, len(faces_index_labels)):
-        print(faces_index_labels[i] + " ", end = "")
-    print("\n")
-        
+
     faces_index = faces[faces_index_labels]
     faces = faces.set_index(pd.MultiIndex.from_frame(faces_index))
     
     spaces_index = spaces[spaces_index_labels]
     spaces = spaces.set_index(pd.MultiIndex.from_frame(spaces_index))
     
+    print("Spaces multi-index set to: ", end = "")
+    print(spaces.index)
+
+    print("\nFaces multi-index set to: ", end = "")
+    print(faces.index)
+    
+    counter = 0
+    stage_matched = 0
+    exception_count = 0
+    
+    print("Matching stage ", str(stage))
     #Iterate through every person in faces file
     for row in faces.itertuples():
+        counter += 1
         try:
             #Index matching:
             sub_spaces = spaces.loc[row.Index]
             #Drop already matched positions:
             sub_spaces = sub_spaces.where(sub_spaces.SSN_MASK == 0)
-            print(row.Index, str(sub_spaces.shape))
+            
+            if(VERBOSE):
+                print("Faces index", row.Index, "type:", type(row.Index))
+                print("Joined tuple:", row.Index + (sub_spaces.iloc[0].FMID,))
+                
+            spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "SSN_MASK"] = row.SSN_MASK
+            spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "stage_matched"] = stage
+            stage_matched += 1
             
         except Exception:
-            print(Exception)
+            if(VERBOSE):
+                print(Exception.with_traceback)
+            exception_count += 1
+        
+        if(counter % 100 == 0):
+            print(".", end = "")
+        if(counter % 5000 == 0):
+            print("\nrecords reviewed:", str(counter), 
+                  " Matched:", str(stage_matched),
+                  " Exceptions:", str(exception_count))
             
         
     #Attempt to locate a matching vacant position based on provided criteria
