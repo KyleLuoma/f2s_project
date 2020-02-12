@@ -135,6 +135,12 @@ def match(criteria, spaces, faces, stage):
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
             
+    print("STAGE", str(stage), "Total records reviewed:", str(counter), 
+                  " Matched:", str(stage_matched),
+                  " Exceptions:", str(exception_count))
+    
+ 
+            
         
     #Attempt to locate a matching vacant position based on provided criteria
     #If match: pop row from faces, add SSN mask to space match
