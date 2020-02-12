@@ -7,26 +7,69 @@ Module to process data files loaded for F2S matching
 
 import pandas as pd
 
-"""Process the AOS spaces billet export Pandas DF(s)"""
+"""Match phase headers
+" STAGE,UIC,PARNO,LN,GRADE,PRI_MOS,ALT_MOS,SQI,ASI,
+" GRADE_VAR_UP,GRADE_VAR_DN,TEMPLET
+"""
+
+"""Process the AOS spaces billet export Pandas DF(s)
+" AOS headers: PARENT_UIC,PARENT_PARNO,PARENT_TITLE,FMID,PERLN,GRADE,POSCO,TITLE,
+" ASI1,ASI2,ASI3,ASI4,SQI1,RMK1,RMK2,RMK3,RMK4,AMSCO,MDEP,BRANCH,IDENT,PPSST,PSIRQ,
+" PPSRQ,LDUIC,MDUIC,LICCO,LPIND,CTYPE,CIVCC,SUPV,MMC,CAFC,FSC,REPORTS_TO_FMID,
+" REPORTS_TO_TITLE,REQ,AUTH,AGR,S_DATE,T_DATE
+"""
 def process_aos_billet_export(aos_billet_export):
+    print("Processing AOS billet export file")
+    print("  - Renaming columns")
     aos_billet_export["stage_matched"] = 0
-    aos_billet_export.rename(columns = {
+    aos_billet_export = aos_billet_export.rename(columns = {
                         "PARENT_UIC" : "UIC",
                         "PARENT_PARNO" : "PARNO",
                         "PERLN" : "LN"
             })
+    
+    print("  - Consolidating AOS ASIs into ASI_LIST column")
+    aos_billet_export["ASI_LIST"] = aos_billet_export.apply(
+            lambda row: pd.Series(
+                    data = [row.ASI1, row.ASI2, row.ASI3, row.ASI4]
+                    ).dropna().to_list(),
+            axis = 1
+            )
+    
+    print("  - Consolidating AOS RMKs into RMK_LIST column")
+    aos_billet_export["RMK_LIST"] = aos_billet_export.apply(
+            lambda row: pd.Series(
+                    data = [row.RMK1, row.RMK2, row.RMK3, row.RMK4]
+                    ).dropna().to_list(),
+            axis = 1
+            )
+    
     return aos_billet_export
 
-"""Process the EMILPO faces assignment file Pandas DF"""
+"""Process the EMILPO faces assignment file Pandas DF
+" EMILPO Headers: SSN_MASK,UIC_PAR_LN,UIC_CD,PARENT_UIC_CD,STRUC_CMD_CD,PARNO,
+" LN,MIL_POSN_RPT_NR,DUTY_ASG_DT,RANK_AB,ASG_RANK,MOS_AOC1,MOS_AOC2,MOS_AOC3,
+" MOS_AOC4,MOS_AOC5,MOS_AOC6,MOS_AOC7,MOS_AOC8,MOS_AOC9,MOS_AOC10,MOS_AOC11,
+" MOS_AOC12,MOS_AOC13,SQI1,SQI2,SQI3,SQI4,SQI5,SQI6,SQI7,SQI8,SQI9,SQI10,SQI11,
+" SQI12,SQI13,SQI14,SQI15,SQI16,ASI1,ASI2,ASI3,ASI4,ASI5,ASI6,ASI7,ASI8,ASI9,
+" ASI10,ASI11,ASI12,ASI13,ASI14
+"
+"""
 def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
-    print("Mapping grade to rank in the eMILPO assignments file")
+    print("Processing EMILPO assignments file")
+    print("  - Renaming columns")
+    emilpo_assignments = emilpo_assignments.rename(columns = {
+                        "UIC_CD" : "UIC"
+            })
+    
+    print("  - Mapping grade to rank in the eMILPO assignments file")
     emilpo_assignments["GRADE"] = emilpo_assignments.apply(
             lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, axis = 1
             )
     
-    print("Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
+    print("  - Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
     emilpo_assignments["ASI_LIST"] = emilpo_assignments.apply(
-            lambda row: [
+            lambda row: pd.Series(data = [
                     row.ASI1,
                     row.ASI2,
                     row.ASI3,
@@ -41,13 +84,13 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
                     row.ASI12,
                     row.ASI13,
                     row.ASI14
-                    ],
+                    ]).dropna().to_list(),
                     axis = 1
             )
     
-    print("Consolidating SQIs into SQI_LIST column in the eMILPO assignments file")
+    print("  - Consolidating SQIs into SQI_LIST column in the eMILPO assignments file")
     emilpo_assignments["SQI_LIST"] = emilpo_assignments.apply(
-            lambda row: [
+            lambda row: pd.Series(data = [
                     row.SQI1,
                     row.SQI2,
                     row.SQI3,
@@ -64,13 +107,13 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
                     row.SQI14,
                     row.SQI15,
                     row.SQI16
-                    ],
+                    ]).dropna().to_list(),
                     axis = 1
             )
     
-    print("Consolidating MOS/AOC into MOS_AOC_LIST column in the eMILPO assignments file")
+    print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the eMILPO assignments file")
     emilpo_assignments["MOS_AOC_LIST"] = emilpo_assignments.apply(
-            lambda row: [
+            lambda row: pd.Series(data = [
                     row.MOS_AOC1,
                     row.MOS_AOC2,
                     row.MOS_AOC3,
@@ -84,7 +127,7 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
                     row.MOS_AOC11,
                     row.MOS_AOC12,
                     row.MOS_AOC13
-                    ],
+                    ]).dropna().to_list(),
                     axis = 1
             )
     
