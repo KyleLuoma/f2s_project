@@ -6,11 +6,63 @@ Module to process data files loaded for F2S matching
 """
 
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 
 """Match phase headers
 " STAGE,UIC,PARNO,LN,GRADE,PRI_MOS,ALT_MOS,SQI,ASI,
 " GRADE_VAR_UP,GRADE_VAR_DN,TEMPLET
 """
+
+"""Converts faces columns to categorical values for indexing"""
+def categorical_faces(faces):
+        print(" - UIC: creating categorical UIC index in faces file")
+        faces["UIC"] = faces["UIC"].astype(CategoricalDtype(faces.UIC.unique()))
+            
+        print(" - PARNO: creating categorical PARNO index in faces file")
+        faces["PARNO"] = faces.PARNO.fillna("NONE")
+        faces["PARNO"] = faces["PARNO"].astype(CategoricalDtype(faces.PARNO.unique()))
+        
+        print(" - LN: creating categorical LN index in faces file")
+        faces["LN"] = faces.LN.fillna("NONE")
+        faces["LN"] = faces["LN"].astype(CategoricalDtype(faces.LN.unique()))
+        
+        print(" - GRADE: creating categorical GRADE index in faces file")
+        faces["GRADE"] = faces["GRADE"].astype(CategoricalDtype(faces.GRADE.unique()))
+        
+        print(" - Primary MOS_AOC: creating categorical Primary MOS_AOC index in faces file")
+        faces["MOS_AOC1"] = faces.MOS_AOC1.fillna("NONE")
+        faces["MOS_AOC1"] = faces["MOS_AOC1"].astype(CategoricalDtype(faces.MOS_AOC1.unique()))
+        
+        return faces
+        
+"""Converts spaces columns to categorical values for indexing"""
+def categorical_spaces(spaces):
+        print(" - UIC: creating categorical UIC index in spaces file")
+        spaces["UIC"] = spaces["UIC"].astype(CategoricalDtype(spaces.UIC.unique()))
+        
+        print(" - PARNO: creating categorical PARNO index in spaces file")
+        spaces["PARNO"] = spaces.PARNO.fillna("NOPAR")
+        spaces["PARNO"] = spaces["PARNO"].astype(CategoricalDtype(spaces.PARNO.unique()))
+
+        print(" - LN: creating categorical LN index in spaces file")
+        spaces["LN"] = spaces.LN.fillna("NOLN")
+        spaces["LN"] = spaces["LN"].astype(CategoricalDtype(spaces.LN.unique()))
+
+        print(" - GRADE: creating categorical GRADE index in spaces file")
+        spaces["GRADE"] = spaces.GRADE.fillna("NOGR")
+        spaces["GRADE"] = spaces["GRADE"].astype(CategoricalDtype(spaces.GRADE.unique()))
+
+        print(" - Primary MOS_AOC: creating categorical POSCO index in spaces file")
+        spaces["POSCO"] = spaces.POSCO.fillna("NOGR")
+        spaces["POSCO"] = spaces["POSCO"].astype(CategoricalDtype(spaces.POSCO.unique()))
+        
+        print(" - SQI: creating categorical SQI index in spaces file")
+        spaces["SQI1"] = spaces.SQI1.fillna("NOSQ")
+        spaces["SQI1"] = spaces["SQI1"].astype(CategoricalDtype(spaces.SQI1.unique()))
+
+        return spaces        
+
+
 
 """Process the AOS spaces billet export Pandas DF(s)
 " AOS headers: PARENT_UIC,PARENT_PARNO,PARENT_TITLE,FMID,PERLN,GRADE,POSCO,TITLE,
