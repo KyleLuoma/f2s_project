@@ -41,10 +41,23 @@ def main():
 
     
 def full_run(criteria, faces, spaces):
+    print("Executing full matching run")
     for i in range(1, match_phases.shape[0] + 1):
-        test_faces, test_spaces = match(match_phases,  
+        print(" - Calling match() for stage", str(i))
+        faces, spaces, face_space_match = match(match_phases,  
               faces.where(faces.stage_matched == 0).dropna(how = "all"),
               spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), i)
+        print(" - match() returned," str(face_space_match.shape[0], " matches."))
+        
+        print(" - indexing spaces on FMID and sorting")
+        spaces.set_index(spaces.FMID, inplace = True, drop = False)
+        spaces.sort_index()
+        
+        print(" - indexing faces on FMID and sorting")
+        faces.set_index(faces.SSN_MASK, inplace = True, drop = False)
+        faces.sort_index()
+        
+        print(" - updating spaces and faces SSN MASK and stage matched columns")
     
     return faces, spaces, face_space_match
     
@@ -129,6 +142,7 @@ def match(criteria, faces, spaces, stage):
         counter += 1
         try:
             print(spaces.loc[row.Index].iloc[0].FMID, row.SSN_MASK)
+            print(row)
             face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "stage_matched"] = stage
             face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "SSN_MASK"] = row.SSN_MASK
             stage_matched += 1
