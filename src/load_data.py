@@ -19,7 +19,7 @@ def load_army_command_aos_billets():
             "../data/AOS_ARMY_COMMANDS_FY21.csv", 
             dtype = {
                     'PARENT_PARNO': str,    
-                    'FMID': np.int64,
+                    'FMID': str,
                     'PERLN': str,
                     'GRADE': str,
                     'POSCO': str,
@@ -45,6 +45,7 @@ def load_emilpo():
             dtype = {
                     "PARNO": str,
                     "LN": str,
+                    "SSN_MASK": str,
                     "MIL_POSN_RPT_NR": str,
                     "MOS_AOC1": str,
                     "MOS_AOC2": str,

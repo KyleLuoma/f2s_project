@@ -12,11 +12,11 @@ import load_data
 import process_data
 import utility
 
-LOAD_AND_PROCESS = True
+LOAD_AND_PROCESS = False
 VERBOSE = False
 
 def main():
-    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk
+    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces, test_spaces, face_space_match
     
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
@@ -34,11 +34,25 @@ def main():
         match_phases = load_data.load_match_phases()
         acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
+        
+    test_faces = faces.head(500).copy()
     
+    test_faces, test_spaces, face_space_match = test_stage(match_phases, test_faces, acom_spaces, 1)
+
+    
+def full_run(criteria, faces, spaces):
     for i in range(1, match_phases.shape[0] + 1):
-        match(match_phases, 
-              acom_spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), 
-              faces.where(faces.stage_matched == 0).dropna(how = "all"), i)
+        test_faces, test_spaces = match(match_phases,  
+              faces.where(faces.stage_matched == 0).dropna(how = "all"),
+              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), i)
+    
+    return faces, spaces, face_space_match
+    
+def test_stage(criteria, faces, spaces, stage):
+    return match(match_phases,  
+              faces.where(faces.stage_matched == 0).dropna(how = "all"),
+              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), stage)
+    
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -50,10 +64,14 @@ def main():
 " Returns: updated spaces and faces DFs with matched faces removed from faces
 " and matching SSN mask added to spaces DF
 """
-def match(criteria, spaces, faces, stage):
-    print("Matching stage ", str(stage))
+def match(criteria, faces, spaces, stage):
+    print("Matching stage ", str(stage), "Faces File Shape:", faces.shape)
     faces_index_labels = []
     spaces_index_labels = []
+    
+    face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    face_space_match.set_index(face_space_match.FMID, drop = False, inplace = True)
+    face_space_match.sort_index()
     
     #Analyze match criteria and set multi index array for spaces and faces files
     if(criteria.UIC.loc[stage]):
@@ -110,23 +128,16 @@ def match(criteria, spaces, faces, stage):
     for row in faces.itertuples():
         counter += 1
         try:
-            #Index matching:
-            sub_spaces = spaces.loc[row.Index]
-            #Drop already matched positions:
-            sub_spaces = sub_spaces.where(sub_spaces.SSN_MASK == 0)
-            
-            if(VERBOSE):
-                print("Faces index", row.Index, "type:", type(row.Index))
-                print("Joined tuple:", row.Index + (sub_spaces.iloc[0].FMID,))
-                
-            spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "SSN_MASK"] = row.SSN_MASK
-            spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "stage_matched"] = stage
-            faces.at[row.Index, "stage_matched"] = stage
+            print(spaces.loc[row.Index].iloc[0].FMID, row.SSN_MASK)
+            face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "stage_matched"] = stage
+            face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "SSN_MASK"] = row.SSN_MASK
             stage_matched += 1
             
+        except KeyError:
+            ##print(KeyError)
+            exception_count += 1
         except Exception:
-            if(VERBOSE):
-                print(Exception.with_traceback)
+            print("Unknown Exception")
             exception_count += 1
         
         if(counter % 100 == 0):
@@ -140,6 +151,7 @@ def match(criteria, spaces, faces, stage):
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
     
+    return faces, spaces, face_space_match
 
             
         
