@@ -35,19 +35,27 @@ def main():
         acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
         
-    test_faces = faces.head(500).copy()
+    test_faces = faces.head(1000).copy()
     
-    test_faces, test_spaces, face_space_match = test_stage(match_phases, test_faces, acom_spaces, 1)
+    test_faces, test_spaces, face_space_match = test_stage(
+            match_phases, 
+            test_faces, 
+            acom_spaces[["UIC", "PARNO", "FMID", "LN", "GRADE", 
+                       "POSCO", "SQI1", "stage_matched", "SSN_MASK",
+                       "ASI_LIST", "RMK_LIST"]], 
+            1)
 
     
 def full_run(criteria, faces, spaces):
     print("Executing full matching run")
+    face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
         faces, spaces, face_space_match = match(match_phases,  
-              faces.where(faces.stage_matched == 0).dropna(how = "all"),
+              faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
               spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), i)
-        print(" - match() returned," str(face_space_match.shape[0], " matches."))
+        print(" - match() returned", str(face_space_match.shape[0], " matches."))
         
         print(" - indexing spaces on FMID and sorting")
         spaces.set_index(spaces.FMID, inplace = True, drop = False)
@@ -83,6 +91,8 @@ def match(criteria, faces, spaces, stage):
     spaces_index_labels = []
     
     face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
+    
     face_space_match.set_index(face_space_match.FMID, drop = False, inplace = True)
     face_space_match.sort_index()
     
@@ -125,6 +135,7 @@ def match(criteria, faces, spaces, stage):
     
     spaces_index = spaces[spaces_index_labels]
     spaces = spaces.set_index(pd.MultiIndex.from_frame(spaces_index))
+    spaces.sort_index()
     
     print("Spaces multi-index set to: ", end = "")
     print(spaces.index)
@@ -141,17 +152,20 @@ def match(criteria, faces, spaces, stage):
     for row in faces.itertuples():
         counter += 1
         try:
-            print(spaces.loc[row.Index].iloc[0].FMID, row.SSN_MASK)
-            print(row)
-            face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "stage_matched"] = stage
-            face_space_match.at[spaces.loc[row.Index].iloc[0].FMID, "SSN_MASK"] = row.SSN_MASK
+            FMID = spaces.loc[row.Index].iloc[0].FMID
+            print(FMID)
+            #print(type(row.SSN_MASK))
+            face_space_match.at[FMID, "stage_matched"] = stage
+            face_space_match.at[FMID, "SSN_MASK"] = row.SSN_MASK
             stage_matched += 1
+            if(spaces.loc[row.Index].shape[0] > 1):
+                spaces.drop(row.Index + (FMID,), inplace = True)
             
         except KeyError:
-            ##print(KeyError)
+            #print(KeyError)
             exception_count += 1
         except Exception:
-            print("Unknown Exception")
+            #print("Unknown Exception")
             exception_count += 1
         
         if(counter % 100 == 0):
@@ -159,7 +173,8 @@ def match(criteria, faces, spaces, stage):
         if(counter % 5000 == 0):
             print("\nrecords reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
-                  " Exceptions:", str(exception_count))
+                  " Exceptions:", str(exception_count),
+                  " Spaces left:", str(spaces.shape[0]))
             
     print("STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
