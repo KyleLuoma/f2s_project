@@ -96,7 +96,18 @@ def process_aos_billet_export(aos_billet_export):
                     ).dropna().to_list(),
             axis = 1
             )
-    
+            
+    print(" - Truncating POSCO to match eMILPO MOS_AOC field")
+    aos_billet_export["POSCO"] = aos_billet_export.apply(
+            lambda row: row.POSCO[0:4] if row.GRADE[0] == "W" else row.POSCO[0:3],
+            axis = 1
+            )
+    """
+    fms_file['LOWEST_UIC'] = fms_file.apply(
+                lambda row: row["UIC"] if pd.isna(row["FULLSUBCO"]) else row["FULLSUBCO"],
+                axis = 1                
+                )   
+    """
     return aos_billet_export
 
 """Process the EMILPO faces assignment file Pandas DF
