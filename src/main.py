@@ -39,7 +39,7 @@ def main():
     
     test_faces, test_spaces, face_space_match = test_stage(
             match_phases, 
-            test_faces, 
+            faces, 
             acom_spaces[["UIC", "PARNO", "FMID", "LN", "GRADE", 
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                        "ASI_LIST", "RMK_LIST"]], 
@@ -146,6 +146,7 @@ def match(criteria, faces, spaces, stage):
     counter = 0
     stage_matched = 0
     exception_count = 0
+    total = spaces.shape[0]
     
     print("Matching stage ", str(stage))
     #Iterate through every person in faces file
@@ -153,7 +154,7 @@ def match(criteria, faces, spaces, stage):
         counter += 1
         try:
             FMID = spaces.loc[row.Index].iloc[0].FMID
-            print(FMID)
+            #print(FMID)
             #print(type(row.SSN_MASK))
             face_space_match.at[FMID, "stage_matched"] = stage
             face_space_match.at[FMID, "SSN_MASK"] = row.SSN_MASK
@@ -168,6 +169,7 @@ def match(criteria, faces, spaces, stage):
             #print("Unknown Exception")
             exception_count += 1
         
+        """
         if(counter % 100 == 0):
             print(".", end = "")
         if(counter % 5000 == 0):
@@ -175,6 +177,11 @@ def match(criteria, faces, spaces, stage):
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count),
                   " Spaces left:", str(spaces.shape[0]))
+        """
+        print("\r", str(counter), "of", str(total), 
+              "Matched:", str(stage_matched),
+              "Exceptions:", str(exception_count), 
+              "Percent match:", str((stage_matched / counter) * 100), end = "")
             
     print("STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
