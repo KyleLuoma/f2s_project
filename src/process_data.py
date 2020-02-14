@@ -13,6 +13,10 @@ from pandas.api.types import CategoricalDtype
 " GRADE_VAR_UP,GRADE_VAR_DN,TEMPLET
 """
 
+MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9", 
+              "W1", "W2", "W3", "W4", "W5",
+              "O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10"]
+
 """Converts faces columns to categorical values for indexing"""
 def categorical_faces(faces):
         print(" - UIC: creating categorical UIC index in faces file")
@@ -72,9 +76,18 @@ def categorical_spaces(spaces):
 """
 def process_aos_billet_export(aos_billet_export):
     print("Processing AOS billet export file")
+    print("  - Dropping non military grade positions")
+    aos_billet_export = aos_billet_export.where(aos_billet_export.GRADE.isin(MIL_GRADES)).dropna(how = "all")
     print("  - Renaming columns")
     aos_billet_export["stage_matched"] = 0
     aos_billet_export["SSN_MASK"] = 0
+    
+    print(" - Truncating POSCO to match eMILPO MOS_AOC field")
+    aos_billet_export["POSCO"] = aos_billet_export.apply(
+            lambda row: row.POSCO[0:4] if row.GRADE[0] == "W" else row.POSCO[0:3],
+            axis = 1
+            )
+    
     aos_billet_export = aos_billet_export.rename(columns = {
                         "PARENT_UIC" : "UIC",
                         "PARENT_PARNO" : "PARNO",
@@ -97,11 +110,6 @@ def process_aos_billet_export(aos_billet_export):
             axis = 1
             )
             
-    print(" - Truncating POSCO to match eMILPO MOS_AOC field")
-    aos_billet_export["POSCO"] = aos_billet_export.apply(
-            lambda row: row.POSCO[0:4] if row.GRADE[0] == "W" else row.POSCO[0:3],
-            axis = 1
-            )
     """
     fms_file['LOWEST_UIC'] = fms_file.apply(
                 lambda row: row["UIC"] if pd.isna(row["FULLSUBCO"]) else row["FULLSUBCO"],
@@ -121,6 +129,7 @@ def process_aos_billet_export(aos_billet_export):
 """
 def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
     print("Processing EMILPO assignments file")
+    emilpo_assignments["stage_matched"] = 0    
     print("  - Renaming columns")
     emilpo_assignments = emilpo_assignments.rename(columns = {
                         "UIC_CD" : "UIC"

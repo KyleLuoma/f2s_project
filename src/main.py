@@ -12,7 +12,7 @@ import load_data
 import process_data
 import utility
 
-LOAD_AND_PROCESS = False
+LOAD_AND_PROCESS = True
 VERBOSE = False
 
 def main():
@@ -37,8 +37,8 @@ def main():
     
     for i in range(1, match_phases.shape[0] + 1):
         match(match_phases, 
-              acom_spaces.where(acom_spaces.UIC == "WJKCAA").dropna(how = "all"), 
-              faces.where(faces.UIC == "WJKCAA").dropna(how = "all"), i)
+              acom_spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), 
+              faces.where(faces.stage_matched == 0).dropna(how = "all"), i)
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -121,6 +121,7 @@ def match(criteria, spaces, faces, stage):
                 
             spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "SSN_MASK"] = row.SSN_MASK
             spaces.at[row.Index + (sub_spaces.iloc[0].FMID,), "stage_matched"] = stage
+            faces.at[row.Index, "stage_matched"] = stage
             stage_matched += 1
             
         except Exception:
@@ -139,7 +140,7 @@ def match(criteria, spaces, faces, stage):
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
     
- 
+
             
         
     #Attempt to locate a matching vacant position based on provided criteria
