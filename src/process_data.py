@@ -82,6 +82,12 @@ def process_aos_billet_export(aos_billet_export):
     aos_billet_export["stage_matched"] = 0
     aos_billet_export["SSN_MASK"] = 0
     
+    print("  - Creating a concatenation of UIC PARA LN")
+    aos_billet_export["UIC_PAR_LN"] = aos_billet_export.apply(
+            lambda row: row.UIC + row.PARNO + row.LN,
+            axis = 1
+            )
+    
     print("  - Truncating POSCO to match eMILPO MOS_AOC field")
     aos_billet_export["POSCO"] = aos_billet_export.apply(
             lambda row: row.POSCO[0:4] if row.GRADE[0] == "W" else row.POSCO[0:3],
