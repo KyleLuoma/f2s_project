@@ -21,6 +21,9 @@ MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
 def categorical_faces(faces):
         print(" - UIC: creating categorical UIC index in faces file")
         faces["UIC"] = faces["UIC"].astype(CategoricalDtype(faces.UIC.unique()))
+        
+        print(" - PARENT_UIC_CD: creating categorical PARENT_UIC_CD index in faces file")
+        faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype(CategoricalDtype(faces.UIC.unique()))
             
         print(" - PARNO: creating categorical PARNO index in faces file")
         faces["PARNO"] = faces.PARNO.fillna("NONE")

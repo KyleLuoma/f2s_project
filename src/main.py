@@ -69,7 +69,9 @@ def full_run(criteria, faces, spaces):
                 i,
                 face_space_match
                 )
-        print(" - match() returned", str(face_space_match.shape[0]), " matches.")
+        print(" - match() returned", 
+              str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
+              " matches.")
         
     
     return faces, spaces, face_space_match
@@ -91,10 +93,9 @@ def test_stage(criteria, faces, spaces, stage):
 " and matching SSN mask added to spaces DF
 """
 def match(criteria, faces, spaces, stage, face_space_match):
-    print("Matching stage ", str(stage), "Faces File Shape:", faces.shape)
+    print("Matching stage ", str(stage), "Faces File Shape:", faces.shape, "Spaces File Shape:", spaces.shape)
     faces_index_labels = []
     spaces_index_labels = []
-    used_fmids = []
     
     """
     face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
@@ -109,6 +110,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
     #Analyze match criteria and set multi index array for spaces and faces files
     if(criteria.UIC.loc[stage]):
         faces_index_labels.append("UIC")
+        spaces_index_labels.append("UIC")
+        
+    if(criteria.PARENT_UIC.loc[stage]):
+        faces_index_labels.append("PARENT_UIC_CD")
         spaces_index_labels.append("UIC")
         
     if(criteria.PARNO.loc[stage]):
@@ -134,6 +139,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
         
     if(criteria.SQI.loc[stage]):
         spaces_index_labels.append("SQI1")  
+        
+    
     
     counter = 0
     stage_matched = 0 #Increase if match found
@@ -186,20 +193,29 @@ def match(criteria, faces, spaces, stage, face_space_match):
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage in [2, 3, 4, 5, 6, 7]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
+    if(stage in [2, 3, 4, 5, 6, 7, 8]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
         face_list = sorted(faces[faces_index_labels].values.tolist())
         space_list = sorted(spaces[spaces_index_labels].values.tolist())
         
         f_total = len(face_list)
+        s_total = len(space_list)
         
         compare_ix = len(faces_index_labels) - 1   #Number of columns for comparison
-        fmid_ix = len(spaces_index_labels) - 1#Column index # for FMID
-        mask_ix = len(faces_index_labels)  - 1#Column index # for SSN MASK
+        fmid_ix = len(spaces_index_labels) - 1     #Column index # for FMID
+        mask_ix = len(faces_index_labels)  - 1     #Column index # for SSN MASK
         
         print("Comparing faces", faces_index_labels[0:compare_ix], 
               "to", spaces_index_labels[0:compare_ix])
         
-        while(f_ix < f_total):
+        if(stage == 8): 
+            print(faces.columns)
+            print("compare_ix:", str(compare_ix))
+            print("fmid_ix:", str(fmid_ix))
+            print("mask_ix:", str(mask_ix))
+            
+        
+        while(f_ix < f_total and s_ix < s_total):
+            
             #print(face_list[f_ix][0:compare_ix], space_list[s_ix][0:compare_ix])
             if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
                 face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
@@ -214,6 +230,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 counter += 1
             elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
                 s_ix += 1
+            
             
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
