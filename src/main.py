@@ -70,20 +70,14 @@ def analyze_unmatched_faces(face_space_match, unmatched_faces, spaces):
     unmatched_analysis["NEED_TEMPLET"] = False
     
     print(" - Checking if UICs are in AOS")
-    unmatched_analysis.UIC_IN_AOS = unmatched_analysis.apply(
-            lambda row: row.UIC in AOS_UIC_list,
-            axis = 1
-            )
+    unmatched_analysis.UIC_IN_AOS = unmatched_analysis.UIC.isin(spaces.UIC)
     
     print(" - Checking if PARENT_UICs are in AOS")
-    unmatched_analysis.PARENT_UIC_IN_AOS = unmatched_analysis.apply(
-            lambda row: row.PARENT_UIC_IN_AOS in AOS_UIC_list,
-            axis = 1
-            )
+    unmatched_analysis.PARENT_UIC_IN_AOS = unmatched_analysis.PARENT_UIC_CD.isin(spaces.UIC)
     
     print(" - Checking if templets are needed")
     unmatched_analysis.NEED_TEMPLET = unmatched_analysis.apply(
-            lambda row: not (row.UIC_IN_AOS or row.PARENT_UIC_IN_AOS),
+            lambda row: True if (row.UIC_IN_AOS or row.PARENT_UIC_IN_AOS) else False,
             axis = 1
             )
     
