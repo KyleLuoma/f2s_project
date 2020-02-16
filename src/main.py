@@ -18,7 +18,7 @@ EXPORT_F2S = True
 EXPORT_UNMATCHED = True
 
 def main():
-    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces, test_spaces, face_space_match
+    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces, test_spaces, face_space_match, unmatched_faces
     
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
@@ -45,8 +45,19 @@ def main():
                        "ASI_LIST", "RMK_LIST"]])
     
     if(EXPORT_F2S): face_space_match.to_csv("..\export\\faces_spaces_match.csv")
-    if(EXPORT_UNMATCHED): unmatched_faces.co_csv("..\export\unmatched_faces.csv")
-    
+    if(EXPORT_UNMATCHED): unmatched_faces.to_csv("..\export\\unmatched_faces.csv")
+
+"""
+" Iterates through all rows of match phases and calls the core match function
+" for each combination. Eliminates matched spaces and faces with each call to 
+" match().
+" Parameters: criteria - DF of matching criteria
+"             faces - DF eMILPO faces file
+"             spaces - DF AOS billet detail file
+" Returns: faces - unmatched faces after all runs complete
+"          spaces - remaining available spaces
+"          face_space_match - DF of FMID-SSN_MASK pairing with stage matched indicator
+"""
 def full_run(criteria, faces, spaces):
     print("Executing full matching run")
     face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
@@ -73,7 +84,10 @@ def full_run(criteria, faces, spaces):
         
     
     return faces, spaces, face_space_match
-    
+
+"""
+" Use to test a single matching stage on match()
+"""
 def test_stage(criteria, faces, spaces, stage):
     return match(match_phases,  
               faces.where(faces.stage_matched == 0).dropna(how = "all"),
@@ -191,7 +205,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage in [2, 3, 4, 5, 6, 7, 8]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
+    if(stage > 1): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
         face_list = sorted(faces[faces_index_labels].values.tolist())
         space_list = sorted(spaces[spaces_index_labels].values.tolist())
         
