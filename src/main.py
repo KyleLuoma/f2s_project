@@ -38,38 +38,39 @@ def main():
         
     test_faces = faces.head(1000).copy()
     
-    test_faces, test_spaces, face_space_match = test_stage(
+    test_faces, test_spaces, face_space_match = full_run(
             match_phases, 
             faces, 
             acom_spaces[["UIC_PAR_LN","UIC", "PARNO", "FMID", "LN", "GRADE", 
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
-                       "ASI_LIST", "RMK_LIST"]], 
-            1)
+                       "ASI_LIST", "RMK_LIST"]])
     
     if(EXPORT_F2S):
-        face_space_match.to_csv("..\export\faces_spaces_match.csv")
+        face_space_match.to_csv("..\export\\faces_spaces_match.csv")
 
     
 def full_run(criteria, faces, spaces):
     print("Executing full matching run")
     face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
+    face_space_match["F_PLN"] = ""
+    face_space_match["S_PLN"] = ""
     
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
-        faces, spaces, face_space_match = match(match_phases,  
-              faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
-              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), i)
-        print(" - match() returned", str(face_space_match.shape[0], " matches."))
+        faces, spaces, face_space_match = match(
+                match_phases,  
+                faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
+                spaces.where(
+                      spaces.FMID.isin(
+                              face_space_match.where(face_space_match.stage_matched == 0).dropna(how = "all").FMID
+                              )
+                      ).dropna(how = "all"), 
+                i,
+                face_space_match
+                )
+        print(" - match() returned", str(face_space_match.shape[0]), " matches.")
         
-        print(" - indexing spaces on FMID and sorting")
-        spaces.set_index(spaces.FMID, inplace = True, drop = False)
-        spaces.sort_index()
-        
-        print(" - indexing faces on FMID and sorting")
-        faces.set_index(faces.SSN_MASK, inplace = True, drop = False)
-        faces.sort_index()
-        
-        print(" - updating spaces and faces SSN MASK and stage matched columns")
     
     return faces, spaces, face_space_match
     
@@ -89,21 +90,22 @@ def test_stage(criteria, faces, spaces, stage):
 " Returns: updated spaces and faces DFs with matched faces removed from faces
 " and matching SSN mask added to spaces DF
 """
-def match(criteria, faces, spaces, stage):
+def match(criteria, faces, spaces, stage, face_space_match):
     print("Matching stage ", str(stage), "Faces File Shape:", faces.shape)
     faces_index_labels = []
     spaces_index_labels = []
     used_fmids = []
     
-    
+    """
     face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
     face_space_match["F_PLN"] = ""
     face_space_match["S_PLN"] = ""
+    """
     
     face_space_match.set_index(face_space_match.FMID, drop = False, inplace = True)
     face_space_match.sort_index()
-    """
+    
     #Analyze match criteria and set multi index array for spaces and faces files
     if(criteria.UIC.loc[stage]):
         faces_index_labels.append("UIC")
@@ -127,48 +129,26 @@ def match(criteria, faces, spaces, stage):
         spaces_index_labels.append("POSCO")
         
     if(criteria.ALT_MOS.loc[stage] and not criteria.PRI_MOS.loc[stage]):
+        faces_index_labels.append("MOS_AOC2")
         spaces_index_labels.append("POSCO")
         
     if(criteria.SQI.loc[stage]):
-        spaces_index_labels.append("SQI1")
-        
-    #spaces_index_labels.append("FMID")
-        
-    #Set the multi index for spaces and faces files
+        spaces_index_labels.append("SQI1")  
+    
+    counter = 0
+    stage_matched = 0 #Increase if match found
+    exception_count = 0 #Increase if exception thrown
+    f_ix = 0 #Faces index
+    s_ix = 0 #Spaces index
     faces = faces.reset_index(drop = True)
-    spaces = spaces.reset_index(drop = True)    
-
-    faces_index = faces[faces_index_labels]
-    faces = faces.set_index(pd.MultiIndex.from_frame(faces_index))
-    faces.sort_index(inplace = True)
-    
-    spaces_index = spaces[spaces_index_labels]
-    spaces = spaces.set_index(pd.MultiIndex.from_frame(spaces_index))
-    spaces.sort_index(inplace = True)
-    
-    print("Spaces multi-index set to: ", spaces_index_labels, end = "")
-    #print(spaces.index)
-
-    print("\nFaces multi-index set to: ", faces_index_labels, end = "")
-    #print(faces.index)
-    """
+    spaces = spaces.reset_index(drop = True)
+    spaces_index_labels.append("FMID") #This will be the last column in the list
+    faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
     print("Matching stage ", str(stage))
     #Iterate through every person in faces file
     if(stage == 1): #UIC, PARNO, LN Matching custom implementation
-        
-        counter = 0
-        stage_matched = 0 #Increase if match found
-        exception_count = 0 #Increase if exception thrown
-        
-        f_ix = 0 #Faces index
-        s_ix = 0 #Spaces index
-        
-        faces = faces.reset_index(drop = True)
-        spaces = spaces.reset_index(drop = True)
-        
-        
-        
+                
         face_list = sorted(faces[["UIC_PAR_LN", "SSN_MASK"]].values.tolist())
         space_list = sorted(spaces[["UIC_PAR_LN", "FMID"]].values.tolist())
         
@@ -205,7 +185,38 @@ def match(criteria, faces, spaces, stage):
                 
             if(f_ix % 100 == 0): print(".", end = "")
             if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
-                
+            
+    if(stage in [2, 3]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
+        face_list = sorted(faces[faces_index_labels].values.tolist())
+        space_list = sorted(spaces[spaces_index_labels].values.tolist())
+        
+        f_total = len(face_list)
+        
+        compare_ix = len(faces_index_labels) - 1   #Number of columns for comparison
+        fmid_ix = len(spaces_index_labels) - 1#Column index # for FMID
+        mask_ix = len(faces_index_labels)  - 1#Column index # for SSN MASK
+        
+        print("Comparing faces", faces_index_labels[0:compare_ix], 
+              "to", spaces_index_labels[0:compare_ix])
+        
+        while(f_ix < f_total):
+            #print(face_list[f_ix][0:compare_ix], space_list[s_ix][0:compare_ix])
+            if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
+                face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
+                face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
+                f_ix += 1
+                s_ix += 1
+                stage_matched += 1
+                counter += 1
+            elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
+                f_ix += 1
+                exception_count += 1
+                counter += 1
+            elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
+                s_ix += 1
+            
+            if(f_ix % 100 == 0): print(".", end = "")
+            if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
     print("STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
