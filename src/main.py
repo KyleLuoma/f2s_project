@@ -15,6 +15,7 @@ import utility
 LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
+EXPORT_UNMATCHED = True
 
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces, test_spaces, face_space_match
@@ -35,19 +36,16 @@ def main():
         match_phases = load_data.load_match_phases()
         acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
-        
-    test_faces = faces.head(1000).copy()
-    
-    test_faces, test_spaces, face_space_match = full_run(
+            
+    unmatched_faces, remaining_spaces, face_space_match = full_run(
             match_phases, 
             faces, 
             acom_spaces[["UIC_PAR_LN","UIC", "PARNO", "FMID", "LN", "GRADE", 
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                        "ASI_LIST", "RMK_LIST"]])
     
-    if(EXPORT_F2S):
-        face_space_match.to_csv("..\export\\faces_spaces_match.csv")
-
+    if(EXPORT_F2S): face_space_match.to_csv("..\export\\faces_spaces_match.csv")
+    if(EXPORT_UNMATCHED): unmatched_faces.co_csv("..\export\unmatched_faces.csv")
     
 def full_run(criteria, faces, spaces):
     print("Executing full matching run")
@@ -239,7 +237,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
     
-    return faces, spaces, face_space_match
+    return faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"), spaces, face_space_match
 
             
         
