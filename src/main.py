@@ -183,10 +183,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 #Advance spaces cursor
                 s_ix += 1
                 
-            if(f_ix % 100 == 0): print(".", end = "")
-            if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
+            #if(f_ix % 100 == 0): print(".", end = "")
+            #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage in [2, 3]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
+    if(stage in [2, 3, 4, 5, 6, 7]): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
         face_list = sorted(faces[faces_index_labels].values.tolist())
         space_list = sorted(spaces[spaces_index_labels].values.tolist())
         
@@ -215,8 +215,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
             elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
                 s_ix += 1
             
-            if(f_ix % 100 == 0): print(".", end = "")
-            if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
+            #if(f_ix % 100 == 0): print(".", end = "")
+            #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
     print("STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
