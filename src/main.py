@@ -18,7 +18,8 @@ EXPORT_F2S = True
 EXPORT_UNMATCHED = True
 
 def main():
-    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces, test_spaces, face_space_match, unmatched_faces
+    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
+    global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
@@ -44,8 +45,51 @@ def main():
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                        "ASI_LIST", "RMK_LIST"]])
     
+    unmatched_analysis = analyze_unmatched_faces(face_space_match, 
+                                                 unmatched_faces, 
+                                                 acom_spaces)
+    
     if(EXPORT_F2S): face_space_match.to_csv("..\export\\faces_spaces_match.csv")
-    if(EXPORT_UNMATCHED): unmatched_faces.to_csv("..\export\\unmatched_faces.csv")
+    if(EXPORT_UNMATCHED): 
+        unmatched_faces.to_csv("..\export\\unmatched_faces.csv")
+        unmatched_analysis.to_csv("..\export\\unmatched_analysis.csv")
+    
+
+def analyze_unmatched_faces(face_space_match, unmatched_faces, spaces):
+    print("Analyzing unmatched faces")
+    unmatched_analysis = unmatched_faces[["SSN_MASK", "UIC", "PARENT_UIC_CD",
+                                          "STRUC_CMD_CD", "PARNO", "LN", 
+                                          "MIL_POSN_RPT_NR", "RANK_AB", 
+                                          "GRADE", "ASI_LIST", "SQI_LIST",
+                                          "MOS_AOC_LIST"]]
+    
+    AOS_UIC_list = spaces.UIC.tolist()
+    
+    unmatched_analysis["UIC_IN_AOS"] = False
+    unmatched_analysis["PARENT_UIC_IN_AOS"] = False
+    unmatched_analysis["NEED_TEMPLET"] = False
+    
+    print(" - Checking if UICs are in AOS")
+    unmatched_analysis.UIC_IN_AOS = unmatched_analysis.apply(
+            lambda row: row.UIC in AOS_UIC_list,
+            axis = 1
+            )
+    
+    print(" - Checking if PARENT_UICs are in AOS")
+    unmatched_analysis.PARENT_UIC_IN_AOS = unmatched_analysis.apply(
+            lambda row: row.PARENT_UIC_IN_AOS in AOS_UIC_list,
+            axis = 1
+            )
+    
+    print(" - Checking if templets are needed")
+    unmatched_analysis.NEED_TEMPLET = unmatched_analysis.apply(
+            lambda row: not (row.UIC_IN_AOS or row.PARENT_UIC_IN_AOS),
+            axis = 1
+            )
+    
+    return unmatched_analysis
+
+    
 
 """
 " Iterates through all rows of match phases and calls the core match function
@@ -205,7 +249,11 @@ def match(criteria, faces, spaces, stage, face_space_match):
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage > 1): #Perfect MOS, GRADE match in PARA (2) and UIC (3)        
+    if(stage > 1): #Perfect MOS, GRADE match in PARA (2) and UIC (3) 
+        faces["PARNO"] = faces["PARNO"].astype("str")
+        faces["LN"] = faces["LN"].astype("str")
+        faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
+        
         face_list = sorted(faces[faces_index_labels].values.tolist())
         space_list = sorted(spaces[spaces_index_labels].values.tolist())
         

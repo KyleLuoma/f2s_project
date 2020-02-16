@@ -85,11 +85,6 @@ def process_aos_billet_export(aos_billet_export):
     aos_billet_export["stage_matched"] = 0
     aos_billet_export["SSN_MASK"] = 0
     
-    print("  - Creating a concatenation of UIC PARA LN")
-    aos_billet_export["UIC_PAR_LN"] = aos_billet_export.apply(
-            lambda row: row.UIC + row.PARNO + row.LN,
-            axis = 1
-            )
     
     print("  - Truncating POSCO to match eMILPO MOS_AOC field")
     aos_billet_export["POSCO"] = aos_billet_export.apply(
@@ -102,6 +97,9 @@ def process_aos_billet_export(aos_billet_export):
                         "PARENT_PARNO" : "PARNO",
                         "PERLN" : "LN"
             })
+    
+    aos_billet_export.PARNO = aos_billet_export.PARNO.astype("str")
+    aos_billet_export.LN = aos_billet_export.LN.astype("str")
     
     print("  - Consolidating AOS ASIs into ASI_LIST column")
     aos_billet_export["ASI_LIST"] = aos_billet_export.apply(
@@ -116,6 +114,12 @@ def process_aos_billet_export(aos_billet_export):
             lambda row: pd.Series(
                     data = [row.RMK1, row.RMK2, row.RMK3, row.RMK4]
                     ).dropna().to_list(),
+            axis = 1
+            )
+            
+    print("  - Creating a concatenation of UIC PARA LN")
+    aos_billet_export["UIC_PAR_LN"] = aos_billet_export.apply(
+            lambda row: row.UIC + row.PARNO + row.LN,
             axis = 1
             )
             
