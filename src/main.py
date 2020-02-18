@@ -12,7 +12,7 @@ import load_data
 import process_data
 import utility
 
-LOAD_AND_PROCESS = False
+LOAD_AND_PROCESS = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -20,10 +20,11 @@ EXPORT_UNMATCHED = True
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
+    global grade_mismatch_xwalk
     
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
-        
+        grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
         #drrsa = load_data.load_drrsa_file()
         
         acom_spaces = process_data.process_aos_billet_export(
@@ -32,7 +33,8 @@ def main():
         
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
-                rank_grade_xwalk)
+                rank_grade_xwalk,
+                grade_mismatch_xwalk)
         
         match_phases = load_data.load_match_phases()
         acom_spaces = process_data.categorical_spaces(acom_spaces)
@@ -174,8 +176,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
         faces_index_labels.append("LN")
         spaces_index_labels.append("LN")
     
+    #Match on grade without variance
     if(criteria.GRADE.loc[stage] & 
-       (criteria.GRADE_VAR_UP.loc[stage] == 0 & criteria.GRADE_VAR_DN.loc[stage] == 0)):
+       ((criteria.ONE_UP.loc[stage] == False &criteria.TWO_UP.loc[stage] == False)
+        & criteria.ONE_DN.loc[stage] == False)):
         faces_index_labels.append("GRADE")
         spaces_index_labels.append("GRADE")
         

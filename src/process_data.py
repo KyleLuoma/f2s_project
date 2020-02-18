@@ -140,7 +140,7 @@ def process_aos_billet_export(aos_billet_export):
 " ASI10,ASI11,ASI12,ASI13,ASI14
 "
 """
-def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
+def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk, grade_mismatch_xwalk):
     print("Processing EMILPO assignments file")
     emilpo_assignments["stage_matched"] = 0    
     print("  - Renaming columns")
@@ -150,8 +150,27 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk):
     
     print("  - Mapping grade to rank in the eMILPO assignments file")
     emilpo_assignments["GRADE"] = emilpo_assignments.apply(
-            lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, axis = 1
+            lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, 
+            axis = 1
             )
+    
+    print("  - Mapping grade to one-up grade in the eMILPO assignments file")
+    emilpo_assignments["ONE_UP"] = emilpo_assignments.apply(
+            lambda row: grade_mismatch_xwalk.loc[row.GRADE].ONE_UP, 
+            axis = 1
+            )
+    
+    print("  - Mapping grade to two-up grade in the eMILPO assignments file")
+    emilpo_assignments["TWO_UP"] = emilpo_assignments.apply(
+            lambda row: grade_mismatch_xwalk.loc[row.GRADE].TWO_UP, 
+            axis = 1
+            )
+    
+    print("  - Mapping grade to one-down grade in the eMILPO assignments file")
+    emilpo_assignments["ONE_DN"] = emilpo_assignments.apply(
+            lambda row: grade_mismatch_xwalk.loc[row.GRADE].ONE_DN, 
+            axis = 1
+            )    
     
     print("  - Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
     emilpo_assignments["ASI_LIST"] = emilpo_assignments.apply(

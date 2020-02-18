@@ -101,5 +101,9 @@ def load_match_phases():
 def load_rank_grade_xwalk():
     return pd.read_csv("../data/rank_grade_xwalk.csv").set_index("RANK")
 
+""" Retrieve grade mismatch crosswalk file """
+def load_grade_mismatch_xwalk():
+    return pd.read_csv("../data/grade_mismatch_xwalk.csv").set_index("GRADE")
+
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     
