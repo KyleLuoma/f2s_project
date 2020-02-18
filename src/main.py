@@ -12,7 +12,8 @@ import load_data
 import process_data
 import utility
 
-LOAD_AND_PROCESS = True
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -20,7 +21,10 @@ EXPORT_UNMATCHED = True
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
-    global grade_mismatch_xwalk
+    global grade_mismatch_xwalk, faces_matches
+    
+    if(LOAD_MATCH_PHASES):
+        match_phases = load_data.load_match_phases()
     
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
@@ -36,7 +40,6 @@ def main():
                 rank_grade_xwalk,
                 grade_mismatch_xwalk)
         
-        match_phases = load_data.load_match_phases()
         acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
             
@@ -51,7 +54,25 @@ def main():
                                                  unmatched_faces, 
                                                  acom_spaces)
     
-    if(EXPORT_F2S): face_space_match.to_csv("..\export\\faces_spaces_match.csv")
+    #Export a join of eMILPO and AOS using face_space_match to connect
+    faces_matches = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
+                           "PARNO", "LN", "MIL_POSN_RPT_NR", "RANK_AB", "GRADE",
+                           ]].set_index("SSN_MASK", drop = True)
+    faces_matches = faces_matches.join(
+            face_space_match.reset_index().set_index("SSN_MASK")[["stage_matched", "FMID"]],
+            lsuffix = "_emilpo",
+            rsuffix = "_f2s"
+            )
+    faces_matches = faces_matches.reset_index().set_index("FMID").join(
+            acom_spaces[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
+            lsuffix = "_emilpo",
+            rsuffix = "_aos"
+            )
+    
+    if(EXPORT_F2S): 
+        face_space_match.to_csv("..\export\\faces_spaces_match.csv")
+        faces_matches.to_csv("..\export\\faces_matches.csv")
+        
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces.csv")
         unmatched_analysis.to_csv("..\export\\unmatched_analysis.csv")
@@ -160,6 +181,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     face_space_match.sort_index()
     
     #Analyze match criteria and set multi index array for spaces and faces files
+    #Order is critical here. Face and Space indices need to be symetrical for matching to work
     if(criteria.UIC.loc[stage]):
         faces_index_labels.append("UIC")
         spaces_index_labels.append("UIC")
@@ -177,11 +199,23 @@ def match(criteria, faces, spaces, stage, face_space_match):
         spaces_index_labels.append("LN")
     
     #Match on grade without variance
-    if(criteria.GRADE.loc[stage] & 
-       ((criteria.ONE_UP.loc[stage] == False &criteria.TWO_UP.loc[stage] == False)
-        & criteria.ONE_DN.loc[stage] == False)):
-        faces_index_labels.append("GRADE")
-        spaces_index_labels.append("GRADE")
+    if(criteria.GRADE.loc[stage]):
+        if(criteria.GRADE_VAR.loc[stage] == 0):        
+            faces_index_labels.append("GRADE")
+            spaces_index_labels.append("GRADE")
+
+        #Match on one up
+        elif(criteria.GRADE_VAR.loc[stage] == 1):
+            faces_index_labels.append("ONE_UP")
+            spaces_index_labels.append("GRADE")
+            
+        elif(criteria.GRADE_VAR.loc[stage] >= 2):
+            faces_index_labels.append("TWO_UP")
+            spaces_index_labels.append("GRADE")
+            
+        elif(criteria.GRADE_VAR.loc[stage] < 0):
+            faces_index_labels.append("ONE_DN")
+            spaces_index_labels.append("GRADE")
         
     if(criteria.PRI_MOS.loc[stage] and not criteria.ALT_MOS.loc[stage]):
         faces_index_labels.append("MOS_AOC1")
@@ -193,8 +227,6 @@ def match(criteria, faces, spaces, stage, face_space_match):
         
     if(criteria.SQI.loc[stage]):
         spaces_index_labels.append("SQI1")  
-        
-    
     
     counter = 0
     stage_matched = 0 #Increase if match found
@@ -208,7 +240,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     
     print("Matching stage ", str(stage))
     #Iterate through every person in faces file
-    if(stage == 1): #UIC, PARNO, LN Matching custom implementation
+    if(stage == 1): #UIC, PARNO, LN Matching custom implementation. Customized because of volumne
                 
         face_list = sorted(faces[["UIC_PAR_LN", "SSN_MASK"]].values.tolist())
         space_list = sorted(spaces[["UIC_PAR_LN", "FMID"]].values.tolist())
@@ -247,7 +279,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage > 1): #Perfect MOS, GRADE match in PARA (2) and UIC (3) 
+    if(stage > 1): #All the rest of the stages happen here
         faces["PARNO"] = faces["PARNO"].astype("str")
         faces["LN"] = faces["LN"].astype("str")
         faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
