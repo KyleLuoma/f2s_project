@@ -40,6 +40,9 @@ def main():
                 rank_grade_xwalk,
                 grade_mismatch_xwalk)
         
+        faces = process_data.add_drrsa_data(faces, drrsa)
+        acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
+        
         acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
             

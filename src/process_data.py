@@ -17,6 +17,31 @@ MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
               "W1", "W2", "W3", "W4", "W5",
               "O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10"]
 
+def add_drrsa_data(target, drrsa):
+    drrsa.set_index("UIC", inplace = True)
+    target["DRRSA_ADCON"] = ""
+    target["DRRSA_HOGEO"] = ""
+    target["DRRSA_ARLOC"] = ""
+    target["DRRSA_GEOLOCATIONNAME"] = ""
+    target["DRRSA_ASGMT"] = ""
+    target["PPA"] = ""
+    
+    exception_counter = 0
+    
+    print("Mapping DRRSA data to target data frame")
+    for row in target.itertuples():
+        try:
+            target.at[row.Index, "DRRSA_ADCON"] = drrsa.loc[row.UIC].ADCON
+            target.at[row.Index, "DRRSA_HOGEO"] = drrsa.loc[row.UIC].HOGEO
+            target.at[row.Index, "DRRSA_ARLOC"] = drrsa.loc[row.UIC].ARLOC
+            target.at[row.Index, "DRRSA_GEOLOCATIONNAME"] = drrsa.loc[row.UIC].GEOLOCATIONNAME
+            target.at[row.Index, "DRRSA_ASGMT"] = drrsa.loc[row.UIC].ASGMT
+            target.at[row.Index, "PPA"] = drrsa.loc[row.UIC].PPA
+        except Exception:
+            exception_counter += 1
+    
+    return target
+
 """Converts faces columns to categorical values for indexing"""
 def categorical_faces(faces):
         print(" - UIC: creating categorical UIC index in faces file")
