@@ -21,7 +21,7 @@ EXPORT_UNMATCHED = True
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
-    global grade_mismatch_xwalk, faces_matches
+    global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk
     
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
@@ -29,6 +29,8 @@ def main():
     if(LOAD_AND_PROCESS):
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
         grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
+        aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
+        
         drrsa = load_data.load_drrsa_file()
         
         acom_spaces = process_data.process_aos_billet_export(
@@ -41,6 +43,8 @@ def main():
                 grade_mismatch_xwalk)
         
         faces = process_data.add_drrsa_data(faces, drrsa)
+        faces = process_data.check_uic_in_aos(faces, aos_ouid_uic_xwalk, "DRRSA_ADCON")
+        
         acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
         
         acom_spaces = process_data.categorical_spaces(acom_spaces)
@@ -73,6 +77,8 @@ def face_space_match_analysis(faces, face_space_match, acom_spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     faces_matches = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
                            "PARNO", "LN", "MIL_POSN_RPT_NR", "RANK_AB", "GRADE",
+                           "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATION_NAME",
+                           "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS"
                            ]].set_index("SSN_MASK", drop = True)
     faces_matches = faces_matches.join(
             face_space_match.reset_index(drop = True).set_index("SSN_MASK")[["stage_matched", "FMID"]],

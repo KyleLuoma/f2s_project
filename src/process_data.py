@@ -18,8 +18,10 @@ MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
               "O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10"]
 
 def add_drrsa_data(target, drrsa):
-    drrsa.set_index("UIC", inplace = True)
+    if(drrsa.index.name != "UIC"):
+        drrsa.set_index("UIC", inplace = True)
     target["DRRSA_ADCON"] = ""
+    target["DRRSA_ADCON_IN_AOS"] = False
     target["DRRSA_HOGEO"] = ""
     target["DRRSA_ARLOC"] = ""
     target["DRRSA_GEOLOCATIONNAME"] = ""
@@ -40,6 +42,12 @@ def add_drrsa_data(target, drrsa):
         except Exception:
             exception_counter += 1
     
+    return target
+
+def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
+    print("Checking if", uic_index_title, "exists in AOS")
+    if(uic_ouid_xwalk.index.name != "UIC"): uic_ouid_xwalk.set_index("UIC", inplace = True)
+    target[(uic_index_title + "_IN_AOS")] = target[uic_index_title].isin(uic_ouid_xwalk.index)
     return target
 
 """Converts faces columns to categorical values for indexing"""
@@ -93,7 +101,6 @@ def categorical_spaces(spaces):
         spaces["SQI1"] = spaces["SQI1"].astype(CategoricalDtype(spaces.SQI1.unique()))
 
         return spaces        
-
 
 
 """Process the AOS spaces billet export Pandas DF(s)

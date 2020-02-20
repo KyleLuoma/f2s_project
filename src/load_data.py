@@ -105,5 +105,9 @@ def load_rank_grade_xwalk():
 def load_grade_mismatch_xwalk():
     return pd.read_csv("../data/grade_mismatch_xwalk.csv").set_index("GRADE")
 
+""" Retrieve OUID to UIC mapping file """
+def load_ouid_uic_xwalk():
+    return pd.read_csv("../data/OUID_UIC_FY21.CSV")
+
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     
