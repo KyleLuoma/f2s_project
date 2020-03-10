@@ -45,7 +45,7 @@ def load_emilpo():
             dtype = {
                     "PARNO": str,
                     "LN": str,
-                    "SSN_MASK": str,
+                    "SSN_MASK_HASH": str,
                     "MIL_POSN_RPT_NR": str,
                     "MOS_AOC1": str,
                     "MOS_AOC2": str,
@@ -91,7 +91,7 @@ def load_emilpo():
                     "ASI13": str,
                     "ASI14": str
                     }
-            )
+            ).rename(columns = {"SSN_MASK_HASH" : "SSN_MASK"})
 
 """ Retreive match phases file """
 def load_match_phases():

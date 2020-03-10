@@ -13,7 +13,7 @@ import process_data
 import utility
 
 LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS = True
+LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
