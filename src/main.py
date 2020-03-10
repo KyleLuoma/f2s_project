@@ -13,7 +13,7 @@ import process_data
 import utility
 
 LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS = False
+LOAD_AND_PROCESS = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -77,7 +77,7 @@ def face_space_match_analysis(faces, face_space_match, acom_spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     faces_matches = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
                            "PARNO", "LN", "MIL_POSN_RPT_NR", "RANK_AB", "GRADE",
-                           "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATION_NAME",
+                           "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
                            "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS"
                            ]].set_index("SSN_MASK", drop = True)
     faces_matches = faces_matches.join(

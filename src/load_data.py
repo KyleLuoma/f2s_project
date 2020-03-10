@@ -41,7 +41,7 @@ def load_army_command_aos_billets():
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
     return pd.read_csv(
-            "../data/EMILPO_ASI_SQI_MOSAOC_ASSIGNMENTS_9FEB2020_WITH_KEY_MASK_NO_SSN.csv",
+            "../data/EMILPO_ASSIGNMENTS_3-3-20.csv",
             dtype = {
                     "PARNO": str,
                     "LN": str,
