@@ -12,7 +12,7 @@ import load_data
 import process_data
 import utility
 
-LOAD_MATCH_PHASES = True
+LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
@@ -86,7 +86,7 @@ def face_space_match_analysis(faces, face_space_match, acom_spaces):
             rsuffix = "_f2s"
             )
     faces_matches = faces_matches.reset_index().set_index("FMID").join(
-            acom_spaces[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
+            acom_spaces.reset_index(drop = True).set_index("FMID")[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
             lsuffix = "_emilpo",
             rsuffix = "_aos"
             )
