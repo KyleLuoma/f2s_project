@@ -15,8 +15,9 @@ def load_drrsa_file():
 
 """ Retrieve AOS Billet Export for Army Commands """
 def load_army_command_aos_billets():
-    return pd.read_csv(
+    return pd.read_xls(
             "../data/AOS_ARMY_COMMANDS_FY21.csv", 
+            header = 2,
             dtype = {
                     'PARENT_PARNO': str,    
                     'FMID': str,
@@ -36,7 +37,61 @@ def load_army_command_aos_billets():
                     'MDEP': str,
                     'BRANCH': str,
                     'CTYPE': str
-                    })
+                    },
+            skipfooter = 1
+            ).append(
+                pd.read_xls(
+                    "../data/aos_billet_export/W00EFF/.xlsx",
+                    header = 2,
+                    dtype = {
+                        'PARENT_PARNO': str,    
+                        'FMID': str,
+                        'PERLN': str,
+                        'GRADE': str,
+                        'POSCO': str,
+                        'ASI1': str,
+                        'ASI2': str,
+                        'ASI3': str,
+                        'ASI4': str,
+                        'SQI1': str,
+                        'RMK1': str,
+                        'RMK2': str,
+                        'RMK3': str,
+                        'RMK4': str,
+                        'AMSCO': str,
+                        'MDEP': str,
+                        'BRANCH': str,
+                        'CTYPE': str
+                        },
+                    skipfooter = 1
+                )
+            ).append(
+                pd.read_xls(
+                    "../data/aos_billet_export/WSTAFF/.xlsx",
+                    header = 2,
+                    dtype = {
+                        'PARENT_PARNO': str,    
+                        'FMID': str,
+                        'PERLN': str,
+                        'GRADE': str,
+                        'POSCO': str,
+                        'ASI1': str,
+                        'ASI2': str,
+                        'ASI3': str,
+                        'ASI4': str,
+                        'SQI1': str,
+                        'RMK1': str,
+                        'RMK2': str,
+                        'RMK3': str,
+                        'RMK4': str,
+                        'AMSCO': str,
+                        'MDEP': str,
+                        'BRANCH': str,
+                        'CTYPE': str
+                        },
+                    skipfooter = 1
+                )
+            )
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
