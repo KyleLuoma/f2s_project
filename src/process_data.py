@@ -50,6 +50,18 @@ def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
     target[(uic_index_title + "_IN_AOS")] = target[uic_index_title].isin(uic_ouid_xwalk.index)
     return target
 
+def add_expected_hsduic(target, UIC_HD_map):
+    print("Adding expected HSDUIC to target file")
+    UIC_primary_code_list = UIC_HD_map.UIC.to_list()
+    UIC_HD_map = UIC_HD_map.set_index("UIC")
+    target["HSDUIC"] = target.apply(
+            lambda row: ((row.UIC[0:4] + UIC_HD_map.HDUIC.loc[row.UIC[4:6]]) 
+                            if (row.UIC[4:6] in UIC_primary_code_list) else "NA"),
+            axis = 1
+            )
+    UIC_HD_map.reset_index()
+    return target
+
 """Converts faces columns to categorical values for indexing"""
 def categorical_faces(faces):
         print(" - UIC: creating categorical UIC index in faces file")

@@ -9,15 +9,18 @@ Sources include DRRSA UIC file and AOS tree export
 import pandas as pd
 import numpy as np
 
+def load_uic_hd_map():
+    return pd.read_csv("../data/uic_hd_map/UIC_HD_MAP.csv")
+
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
     return pd.read_csv("../data/DRRSA_Data_20200114.csv")
 
 """ Retrieve AOS Billet Export for Army Commands """
 def load_army_command_aos_billets():
-    return pd.read_xls(
+    return pd.read_csv(
             "../data/AOS_ARMY_COMMANDS_FY21.csv", 
-            header = 2,
+            #header = 2,
             dtype = {
                     'PARENT_PARNO': str,    
                     'FMID': str,
@@ -37,11 +40,11 @@ def load_army_command_aos_billets():
                     'MDEP': str,
                     'BRANCH': str,
                     'CTYPE': str
-                    },
-            skipfooter = 1
+                    }
+            #, skipfooter = 1
             ).append(
-                pd.read_xls(
-                    "../data/aos_billet_export/W00EFF/.xlsx",
+                pd.read_excel(
+                    "../data/aos_billet_export/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    
@@ -66,8 +69,8 @@ def load_army_command_aos_billets():
                     skipfooter = 1
                 )
             ).append(
-                pd.read_xls(
-                    "../data/aos_billet_export/WSTAFF/.xlsx",
+                pd.read_excel(
+                    "../data/aos_billet_export/WSTAFF/WSTAFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    

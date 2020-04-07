@@ -12,8 +12,8 @@ import load_data
 import process_data
 import utility
 
-LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS = False
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -21,21 +21,22 @@ EXPORT_UNMATCHED = True
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
-    global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk
+    global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk, uic_hd_map
     
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
     
     if(LOAD_AND_PROCESS):
+        uic_hd_map = load_data.load_uic_hd_map()
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
         grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
         
         drrsa = load_data.load_drrsa_file()
         
-        acom_spaces = process_data.process_aos_billet_export(
-                load_data.load_army_command_aos_billets()
-                )
+        acom_spaces = load_data.load_army_command_aos_billets()
+        acom_spaces = process_data.process_aos_billet_export(acom_spaces)
+        acom_spaces = process_data.add_expected_hsduic(acom_spaces, uic_hd_map)
         
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
@@ -237,6 +238,11 @@ def match(criteria, faces, spaces, stage, face_space_match):
         
     if(criteria.SQI.loc[stage]):
         spaces_index_labels.append("SQI1")  
+        
+    if(criteria.TEMPLET.loc[stage]):
+        pass
+    if(criteria.HSDUIC.loc[stage]):
+        pass
     
     counter = 0
     stage_matched = 0 #Increase if match found
@@ -289,7 +295,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
             #if(f_ix % 100 == 0): print(".", end = "")
             #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
-    if(stage > 1): #All the rest of the stages happen here
+    if(stage > 1): #All the rest of the stages happen here escept templet matching
         faces["PARNO"] = faces["PARNO"].astype("str")
         faces["LN"] = faces["LN"].astype("str")
         faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
@@ -306,14 +312,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
         mask_ix = len(faces_index_labels)  - 1     #Column index # for SSN MASK
         
         print("Comparing faces", faces_index_labels[0:compare_ix], 
-              "to", spaces_index_labels[0:compare_ix])
-        
-        if(stage == 8): 
-            print(faces.columns)
-            print("compare_ix:", str(compare_ix))
-            print("fmid_ix:", str(fmid_ix))
-            print("mask_ix:", str(mask_ix))
-            
+              "to", spaces_index_labels[0:compare_ix])            
         
         while(f_ix < f_total and s_ix < s_total):
             
@@ -331,6 +330,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 counter += 1
             elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
                 s_ix += 1
+
             
             
             #if(f_ix % 100 == 0): print(".", end = "")
