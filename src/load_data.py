@@ -16,33 +16,71 @@ def load_uic_hd_map():
 def load_drrsa_file():
     return pd.read_csv("../data/DRRSA_Data_20200114.csv")
 
-""" Retrieve AOS Billet Export for Army Commands """
-def load_army_command_aos_billets():
-    return pd.read_csv(
-            "../data/AOS_ARMY_COMMANDS_FY21.csv", 
-            #header = 2,
+""" Retrieve partitioned command tree and return a single DF of all Army Commands"""
+def load_and_append_warcff_billet_export(num_partitions):
+    cmd_uic = "WARCF"
+    file_path = "../data/aos_billet_export/WARCFF/"
+    file_name_end = " C2 BILLET EXPORT 4-7-2021.xlsx"
+    
+    cmd_billet_export = pd.read_excel(
+            file_path + cmd_uic + str(1) + file_name_end,
+            header = 2,
             dtype = {
-                    'PARENT_PARNO': str,    
-                    'FMID': str,
-                    'PERLN': str,
-                    'GRADE': str,
-                    'POSCO': str,
-                    'ASI1': str,
-                    'ASI2': str,
-                    'ASI3': str,
-                    'ASI4': str,
-                    'SQI1': str,
-                    'RMK1': str,
-                    'RMK2': str,
-                    'RMK3': str,
-                    'RMK4': str,
-                    'AMSCO': str,
-                    'MDEP': str,
-                    'BRANCH': str,
-                    'CTYPE': str
-                    }
-            #, skipfooter = 1
-            ).append(
+                'PARENT_PARNO': str,    
+                'FMID': str,
+                'PERLN': str,
+                'GRADE': str,
+                'POSCO': str,
+                'ASI1': str,
+                'ASI2': str,
+                'ASI3': str,
+                'ASI4': str,
+                'SQI1': str,
+                'RMK1': str,
+                'RMK2': str,
+                'RMK3': str,
+                'RMK4': str,
+                'AMSCO': str,
+                'MDEP': str,
+                'BRANCH': str,
+                'CTYPE': str
+                },
+            skipfooter = 1
+            )
+    
+    for i in range (2, num_partitions + 1):
+        cmd_billet_export.append(
+                pd.read_excel(
+                        file_path + cmd_uic + str(i) + file_name_end,
+                        header = 2,
+                        dtype = {
+                            'PARENT_PARNO': str,    
+                            'FMID': str,
+                            'PERLN': str,
+                            'GRADE': str,
+                            'POSCO': str,
+                            'ASI1': str,
+                            'ASI2': str,
+                            'ASI3': str,
+                            'ASI4': str,
+                            'SQI1': str,
+                            'RMK1': str,
+                            'RMK2': str,
+                            'RMK3': str,
+                            'RMK4': str,
+                            'AMSCO': str,
+                            'MDEP': str,
+                            'BRANCH': str,
+                            'CTYPE': str
+                            },
+                        skipfooter = 1
+                        )
+                )
+    return cmd_billet_export
+
+""" Retrieve AOS Billet Export for USAR and AC """
+def load_army_command_aos_billets():
+    return load_and_append_warcff_billet_export(4).append(
                 pd.read_excel(
                     "../data/aos_billet_export/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
