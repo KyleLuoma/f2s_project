@@ -20,7 +20,7 @@ def load_drrsa_file():
 def load_and_append_warcff_billet_export(num_partitions):
     cmd_uic = "WARCF"
     file_path = "../data/aos_billet_export/WARCFF/"
-    file_name_end = " C2 BILLET EXPORT 4-7-2021.xlsx"
+    file_name_end = " C2 BILLET EXPORT 4-6-2021.xlsx"
     
     cmd_billet_export = pd.read_excel(
             file_path + cmd_uic + str(1) + file_name_end,
@@ -137,7 +137,7 @@ def load_army_command_aos_billets():
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
     return pd.read_csv(
-            "../data/EMILPO_ASSIGNMENTS_3-3-20.csv",
+            "../data/emilpo/EMILPO_ASSIGNMENTS_4-6-20.csv",
             dtype = {
                     "PARNO": str,
                     "LN": str,
