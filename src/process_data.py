@@ -140,9 +140,9 @@ def process_aos_billet_export(aos_billet_export):
     aos_billet_export["SSN_MASK"] = 0
     
     aos_billet_export.GRADE.fillna("TMP")
-    aos_billet_export.GRADE = aos_billet_export.astype("str")
+    aos_billet_export.GRADE = aos_billet_export.GRADE.astype("str")
     aos_billet_export.POSCO.fillna("TMP")   
-    aos_billet_export.POSCO = aos_billet_export.astype("str")
+    aos_billet_export.POSCO = aos_billet_export.POSCO.astype("str")
     
     print("  - Truncating POSCO to match eMILPO MOS_AOC field")
     aos_billet_export["POSCO"] = aos_billet_export.apply(
