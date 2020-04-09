@@ -21,12 +21,12 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
               "09", "10", "11", "12", "13", "14", "15"]
 
 def add_match_phase_description(target, match_phases):
+    print("Joining match phase description to target dataframe")
     match_phases = match_phases.reset_index().set_index("STAGE")
     target.stage_matched = target.stage_matched.fillna(0).astype("int64")
-    target["MATCH_DESCRIPTION"] = ""
-    for row in target.itertuples():
-        if(row.Index > 0 and row.Index <= len(match_phases)):
-            target.at(row.Inxex, "MATCH_DESCRIPTION") = match_phases.loc[row.stage_matched].DESCRIPTION
+    target = target.join(match_phases["DESCRIPTION"], on = "stage_matched").rename(
+                columns = {"DESCRIPTION" : "MATCH_DESCRIPTION"}
+            )
     return target
 
 def add_drrsa_data(target, drrsa):
