@@ -12,8 +12,8 @@ import load_data
 import process_data
 import utility
 
-LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS = True
+LOAD_MATCH_PHASES = False
+LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -262,8 +262,9 @@ def match(criteria, faces, spaces, stage, face_space_match):
         space_list = sorted(spaces[["UIC_PAR_LN", "FMID"]].values.tolist())
         
         f_total = len(face_list)
+        s_total = len(space_list)
         
-        while(f_ix < f_total):
+        while(f_ix < f_total and s_ix < s_total):
             #If UIC, PARNO and LN match, log match and advance both cursors
             #print(face_list[f_ix][0], space_list[s_ix][0])
             if(face_list[f_ix][0]   == space_list[s_ix][0]):

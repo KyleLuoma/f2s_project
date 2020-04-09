@@ -62,6 +62,13 @@ def add_expected_hsduic(target, UIC_HD_map):
     UIC_HD_map.reset_index()
     return target
 
+def add_templet_columns(target, para = "999E", ln = "99"):
+    print("Adding templet PARA and LN to target data frame")
+    target["TMP_PARA"] = para
+    target["TMP_LN"] = ln
+    return target
+        
+
 """Converts faces columns to categorical values for indexing"""
 def categorical_faces(faces):
         print(" - UIC: creating categorical UIC index in faces file")
