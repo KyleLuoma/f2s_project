@@ -17,6 +17,7 @@ LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
+UPDATE_CONNECTIONS = True
 
 def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -62,16 +63,20 @@ def main():
                                                  acom_spaces)
     
     faces_matches = face_space_match_analysis(faces, face_space_match, acom_spaces)
-    
+    faces_matches = process_data.add_match_phase_description(faces_matches, match_phases)
     
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\faces_spaces_match" + utility.get_file_timestamp() + ".csv")
         faces_matches.to_csv("..\export\\faces_matches" + utility.get_file_timestamp() + ".csv")
         
+        
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
         unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
-        
+    
+    if(UPDATE_CONNECTIONS):
+        faces_matches.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
+    
 def reload_spaces():
     spaces = load_army_command_aos_billets()
     spaces = process_aos_billet_export(spaces)
