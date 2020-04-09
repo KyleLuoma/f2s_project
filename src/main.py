@@ -37,20 +37,17 @@ def main():
         acom_spaces = load_data.load_army_command_aos_billets()
         acom_spaces = process_data.process_aos_billet_export(acom_spaces)
         acom_spaces = process_data.add_expected_hsduic(acom_spaces, uic_hd_map, "NA")
-        
+        acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
+        acom_spaces = process_data.categorical_spaces(acom_spaces)
+
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
                 rank_grade_xwalk,
                 grade_mismatch_xwalk)
-        
         faces = process_data.add_drrsa_data(faces, drrsa)
         faces = process_data.check_uic_in_aos(faces, aos_ouid_uic_xwalk, "DRRSA_ADCON")
         faces = process_data.add_templet_columns(faces)
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
-        
-        acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
-        
-        acom_spaces = process_data.categorical_spaces(acom_spaces)
         faces = process_data.categorical_faces(faces)
             
     unmatched_faces, remaining_spaces, face_space_match = full_run(

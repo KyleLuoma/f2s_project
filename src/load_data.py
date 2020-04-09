@@ -49,7 +49,7 @@ def load_and_append_warcff_billet_export(num_partitions):
             )
     
     for i in range (2, num_partitions + 1):
-        cmd_billet_export.append(
+        cmd_billet_export = cmd_billet_export.append(
                 pd.read_excel(
                         file_path + cmd_uic + str(i) + file_name_end,
                         header = 2,
