@@ -36,7 +36,7 @@ def main():
         
         acom_spaces = load_data.load_army_command_aos_billets()
         acom_spaces = process_data.process_aos_billet_export(acom_spaces)
-        acom_spaces = process_data.add_expected_hsduic(acom_spaces, uic_hd_map)
+        acom_spaces = process_data.add_expected_hsduic(acom_spaces, uic_hd_map, "NA")
         
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
@@ -45,6 +45,8 @@ def main():
         
         faces = process_data.add_drrsa_data(faces, drrsa)
         faces = process_data.check_uic_in_aos(faces, aos_ouid_uic_xwalk, "DRRSA_ADCON")
+        faces = process_data.add_templet_columns(faces)
+        faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         
         acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
         
@@ -72,6 +74,14 @@ def main():
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
         unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
+        
+def reload_spaces():
+    spaces = load_army_command_aos_billets()
+    spaces = process_aos_billet_export(spaces)
+    spaces = add_expected_hsduic(spaces, uic_hd_map, "NA")
+    spaces = add_drrsa_data(spaces, drrsa)
+    spaces = categorical_spaces(spaces)
+    return spaces
 
 
 def face_space_match_analysis(faces, face_space_match, acom_spaces):
@@ -164,9 +174,16 @@ def full_run(criteria, faces, spaces):
 " Use to test a single matching stage on match()
 """
 def test_stage(criteria, faces, spaces, stage):
+    face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
+    face_space_match["F_PLN"] = ""
+    face_space_match["S_PLN"] = ""
+    
     return match(match_phases,  
               faces.where(faces.stage_matched == 0).dropna(how = "all"),
-              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), stage)
+              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), 
+              stage,
+              face_space_match)
     
     
 """
@@ -200,6 +217,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
     if(criteria.LDUIC.loc[stage]):
         faces_index_labels.append("UIC")
         spaces_index_labels.append("LDUIC")
+        
+    if(criteria.HSDUIC.loc[stage]):
+        faces_index_labels.append("HSDUIC")
+        spaces_index_labels.append("UIC")
         
     if(criteria.PARNO.loc[stage]):
         faces_index_labels.append("PARNO")
@@ -240,9 +261,12 @@ def match(criteria, faces, spaces, stage, face_space_match):
         spaces_index_labels.append("SQI1")  
         
     if(criteria.TEMPLET.loc[stage]):
-        pass
-    if(criteria.HSDUIC.loc[stage]):
-        pass
+        faces_index_labels.append("TMP_PARNO")
+        faces_index_labels.append("TMP_LN")
+        spaces_index_labels.append("PARNO")
+        spaces_index_labels.append("LN")
+        
+    
     
     counter = 0
     stage_matched = 0 #Increase if match found
@@ -299,6 +323,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
     if(stage > 1): #All the rest of the stages happen here escept templet matching
         faces["PARNO"] = faces["PARNO"].astype("str")
         faces["LN"] = faces["LN"].astype("str")
+        faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
+        faces["TMP_LN"] = faces["TMP_LN"].astype("str")
         faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
         spaces["LDUIC"] = spaces["LDUIC"].astype("str")
         

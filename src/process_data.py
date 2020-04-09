@@ -17,6 +17,9 @@ MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
               "W1", "W2", "W3", "W4", "W5",
               "O1", "O2", "O3", "O4", "O5", "O6", "O7", "O8", "O9", "O10"]
 
+CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
+              "09", "10", "11", "12", "13", "14", "15"]
+
 def add_drrsa_data(target, drrsa):
     if(drrsa.index.name != "UIC"):
         drrsa.set_index("UIC", inplace = True)
@@ -50,7 +53,7 @@ def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
     target[(uic_index_title + "_IN_AOS")] = target[uic_index_title].isin(uic_ouid_xwalk.index)
     return target
 
-def add_expected_hsduic(target, UIC_HD_map):
+def add_expected_hsduic(target, UIC_HD_map, NA_value = "NA"):
     print("Adding expected HSDUIC to target file")
     UIC_primary_code_list = UIC_HD_map.UIC.to_list()
     UIC_HD_map = UIC_HD_map.set_index("UIC")
@@ -62,9 +65,9 @@ def add_expected_hsduic(target, UIC_HD_map):
     UIC_HD_map.reset_index()
     return target
 
-def add_templet_columns(target, para = "999E", ln = "99"):
+def add_templet_columns(target, parno = "999E", ln = "99"):
     print("Adding templet PARA and LN to target data frame")
-    target["TMP_PARA"] = para
+    target["TMP_PARNO"] = parno
     target["TMP_LN"] = ln
     return target
         
@@ -131,11 +134,15 @@ def categorical_spaces(spaces):
 def process_aos_billet_export(aos_billet_export):
     print("Processing AOS billet export file")
     print("  - Dropping non military grade positions")
-    aos_billet_export = aos_billet_export.where(aos_billet_export.GRADE.isin(MIL_GRADES)).dropna(how = "all")
+    aos_billet_export = aos_billet_export.where(~aos_billet_export.GRADE.isin(CIV_GRADES)).dropna(how = "all")
     print("  - Renaming columns")
     aos_billet_export["stage_matched"] = 0
     aos_billet_export["SSN_MASK"] = 0
     
+    aos_billet_export.GRADE.fillna("TMP")
+    aos_billet_export.GRADE = aos_billet_export.astype("str")
+    aos_billet_export.POSCO.fillna("TMP")   
+    aos_billet_export.POSCO = aos_billet_export.astype("str")
     
     print("  - Truncating POSCO to match eMILPO MOS_AOC field")
     aos_billet_export["POSCO"] = aos_billet_export.apply(
