@@ -30,30 +30,19 @@ def add_match_phase_description(target, match_phases):
     return target
 
 def add_drrsa_data(target, drrsa):
-    if(drrsa.index.name != "UIC"):
-        drrsa.set_index("UIC", inplace = True)
-    target["DRRSA_ADCON"] = ""
-    target["DRRSA_ADCON_IN_AOS"] = False
-    target["DRRSA_HOGEO"] = ""
-    target["DRRSA_ARLOC"] = ""
-    target["DRRSA_GEOLOCATIONNAME"] = ""
-    target["DRRSA_ASGMT"] = ""
-    target["PPA"] = ""
-    
-    exception_counter = 0
-    
-    print("Mapping DRRSA data to target data frame")
-    for row in target.itertuples():
-        try:
-            target.at[row.Index, "DRRSA_ADCON"] = drrsa.loc[row.UIC].ADCON
-            target.at[row.Index, "DRRSA_HOGEO"] = drrsa.loc[row.UIC].HOGEO
-            target.at[row.Index, "DRRSA_ARLOC"] = drrsa.loc[row.UIC].ARLOC
-            target.at[row.Index, "DRRSA_GEOLOCATIONNAME"] = drrsa.loc[row.UIC].GEOLOCATIONNAME
-            target.at[row.Index, "DRRSA_ASGMT"] = drrsa.loc[row.UIC].ASGMT
-            target.at[row.Index, "PPA"] = drrsa.loc[row.UIC].PPA
-        except Exception:
-            exception_counter += 1
-    
+    drrsa = drrsa.reset_index().set_index("UIC")
+    print("Mapping DRRSA data to target data frame")    
+    target = target.join(
+            drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA"]],
+            on = "UIC",
+            lsuffix = "AOS_",
+            rsuffix = "DRRSA_").rename(columns = {
+                        "ADCON" : "DRRSA_ADCON",
+                        "HOGEO" : "DRRSA_HOGEO",
+                        "ARLOC" : "DRRSA_ARLOC",
+                        "GEOLOCATIONNAME" : "DRRSA_GEOLOCATIONNAME",
+                        "ASGMT" : "DRRSA_ASGMT"
+                    })
     return target
 
 def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
