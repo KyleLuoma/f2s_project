@@ -7,12 +7,12 @@ Created on Mon Feb 10 13:45:26 2020
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 import numpy as np
-import math
+#import math
 import load_data
 import process_data
 import utility
 import pyodbc as db
-import sqlalchemy
+#import sqlalchemy
 
 LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS = False
@@ -25,9 +25,7 @@ def main():
     global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk, uic_hd_map
-    
-    db_connection = utility.get_dq_db_connection()
-    
+        
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
     if(LOAD_AND_PROCESS):
@@ -76,12 +74,7 @@ def main():
         unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
     if(UPDATE_CONNECTIONS):
         faces_matches.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
-        db_connection.execute(faces_matches.to_sql(
-                    con = utility.get_sql_engine(),
-                    name = "all_faces_matched_spaces",
-                    if_exists = "replace"
-                ))
-    
+        
 def reload_spaces():
     spaces = load_army_command_aos_billets()
     spaces = process_aos_billet_export(spaces)
