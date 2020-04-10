@@ -11,6 +11,8 @@ import math
 import load_data
 import process_data
 import utility
+import pyodbc as db
+import sqlalchemy
 
 LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS = False
@@ -24,9 +26,10 @@ def main():
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk, uic_hd_map
     
+    db_connection = utility.get_dq_db_connection()
+    
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
-    
     if(LOAD_AND_PROCESS):
         uic_hd_map = load_data.load_uic_hd_map()
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
@@ -67,15 +70,17 @@ def main():
     
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\faces_spaces_match" + utility.get_file_timestamp() + ".csv")
-        faces_matches.to_csv("..\export\\faces_matches" + utility.get_file_timestamp() + ".csv")
-        
-        
+        faces_matches.to_csv("..\export\\faces_matches" + utility.get_file_timestamp() + ".csv")                
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
         unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
-    
     if(UPDATE_CONNECTIONS):
         faces_matches.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
+        db_connection.execute(faces_matches.to_sql(
+                    con = utility.get_sql_engine(),
+                    name = "all_faces_matched_spaces",
+                    if_exists = "replace"
+                ))
     
 def reload_spaces():
     spaces = load_army_command_aos_billets()
@@ -132,8 +137,6 @@ def analyze_unmatched_faces(face_space_match, unmatched_faces, spaces):
     
     return unmatched_analysis
 
-    
-
 """
 " Iterates through all rows of match phases and calls the core match function
 " for each combination. Eliminates matched spaces and faces with each call to 
@@ -169,7 +172,6 @@ def full_run(criteria, faces, spaces):
               str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
               " matches.")
         
-    
     return faces, spaces, face_space_match
 
 """
@@ -186,7 +188,6 @@ def test_stage(criteria, faces, spaces, stage):
               spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), 
               stage,
               face_space_match)
-    
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -268,8 +269,6 @@ def match(criteria, faces, spaces, stage, face_space_match):
         spaces_index_labels.append("PARNO")
         spaces_index_labels.append("LN")
         
-    
-    
     counter = 0
     stage_matched = 0 #Increase if match found
     exception_count = 0 #Increase if exception thrown
@@ -280,7 +279,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     spaces_index_labels.append("FMID") #This will be the last column in the list
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
-    print("Matching stage ", str(stage))
+    print(" - Matching stage ", str(stage))
     #Iterate through every person in faces file
     if(stage == 1): #UIC, PARNO, LN Matching custom implementation. Customized because of volumne
                 
@@ -292,14 +291,12 @@ def match(criteria, faces, spaces, stage, face_space_match):
         
         while(f_ix < f_total and s_ix < s_total):
             #If UIC, PARNO and LN match, log match and advance both cursors
-            #print(face_list[f_ix][0], space_list[s_ix][0])
             if(face_list[f_ix][0]   == space_list[s_ix][0]):
                 #Log the match in the face_space_match file
                 face_space_match.at[space_list[s_ix][1], "SSN_MASK"] = face_list[f_ix][1]
                 face_space_match.at[space_list[s_ix][1], "stage_matched"] = stage
                 face_space_match.at[space_list[s_ix][1], "F_PLN"] = face_list[f_ix][0]
                 face_space_match.at[space_list[s_ix][1], "S_PLN"] = space_list[s_ix][0]
-                #print(face_list[f_ix][1], space_list[s_ix][1])
                 #Advance both cursors
                 f_ix += 1
                 s_ix += 1
@@ -307,7 +304,6 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 counter += 1
             #If faces < spaces position
             elif(face_list[f_ix][0] < space_list[s_ix][0]):
-                #print(face_list[f_ix][1])
                 #Advance faces cursor
                 f_ix += 1
                 #This indicaets an unmatched face, so advance the exception_count:
@@ -319,9 +315,6 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 #Advance spaces cursor
                 s_ix += 1
                 
-            #if(f_ix % 100 == 0): print(".", end = "")
-            #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
-            
     if(stage > 1): #All the rest of the stages happen here escept templet matching
         faces["PARNO"] = faces["PARNO"].astype("str")
         faces["LN"] = faces["LN"].astype("str")
@@ -343,8 +336,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
         print("Comparing faces", faces_index_labels[0:compare_ix], 
               "to", spaces_index_labels[0:compare_ix])            
         
-        while(f_ix < f_total and s_ix < s_total):
-            
+        while(f_ix < f_total and s_ix < s_total):  
             #print(face_list[f_ix][0:compare_ix], space_list[s_ix][0:compare_ix])
             if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
                 face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
@@ -359,23 +351,11 @@ def match(criteria, faces, spaces, stage, face_space_match):
                 counter += 1
             elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
                 s_ix += 1
-
-            
-            
-            #if(f_ix % 100 == 0): print(".", end = "")
-            #if(f_ix % 1000== 0): print("Faces index:", str(f_ix), "Matched:", str(stage_matched))
             
     print("STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
     
     return faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"), spaces, face_space_match
-
-            
-        
-    #Attempt to locate a matching vacant position based on provided criteria
-    #If match: pop row from faces, add SSN mask to space match
-    #If no match: iterate to next faces row
-    print("Match", str(stage))
 
 if (__name__ == "__main__"): main()
