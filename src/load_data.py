@@ -78,7 +78,7 @@ def load_and_append_warcff_billet_export(num_partitions):
                         skipfooter = 1
                         )
                 )
-    return cmd_billet_export
+    return cmd_billet_export.drop_duplicates("FMID")
 
 """ Retrieve AOS Billet Export for USAR and AC """
 def load_army_command_aos_billets():
@@ -134,7 +134,7 @@ def load_army_command_aos_billets():
                         },
                     skipfooter = 1
                 )
-            )
+            ).drop_duplicates("FMID")
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():

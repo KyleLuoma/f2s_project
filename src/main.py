@@ -16,7 +16,7 @@ import pyodbc as db
 
 LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS = False
-VERBOSE = True
+VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
 UPDATE_CONNECTIONS = True
@@ -57,11 +57,13 @@ def main():
             faces, 
             spaces[["UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
-                       "ASI_LIST", "RMK_LIST"]])
+                       "ASI_LIST", "RMK_LIST", "DRRSA_ASGMT"]],
+            include_only_cmds = [],
+            exclude_cmds = ["AR"])
     
     all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
-    all_faces_to_matched_spaces = diagnose_mismatch_in_target(target, unmatched_faces, spaces)
+    all_faces_to_matched_spaces = diagnose_mismatch_in_target(all_faces_to_matched_spaces, unmatched_faces, spaces)
     
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
@@ -109,10 +111,10 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
-    unmatched_analysis.UIC_IN_AOS = unmatched_analysis.UIC.isin(spaces.UIC)
+    target.ADD_UIC_TO_AOS = target.UIC_emilpo.isin(spaces.UIC)
     print(" - Checking if templets are needed")
-    unmatched_analysis.NEED_TEMPLET = unmatched_analysis.apply(
-            lambda row: True if row.UIC_IN_AOS else False,
+    target.CREATE_TEMPLET = target.apply(
+            lambda row: True if (row.ADD_UIC_TO_AOS and row.stage_matched == 0) else False,
             axis = 1
             )
     return target
@@ -128,30 +130,36 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
 "          spaces - remaining available spaces
 "          face_space_match - DF of FMID-SSN_MASK pairing with stage matched indicator
 """
-def full_run(criteria, faces, spaces):
+def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = []):
     print("Executing full matching run")
-    face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
+    face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
-    face_space_match["F_PLN"] = ""
-    face_space_match["S_PLN"] = ""
+    
+    if(len(include_only_cmds) > 0):
+        spaces = spaces.where(spaces.DRRSA_ASGMT.isin(include_only_cmds)).dropna(how = "all")
+        faces = faces.where(faces.STRUC_CMD_CD.isin(include_only_cmds)).dropna(how = "all")
+        
+    if(len(exclude_cmds) > 0):
+        spaces = spaces.where(~spaces.DRRSA_ASGMT.isin(exclude_cmds)).dropna(how = "all")
+        faces = faces.where(~faces.STRUC_CMD_CD.isin(exclude_cmds)).dropna(how = "all")
     
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
         faces, spaces, face_space_match = match(
-                match_phases,  
-                faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
-                spaces.where(
-                      spaces.FMID.isin(
-                              face_space_match.where(face_space_match.stage_matched == 0).dropna(how = "all").FMID
-                              )
-                      ).dropna(how = "all"), 
-                i,
-                face_space_match
+            match_phases,  
+            faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
+            spaces.where(
+                spaces.FMID.isin(
+                    face_space_match.where(face_space_match.stage_matched == 0).dropna(how = "all").FMID
                 )
+            ).dropna(how = "all"), 
+            i,
+            face_space_match
+        )
         print(" - match() returned", 
-              str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
-              " matches.")
-        
+            str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
+            " matches."
+        )
     return faces, spaces, face_space_match
 
 """
@@ -163,11 +171,13 @@ def test_stage(criteria, faces, spaces, stage):
     face_space_match["F_PLN"] = ""
     face_space_match["S_PLN"] = ""
     
-    return match(match_phases,  
-              faces.where(faces.stage_matched == 0).dropna(how = "all"),
-              spaces.where(spaces.stage_matched == 0).dropna(how = "all"), 
-              stage,
-              face_space_match)
+    return match(
+        match_phases,  
+        faces.where(faces.stage_matched == 0).dropna(how = "all"),
+        spaces.where(spaces.stage_matched == 0).dropna(how = "all"), 
+        stage,
+        face_space_match
+    )
     
 """
 " Core matching function that iterates through available spaces and aligns
@@ -259,6 +269,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
     spaces_index_labels.append("FMID") #This will be the last column in the list
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
+    if(stage == 1): #Overwrite the index labels for perfect matching stage 1
+        face_list = faces_index_labels = ["UIC_PAR_LN", "SSN_MASK"]
+        space_list = spaces_index_labels = ["UIC_PAR_LN", "FMID"]
+    
     print(" - Matching stage ", str(stage))
                 
     faces["PARNO"] = faces["PARNO"].astype("str")
@@ -267,7 +281,9 @@ def match(criteria, faces, spaces, stage, face_space_match):
     faces["TMP_LN"] = faces["TMP_LN"].astype("str")
     faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
     spaces["LDUIC"] = spaces["LDUIC"].astype("str")
-    
+    spaces["PARNO"] = spaces["PARNO"].astype("str")
+    spaces["LN"] = spaces["LN"].astype("str")
+
     face_list = sorted(faces[faces_index_labels].values.tolist())
     space_list = sorted(spaces[spaces_index_labels].values.tolist())
     
@@ -284,7 +300,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     comparison_count = 0
     while(f_ix < f_total and s_ix < s_total): 
         comparison_count += 1
-        if VERBOSE and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix))
+        if VERBOSE and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix), "Match:", str(stage_matched))
         if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
             face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
             face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
