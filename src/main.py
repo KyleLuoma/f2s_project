@@ -22,9 +22,9 @@ EXPORT_UNMATCHED = True
 UPDATE_CONNECTIONS = True
 
 def main():
-    global drrsa, acom_spaces, faces, match_phases, rank_grade_xwalk, test_faces 
+    global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
-    global grade_mismatch_xwalk, faces_matches, aos_ouid_uic_xwalk, uic_hd_map
+    global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk, uic_hd_map
         
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
@@ -36,11 +36,11 @@ def main():
         
         drrsa = load_data.load_drrsa_file()
         
-        acom_spaces = load_data.load_army_command_aos_billets()
-        acom_spaces = process_data.process_aos_billet_export(acom_spaces)
-        acom_spaces = process_data.add_expected_hsduic(acom_spaces, uic_hd_map, "NA")
-        acom_spaces = process_data.add_drrsa_data(acom_spaces, drrsa)
-        acom_spaces = process_data.categorical_spaces(acom_spaces)
+        spaces = load_data.load_army_command_aos_billets()
+        spaces = process_data.process_aos_billet_export(spaces)
+        spaces = process_data.add_expected_hsduic(spaces, uic_hd_map, "NA")
+        spaces = process_data.add_drrsa_data(spaces, drrsa)
+        spaces = process_data.categorical_spaces(spaces)
 
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
@@ -55,25 +55,25 @@ def main():
     unmatched_faces, remaining_spaces, face_space_match = full_run(
             match_phases, 
             faces, 
-            acom_spaces[["UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
+            spaces[["UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                        "ASI_LIST", "RMK_LIST"]])
     
     unmatched_analysis = analyze_unmatched_faces(face_space_match, 
                                                  unmatched_faces, 
-                                                 acom_spaces)
+                                                 spaces)
     
-    faces_matches = face_space_match_analysis(faces, face_space_match, acom_spaces)
-    faces_matches = process_data.add_match_phase_description(faces_matches, match_phases)
+    all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
+    all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
     
     if(EXPORT_F2S): 
-        face_space_match.to_csv("..\export\\faces_spaces_match" + utility.get_file_timestamp() + ".csv")
-        faces_matches.to_csv("..\export\\faces_matches" + utility.get_file_timestamp() + ".csv")                
+        face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
+        all_faces_to_matched_spaces.to_csv("..\export\\all_faces_to_matched_spaces" + utility.get_file_timestamp() + ".csv")                
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
         unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
     if(UPDATE_CONNECTIONS):
-        faces_matches.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
+        all_faces_to_matched_spaces.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
         
 def reload_spaces():
     spaces = load_army_command_aos_billets()
@@ -83,25 +83,26 @@ def reload_spaces():
     spaces = categorical_spaces(spaces)
     return spaces
 
+def 
 
-def face_space_match_analysis(faces, face_space_match, acom_spaces):
+def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
-    faces_matches = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
+    all_faces_to_matched_spaces = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
                            "PARNO", "LN", "MIL_POSN_RPT_NR", "RANK_AB", "GRADE",
                            "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
                            "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS"
                            ]].set_index("SSN_MASK", drop = True)
-    faces_matches = faces_matches.join(
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
             face_space_match.reset_index(drop = True).set_index("SSN_MASK")[["stage_matched", "FMID"]],
             lsuffix = "_emilpo",
             rsuffix = "_f2s"
             )
-    faces_matches = faces_matches.reset_index().set_index("FMID").join(
-            acom_spaces.reset_index(drop = True).set_index("FMID")[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().set_index("FMID").join(
+            spaces.reset_index(drop = True).set_index("FMID")[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
             lsuffix = "_emilpo",
             rsuffix = "_aos"
             )
-    return faces_matches
+    return all_faces_to_matched_spaces
 
 
 def analyze_unmatched_faces(face_space_match, unmatched_faces, spaces):
@@ -178,7 +179,7 @@ def test_stage(criteria, faces, spaces, stage):
     
     return match(match_phases,  
               faces.where(faces.stage_matched == 0).dropna(how = "all"),
-              spaces.where(acom_spaces.stage_matched == 0).dropna(how = "all"), 
+              spaces.where(spaces.stage_matched == 0).dropna(how = "all"), 
               stage,
               face_space_match)
     
