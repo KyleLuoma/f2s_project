@@ -9,12 +9,14 @@ Sources include DRRSA UIC file and AOS tree export
 import pandas as pd
 import numpy as np
 
+WARCFF_PARTITION_COUNT = 5
+
 def load_uic_hd_map():
     return pd.read_csv("../data/uic_hd_map/UIC_HD_MAP.csv")
 
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
-    return pd.read_csv("../data/DRRSA_Data_20200114.csv")
+    return pd.read_csv("../data/drrsa/DRRSA_Data_20200114.csv")
 
 """ Retrieve partitioned command tree and return a single DF of all Army Commands"""
 def load_and_append_warcff_billet_export(num_partitions):
@@ -80,7 +82,7 @@ def load_and_append_warcff_billet_export(num_partitions):
 
 """ Retrieve AOS Billet Export for USAR and AC """
 def load_army_command_aos_billets():
-    return load_and_append_warcff_billet_export(4).append(
+    return load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
                 pd.read_excel(
                     "../data/aos_billet_export/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
@@ -191,19 +193,19 @@ def load_emilpo():
 
 """ Retreive match phases file """
 def load_match_phases():
-    return pd.read_csv("../data/match_phases.csv").set_index("STAGE")
+    return pd.read_csv("../data/phases/match_phases.csv").set_index("STAGE")
 
 """ Retrieve rank grade crosswalk file """
 def load_rank_grade_xwalk():
-    return pd.read_csv("../data/rank_grade_xwalk.csv").set_index("RANK")
+    return pd.read_csv("../data/xwalks/rank_grade_xwalk.csv").set_index("RANK")
 
 """ Retrieve grade mismatch crosswalk file """
 def load_grade_mismatch_xwalk():
-    return pd.read_csv("../data/grade_mismatch_xwalk.csv").set_index("GRADE")
+    return pd.read_csv("../data/xwalks/grade_mismatch_xwalk.csv").set_index("GRADE")
 
 """ Retrieve OUID to UIC mapping file """
 def load_ouid_uic_xwalk():
-    return pd.read_csv("../data/OUID_UIC_FY21.CSV")
+    return pd.read_csv("../data/xwalks/OUID_UIC_FY21.CSV")
 
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     
