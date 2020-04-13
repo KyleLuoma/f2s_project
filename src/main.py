@@ -103,20 +103,21 @@ def face_space_match_analysis(faces, face_space_match, spaces):
 
 def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     print("Analyzing unmatched faces")
-    unmatched_analysis = unmatched_faces[["SSN_MASK", "UIC", "PARENT_UIC_CD",
-                                          "STRUC_CMD_CD", "PARNO", "LN", 
-                                          "MIL_POSN_RPT_NR", "RANK_AB", 
-                                          "GRADE", "ASI_LIST", "SQI_LIST",
-                                          "MOS_AOC_LIST"]]
+    unmatched_analysis = unmatched_faces[[
+             "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "PARNO", "LN", 
+             "MIL_POSN_RPT_NR", "RANK_AB", "GRADE", "ASI_LIST", "SQI_LIST", "MOS_AOC_LIST"
+        ]
+    ]
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
-    target.ADD_UIC_TO_AOS = target.UIC_emilpo.isin(spaces.UIC)
+    target.ADD_UIC_TO_AOS = (not target.UIC_emilpo.isin(spaces.UIC))
+    
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
-            lambda row: True if (row.ADD_UIC_TO_AOS and row.stage_matched == 0) else False,
-            axis = 1
-            )
+        lambda row: True if (not row.ADD_UIC_TO_AOS and row.stage_matched == 0) else False,
+        axis = 1
+    )
     return target
 
 """

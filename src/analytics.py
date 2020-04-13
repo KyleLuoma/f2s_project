@@ -26,7 +26,7 @@ def match_phases_pivot(faces_matches, cmd = ["ALL"], width = 800, height = 400):
         x_axis_type = "linear"
     )
     plt.varea(x = stages, y1 = multi_line[1], y2 = [0] * len(stages), color = "gray")
-    plt.varea(x = stages, y1 = multi_line[2], y2 = [0] * len(stages), color = "black")
+    #plt.varea(x = stages, y1 = multi_line[2], y2 = [0] * len(stages), color = "black")
     #Stage matches bar chart:
     plt.multi_line(
         xs = [stages, stages, stages],
@@ -58,4 +58,4 @@ def calculate_remaining_faces(phase_values):
     return remaining
     
     
-match_phases_pivot(faces_matches, ["FC"])
+match_phases_pivot(all_faces_to_matched_spaces, ["AF"])
