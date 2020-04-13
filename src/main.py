@@ -14,9 +14,9 @@ import utility
 import pyodbc as db
 #import sqlalchemy
 
-LOAD_MATCH_PHASES = False
+LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS = False
-VERBOSE = False
+VERBOSE = True
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
 UPDATE_CONNECTIONS = True
@@ -59,21 +59,17 @@ def main():
                        "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                        "ASI_LIST", "RMK_LIST"]])
     
-    unmatched_analysis = analyze_unmatched_faces(face_space_match, 
-                                                 unmatched_faces, 
-                                                 spaces)
-    
     all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
+    all_faces_to_matched_spaces = diagnose_mismatch_in_target(target, unmatched_faces, spaces)
     
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
         all_faces_to_matched_spaces.to_csv("..\export\\all_faces_to_matched_spaces" + utility.get_file_timestamp() + ".csv")                
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
-        unmatched_analysis.to_csv("..\export\\unmatched_analysis" + utility.get_file_timestamp() + ".csv")
     if(UPDATE_CONNECTIONS):
-        all_faces_to_matched_spaces.to_csv("..\export\\for_connections\\faces_matches_latest.csv")
+        all_faces_to_matched_spaces.to_csv("..\export\\for_connections\\all_faces_to_matched_space_latest.csv")
         
 def reload_spaces():
     spaces = load_army_command_aos_billets()
@@ -82,8 +78,6 @@ def reload_spaces():
     spaces = add_drrsa_data(spaces, drrsa)
     spaces = categorical_spaces(spaces)
     return spaces
-
-def 
 
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
@@ -105,31 +99,23 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     return all_faces_to_matched_spaces
 
 
-def analyze_unmatched_faces(face_space_match, unmatched_faces, spaces):
+def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     print("Analyzing unmatched faces")
     unmatched_analysis = unmatched_faces[["SSN_MASK", "UIC", "PARENT_UIC_CD",
                                           "STRUC_CMD_CD", "PARNO", "LN", 
                                           "MIL_POSN_RPT_NR", "RANK_AB", 
                                           "GRADE", "ASI_LIST", "SQI_LIST",
                                           "MOS_AOC_LIST"]]
-
-    unmatched_analysis["UIC_IN_AOS"] = False
-    unmatched_analysis["PARENT_UIC_IN_AOS"] = False
-    unmatched_analysis["NEED_TEMPLET"] = False
-    
+    target["ADD_UIC_TO_AOS"] = False
+    target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
     unmatched_analysis.UIC_IN_AOS = unmatched_analysis.UIC.isin(spaces.UIC)
-    
-    print(" - Checking if PARENT_UICs are in AOS")
-    unmatched_analysis.PARENT_UIC_IN_AOS = unmatched_analysis.PARENT_UIC_CD.isin(spaces.UIC)
-    
     print(" - Checking if templets are needed")
     unmatched_analysis.NEED_TEMPLET = unmatched_analysis.apply(
-            lambda row: True if (row.UIC_IN_AOS or row.PARENT_UIC_IN_AOS) else False,
+            lambda row: True if row.UIC_IN_AOS else False,
             axis = 1
             )
-    
-    return unmatched_analysis
+    return target
 
 """
 " Iterates through all rows of match phases and calls the core match function
@@ -194,7 +180,7 @@ def test_stage(criteria, faces, spaces, stage):
 " and matching SSN mask added to spaces DF
 """
 def match(criteria, faces, spaces, stage, face_space_match):
-    print("Matching stage ", str(stage), "Faces File Shape:", faces.shape, "Spaces File Shape:", spaces.shape)
+    print(" - Stage ", str(stage), "Faces File Shape:", faces.shape, "Spaces File Shape:", spaces.shape)
     faces_index_labels = []
     spaces_index_labels = []
     
@@ -274,79 +260,46 @@ def match(criteria, faces, spaces, stage, face_space_match):
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
     print(" - Matching stage ", str(stage))
-    #Iterate through every person in faces file
-    if(stage == 1): #UIC, PARNO, LN Matching custom implementation. Customized because of volumne
                 
-        face_list = sorted(faces[["UIC_PAR_LN", "SSN_MASK"]].values.tolist())
-        space_list = sorted(spaces[["UIC_PAR_LN", "FMID"]].values.tolist())
-        
-        f_total = len(face_list)
-        s_total = len(space_list)
-        
-        while(f_ix < f_total and s_ix < s_total):
-            #If UIC, PARNO and LN match, log match and advance both cursors
-            if(face_list[f_ix][0]   == space_list[s_ix][0]):
-                #Log the match in the face_space_match file
-                face_space_match.at[space_list[s_ix][1], "SSN_MASK"] = face_list[f_ix][1]
-                face_space_match.at[space_list[s_ix][1], "stage_matched"] = stage
-                face_space_match.at[space_list[s_ix][1], "F_PLN"] = face_list[f_ix][0]
-                face_space_match.at[space_list[s_ix][1], "S_PLN"] = space_list[s_ix][0]
-                #Advance both cursors
-                f_ix += 1
-                s_ix += 1
-                stage_matched += 1
-                counter += 1
-            #If faces < spaces position
-            elif(face_list[f_ix][0] < space_list[s_ix][0]):
-                #Advance faces cursor
-                f_ix += 1
-                #This indicaets an unmatched face, so advance the exception_count:
-                exception_count += 1
-                counter += 1
-            #If spaces < faces position
-            elif(face_list[f_ix][0] > space_list[s_ix][0]):
-                #print("           ", space_list[s_ix][1])
-                #Advance spaces cursor
-                s_ix += 1
-                
-    if(stage > 1): #All the rest of the stages happen here escept templet matching
-        faces["PARNO"] = faces["PARNO"].astype("str")
-        faces["LN"] = faces["LN"].astype("str")
-        faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
-        faces["TMP_LN"] = faces["TMP_LN"].astype("str")
-        faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
-        spaces["LDUIC"] = spaces["LDUIC"].astype("str")
-        
-        face_list = sorted(faces[faces_index_labels].values.tolist())
-        space_list = sorted(spaces[spaces_index_labels].values.tolist())
-        
-        f_total = len(face_list)
-        s_total = len(space_list)
-        
-        compare_ix = len(faces_index_labels) - 1   #Number of columns for comparison
-        fmid_ix = len(spaces_index_labels) - 1     #Column index # for FMID
-        mask_ix = len(faces_index_labels)  - 1     #Column index # for SSN MASK
-        
-        print("Comparing faces", faces_index_labels[0:compare_ix], 
-              "to", spaces_index_labels[0:compare_ix])            
-        
-        while(f_ix < f_total and s_ix < s_total):  
-            #print(face_list[f_ix][0:compare_ix], space_list[s_ix][0:compare_ix])
-            if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
-                face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
-                face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
-                f_ix += 1
-                s_ix += 1
-                stage_matched += 1
-                counter += 1
-            elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
-                f_ix += 1
-                exception_count += 1
-                counter += 1
-            elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
-                s_ix += 1
+    faces["PARNO"] = faces["PARNO"].astype("str")
+    faces["LN"] = faces["LN"].astype("str")
+    faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
+    faces["TMP_LN"] = faces["TMP_LN"].astype("str")
+    faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
+    spaces["LDUIC"] = spaces["LDUIC"].astype("str")
+    
+    face_list = sorted(faces[faces_index_labels].values.tolist())
+    space_list = sorted(spaces[spaces_index_labels].values.tolist())
+    
+    f_total = len(face_list)
+    s_total = len(space_list)
+    
+    compare_ix = len(faces_index_labels) - 1   #Number of columns for comparison
+    fmid_ix = len(spaces_index_labels) - 1     #Column index # for FMID
+    mask_ix = len(faces_index_labels)  - 1     #Column index # for SSN MASK
+    
+    print("  - Comparing faces", faces_index_labels[0:compare_ix], 
+          "to", spaces_index_labels[0:compare_ix])            
+    
+    comparison_count = 0
+    while(f_ix < f_total and s_ix < s_total): 
+        comparison_count += 1
+        if VERBOSE and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix))
+        if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
+            face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
+            face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
+            f_ix += 1
+            s_ix += 1
+            stage_matched += 1
+            counter += 1
+        elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
+            f_ix += 1
+            exception_count += 1
+            counter += 1
+        elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
+            s_ix += 1
             
-    print("STAGE", str(stage), "Total records reviewed:", str(counter), 
+    print(" - STAGE", str(stage), "Total records reviewed:", str(counter), 
                   " Matched:", str(stage_matched),
                   " Exceptions:", str(exception_count))
     
