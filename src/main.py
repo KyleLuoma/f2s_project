@@ -145,6 +145,7 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [],
     print("Executing full matching run")
     face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
+    rmks_excluded = False
     
     if(len(include_only_cmds) > 0):
         print(" - for commands:", include_only_cmds)
@@ -155,13 +156,6 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [],
         print(" - excluding commands:", exclude_cmds)
         spaces = spaces.where(~spaces.DRRSA_ASGMT.isin(exclude_cmds)).dropna(how = "all")
         faces = faces.where(~faces.STRUC_CMD_CD.isin(exclude_cmds)).dropna(how = "all")
-        
-    if(len(exclude_rmks) > 0):
-        print(" - excluding billets with remarks:", exclude_rmks)
-        spaces = spaces.where(~spaces.RMK1.isin(exclude_rmks)).dropna(how = "all")
-        spaces = spaces.where(~spaces.RMK2.isin(exclude_rmks)).dropna(how = "all")
-        spaces = spaces.where(~spaces.RMK3.isin(exclude_rmks)).dropna(how = "all")
-        spaces = spaces.where(~spaces.RMK4.isin(exclude_rmks)).dropna(how = "all")
     
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
@@ -180,6 +174,14 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [],
             str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
             " matches."
         )
+        #Runs after phase 1 to enable perfect match on all positions regardless of RMK code
+        if(not rmks_excluded and len(exclude_rmks) > 0):
+            print(" - excluding billets with remarks:", exclude_rmks)
+            spaces = spaces.where(~spaces.RMK1.isin(exclude_rmks)).dropna(how = "all")
+            spaces = spaces.where(~spaces.RMK2.isin(exclude_rmks)).dropna(how = "all")
+            spaces = spaces.where(~spaces.RMK3.isin(exclude_rmks)).dropna(how = "all")
+            spaces = spaces.where(~spaces.RMK4.isin(exclude_rmks)).dropna(how = "all")
+            rmks_excluded = True
     return faces, spaces, face_space_match
     
 """
