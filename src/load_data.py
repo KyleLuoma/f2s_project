@@ -207,5 +207,11 @@ def load_grade_mismatch_xwalk():
 def load_ouid_uic_xwalk():
     return pd.read_csv("../data/xwalks/OUID_UIC_FY21.CSV")
 
+""" Retrieve RMK Domain Codes """
+def load_rmk_codes():
+    rmk_codes = pd.read_excel(
+        "../data/domain_codes/Standard Personnel RMK Codes 4-14-2020.xlsx"
+    )[["PERMK", "NO_AC", "SPTXT"]].set_index("PERMK")
+
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     

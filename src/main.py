@@ -14,7 +14,7 @@ import utility
 import pyodbc as db
 #import sqlalchemy
 
-LOAD_MATCH_PHASES = True
+LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS = False
 VERBOSE = False
 EXPORT_F2S = True
@@ -24,7 +24,8 @@ UPDATE_CONNECTIONS = True
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
-    global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk, uic_hd_map
+    global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
+    global rmk_codes, uic_hd_map
         
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
@@ -33,6 +34,7 @@ def main():
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
         grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
+        rmk_codes = load_data.load_rmk_codes()
         
         drrsa = load_data.load_drrsa_file()
         
@@ -52,14 +54,22 @@ def main():
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         faces = process_data.categorical_faces(faces)
             
+    # Full run for AC faces and spaces:
     unmatched_faces, remaining_spaces, face_space_match = full_run(
             match_phases, 
             faces, 
-            spaces[["UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
-                       "POSCO", "SQI1", "stage_matched", "SSN_MASK",
-                       "ASI_LIST", "RMK_LIST", "DRRSA_ASGMT"]],
+            spaces[[
+                "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
+                "POSCO", "SQI1", "stage_matched", "SSN_MASK",
+                "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
+                "DRRSA_ASGMT"
+            ]],
             include_only_cmds = [],
-            exclude_cmds = ["AR"])
+            exclude_cmds = ["AR"],
+            exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
+                .dropna(how = "all")
+                .index.to_list()
+            )
     
     all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
@@ -111,7 +121,7 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
-    target.ADD_UIC_TO_AOS = (not target.UIC_emilpo.isin(spaces.UIC))
+    target.ADD_UIC_TO_AOS = (~target.UIC_emilpo.isin(spaces.UIC))
     
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
@@ -131,18 +141,27 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
 "          spaces - remaining available spaces
 "          face_space_match - DF of FMID-SSN_MASK pairing with stage matched indicator
 """
-def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = []):
+def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [], exclude_rmks = []):
     print("Executing full matching run")
     face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
     
     if(len(include_only_cmds) > 0):
+        print(" - for commands:", include_only_cmds)
         spaces = spaces.where(spaces.DRRSA_ASGMT.isin(include_only_cmds)).dropna(how = "all")
         faces = faces.where(faces.STRUC_CMD_CD.isin(include_only_cmds)).dropna(how = "all")
         
     if(len(exclude_cmds) > 0):
+        print(" - excluding commands:", exclude_cmds)
         spaces = spaces.where(~spaces.DRRSA_ASGMT.isin(exclude_cmds)).dropna(how = "all")
         faces = faces.where(~faces.STRUC_CMD_CD.isin(exclude_cmds)).dropna(how = "all")
+        
+    if(len(exclude_rmks) > 0):
+        print(" - excluding billets with remarks:", exclude_rmks)
+        spaces = spaces.where(~spaces.RMK1.isin(exclude_rmks)).dropna(how = "all")
+        spaces = spaces.where(~spaces.RMK2.isin(exclude_rmks)).dropna(how = "all")
+        spaces = spaces.where(~spaces.RMK3.isin(exclude_rmks)).dropna(how = "all")
+        spaces = spaces.where(~spaces.RMK4.isin(exclude_rmks)).dropna(how = "all")
     
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
@@ -162,23 +181,6 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [])
             " matches."
         )
     return faces, spaces, face_space_match
-
-"""
-" Use to test a single matching stage on match()
-"""
-def test_stage(criteria, faces, spaces, stage):
-    face_space_match = spaces[["FMID", "SSN_MASK", "stage_matched"]]
-    face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
-    face_space_match["F_PLN"] = ""
-    face_space_match["S_PLN"] = ""
-    
-    return match(
-        match_phases,  
-        faces.where(faces.stage_matched == 0).dropna(how = "all"),
-        spaces.where(spaces.stage_matched == 0).dropna(how = "all"), 
-        stage,
-        face_space_match
-    )
     
 """
 " Core matching function that iterates through available spaces and aligns
