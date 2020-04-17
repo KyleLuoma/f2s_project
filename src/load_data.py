@@ -212,6 +212,14 @@ def load_rmk_codes():
     rmk_codes = pd.read_excel(
         "../data/domain_codes/Standard Personnel RMK Codes 4-14-2020.xlsx"
     )[["PERMK", "NO_AC", "SPTXT"]].set_index("PERMK")
+    return rmk_codes
+    
+""" Retrieve CMD Codes and Titles Crosswalk """
+def load_cmd_description_xwalk():
+    cmd_description_xwalk = pd.read_excel(
+        "../data/xwalks/CMD_code_CMD_title_xwalk.xlsx"
+    )[["CMDCD", "CMDTITLE"]].set_index("CMDCD")
+    return cmd_description_xwalk
 
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     

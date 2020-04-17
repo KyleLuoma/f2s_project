@@ -25,7 +25,7 @@ def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
-    global rmk_codes, uic_hd_map
+    global rmk_codes, uic_hd_map, cmd_description_xwalk
         
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
@@ -35,6 +35,7 @@ def main():
         grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
         rmk_codes = load_data.load_rmk_codes()
+        cmd_description_xwalk = load_data.load_cmd_description_xwalk()
         
         drrsa = load_data.load_drrsa_file()
         

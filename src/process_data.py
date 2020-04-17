@@ -20,6 +20,8 @@ MIL_GRADES = ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9",
 CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
               "09", "10", "11", "12", "13", "14", "15"]
 
+NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
+
 def add_match_phase_description(target, match_phases):
     print("Joining match phase description to target dataframe")
     match_phases = match_phases.reset_index().set_index("STAGE")
@@ -29,20 +31,30 @@ def add_match_phase_description(target, match_phases):
             )
     return target
 
+def add_command_title(target, cmd_description_xwalk, cmd_col_name = "STRUC_CMD_CD"):
+    print("Mapping command titles to target data frame")
+    target = target.join(
+        cmd_description_xwalk,
+        on = cmd_col_name
+    )
+    return target
+
 def add_drrsa_data(target, drrsa):
     drrsa = drrsa.reset_index().set_index("UIC")
     print("Mapping DRRSA data to target data frame")    
     target = target.join(
-            drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA"]],
-            on = "UIC",
-            lsuffix = "AOS_",
-            rsuffix = "DRRSA_").rename(columns = {
-                        "ADCON" : "DRRSA_ADCON",
-                        "HOGEO" : "DRRSA_HOGEO",
-                        "ARLOC" : "DRRSA_ARLOC",
-                        "GEOLOCATIONNAME" : "DRRSA_GEOLOCATIONNAME",
-                        "ASGMT" : "DRRSA_ASGMT"
-                    })
+        drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA"]],
+        on = "UIC",
+        lsuffix = "AOS_",
+        rsuffix = "DRRSA_"
+    ).rename(columns = {
+        "ADCON" : "DRRSA_ADCON",
+        "HOGEO" : "DRRSA_HOGEO",
+        "ARLOC" : "DRRSA_ARLOC",
+        "GEOLOCATIONNAME" : "DRRSA_GEOLOCATIONNAME",
+        "ASGMT" : "DRRSA_ASGMT"
+        }
+    )
     return target
 
 def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
