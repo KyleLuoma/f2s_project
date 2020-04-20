@@ -12,13 +12,14 @@ import load_data
 import process_data
 import utility
 import pyodbc as db
+import cmd_match_metrics_table
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS = False
 VERBOSE = False
-EXPORT_F2S = True
-EXPORT_UNMATCHED = True
+EXPORT_F2S = False
+EXPORT_UNMATCHED = False
 UPDATE_CONNECTIONS = True
 
 def main():
@@ -76,6 +77,8 @@ def main():
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
     all_faces_to_matched_spaces = diagnose_mismatch_in_target(all_faces_to_matched_spaces, unmatched_faces, spaces)
     
+    cmd_metrics = cmd_match_metrics_table.make_cmd_f2s_metric_df(all_faces_to_matched_spaces)
+    
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
         all_faces_to_matched_spaces.to_csv("..\export\\all_faces_to_matched_spaces" + utility.get_file_timestamp() + ".csv")                
@@ -83,6 +86,7 @@ def main():
         unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
     if(UPDATE_CONNECTIONS):
         all_faces_to_matched_spaces.to_csv("..\export\\for_connections\\all_faces_to_matched_space_latest.csv")
+        cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
         
 def reload_spaces():
     spaces = load_army_command_aos_billets()

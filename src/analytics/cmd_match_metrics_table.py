@@ -34,7 +34,9 @@ def make_cmd_f2s_metric_df(all_faces_to_matched_spaces):
         on = "STRUC_CMD_CD"
     )
         
+    cmd_metrics.UNMATCHED_NO_TEMPLET.fillna(0, inplace = True)
     cmd_metrics["UNMATCHED_NO_UIC"] = cmd_metrics.UNMATCHED - cmd_metrics.UNMATCHED_NO_TEMPLET
+    cmd_metrics.UNMATCHED_NO_UIC.fillna(0, inplace = True)
     
     cmd_metrics = cmd_metrics.join(
         non_matches.where(
@@ -54,5 +56,6 @@ def make_cmd_f2s_metric_df(all_faces_to_matched_spaces):
         ),
         on = "STRUC_CMD_CD"
     )
+    cmd_metrics.UICS_NOT_IN_AOS.fillna(0, inplace = True)
         
     return cmd_metrics
