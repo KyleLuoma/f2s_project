@@ -58,4 +58,3 @@ def calculate_remaining_faces(phase_values):
     return remaining
     
     
-match_phases_pivot(all_faces_to_matched_spaces, ["AF"])
