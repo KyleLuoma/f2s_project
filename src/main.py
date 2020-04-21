@@ -26,7 +26,7 @@ def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
-    global rmk_codes, uic_hd_map, cmd_description_xwalk
+    global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
         
     if(LOAD_MATCH_PHASES):
         match_phases = load_data.load_match_phases()
@@ -77,7 +77,7 @@ def main():
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
     all_faces_to_matched_spaces = diagnose_mismatch_in_target(all_faces_to_matched_spaces, unmatched_faces, spaces)
     
-    cmd_metrics = cmd_match_metrics_table.make_cmd_f2s_metric_df(all_faces_to_matched_spaces)
+    cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(all_faces_to_matched_spaces)
     
     if(EXPORT_F2S): 
         face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
