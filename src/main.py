@@ -12,7 +12,7 @@ import load_data
 import process_data
 import utility
 import pyodbc as db
-import cmd_match_metrics_table
+import analytics.cmd_match_metrics_table
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = False
