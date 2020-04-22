@@ -64,7 +64,7 @@ def main():
                 "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
                 "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                 "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
-                "DRRSA_ASGMT"
+                "DRRSA_ASGMT", "S_DATE", "T_DATE"
             ]],
             include_only_cmds = [],
             exclude_cmds = ["AR"],
@@ -99,20 +99,28 @@ def reload_spaces():
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
-                           "PARNO", "LN", "MIL_POSN_RPT_NR", "RANK_AB", "GRADE",
+                           "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
                            "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
                            "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS"
                            ]].set_index("SSN_MASK", drop = True)
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
-            face_space_match.reset_index(drop = True).set_index("SSN_MASK")[["stage_matched", "FMID"]],
-            lsuffix = "_emilpo",
-            rsuffix = "_f2s"
-            )
+        face_space_match.reset_index(
+            drop = True
+        ).set_index(
+            "SSN_MASK"
+        )[["stage_matched", "FMID"]],
+        lsuffix = "_emilpo",
+        rsuffix = "_f2s"
+        )
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().set_index("FMID").join(
-            spaces.reset_index(drop = True).set_index("FMID")[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO"]],
-            lsuffix = "_emilpo",
-            rsuffix = "_aos"
-            )
+        spaces.reset_index(
+            drop = True
+        ).set_index(
+            "FMID"
+        )[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", "S_DATE", "T_DATE"]],
+        lsuffix = "_emilpo",
+        rsuffix = "_aos"
+        )
     return all_faces_to_matched_spaces
 
 
