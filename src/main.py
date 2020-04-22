@@ -103,7 +103,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     all_faces_to_matched_spaces = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
                            "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
                            "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
-                           "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS"
+                           "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE"
                            ]].set_index("SSN_MASK", drop = True)
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         face_space_match.reset_index(
@@ -119,7 +119,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
             drop = True
         ).set_index(
             "FMID"
-        )[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", "S_DATE", "T_DATE"]],
+        )[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE"]],
         lsuffix = "_emilpo",
         rsuffix = "_aos"
         )
@@ -282,11 +282,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
         spaces_index_labels.append("PARNO")
         spaces_index_labels.append("LN")
         
-    age_matters = criteria.AGE_MATTERS.loc[stage]
-        
     counter = 0
     stage_matched = 0 #Increase if match found
     exception_count = 0 #Increase if exception thrown
+    asgn_age_reject_count = 0
     f_ix = 0 #Faces index
     s_ix = 0 #Spaces index
     faces = faces.reset_index(drop = True)
@@ -330,7 +329,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
         comparison_count += 1
         if VERBOSE and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix), "Match:", str(stage_matched))
         if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
-            if(face_list[age_ix] <= space_list[age_ix] or not age_matters):
+            if(int(face_list[f_ix][age_ix]) <= int(space_list[s_ix][age_ix]) or ~criteria.AGE_MATTERS.loc[stage]):
                 face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
                 face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
                 f_ix += 1
@@ -339,6 +338,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
             else:
                 f_ix += 1
                 exception_count += 1
+                asgn_age_reject_count += 1
             counter += 1
         elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
             f_ix += 1
@@ -348,8 +348,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
             s_ix += 1
             
     print(" - STAGE", str(stage), "Total records reviewed:", str(counter), 
-                  " Matched:", str(stage_matched),
-                  " Exceptions:", str(exception_count))
+        " Matched:", str(stage_matched),
+        " Exceptions:", str(exception_count),
+        " Assignment Age Rejects:", str(asgn_age_reject_count)
+    )
     
     return faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"), spaces, face_space_match
 
