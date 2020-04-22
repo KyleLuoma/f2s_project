@@ -22,6 +22,15 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
+def calculate_age(target, today, time_column, age_column_prefix = ""):
+    print("Calculating target column age with prefix", age_column_prefix)
+    target_column = age_column_prefix + "_AGE"
+    target[target_column] = target.apply(
+        lambda row: (today - row[time_column]).days, 
+        axis = 1
+    )
+    return target
+
 def add_match_phase_description(target, match_phases):
     print("Joining match phase description to target dataframe")
     match_phases = match_phases.reset_index().set_index("STAGE")
@@ -190,6 +199,14 @@ def process_aos_billet_export(aos_billet_export):
             lambda row: row.UIC + row.PARNO + row.LN,
             axis = 1
             )
+    
+    print("  - Converting S_Date and T_Date to date time format")
+    aos_billet_export["T_DATE"] = pd.to_datetime(
+        aos_billet_export.T_DATE, infer_datetime_format = True, errors = "ignore"        
+    )
+    aos_billet_export["S_DATE"] = pd.to_datetime(
+        aos_billet_export.S_DATE, infer_datetime_format = True, errors = "ignore"        
+    )
             
     """
     fms_file['LOWEST_UIC'] = fms_file.apply(
@@ -303,5 +320,10 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk, grade_misma
                     ]).dropna().to_list(),
                     axis = 1
             )
+    
+    print("  - Converting duty assignment date to date_time format")
+    emilpo_assignments["DUTY_ASG_DT"] = pd.to_datetime(
+        emilpo_assignments.DUTY_ASG_DT, infer_datetime_format = True, errors = "ignore"
+    )
         
     return emilpo_assignments

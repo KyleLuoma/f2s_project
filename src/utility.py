@@ -4,6 +4,7 @@ import time as tm
 import pyodbc as db
 import urllib
 import sqlalchemy
+import pandas as pd
 
 def get_file_timestamp():
     t = tm.localtime()
@@ -18,6 +19,9 @@ def get_file_timestamp():
 
 def get_local_time_as_string():
     return tm.ctime()
+
+def get_local_time_as_datetime():
+    return pd.to_datetime(tm.ctime())
 
 def get_dq_db_connection():
     db_connection = db.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=X:\AOS\aos_dq_analysis.accdb;')

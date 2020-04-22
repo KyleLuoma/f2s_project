@@ -45,6 +45,7 @@ def main():
         spaces = process_data.add_expected_hsduic(spaces, uic_hd_map, "NA")
         spaces = process_data.add_drrsa_data(spaces, drrsa)
         spaces = process_data.categorical_spaces(spaces)
+        spaces = process_data.calculate_age(spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION")
 
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
@@ -55,6 +56,7 @@ def main():
         faces = process_data.add_templet_columns(faces)
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         faces = process_data.categorical_faces(faces)
+        faces = process_data.calculate_age(faces, utility.get_local_time_as_datetime(), "DUTY_ASG_DT", "ASSIGNMENT")
             
     # Full run for AC faces and spaces:
     unmatched_faces, remaining_spaces, face_space_match = full_run(
@@ -64,7 +66,7 @@ def main():
                 "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
                 "POSCO", "SQI1", "stage_matched", "SSN_MASK",
                 "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
-                "DRRSA_ASGMT", "S_DATE", "T_DATE"
+                "DRRSA_ASGMT", "S_DATE", "T_DATE", "POSITION_AGE"
             ]],
             include_only_cmds = [],
             exclude_cmds = ["AR"],
@@ -121,6 +123,9 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         lsuffix = "_emilpo",
         rsuffix = "_aos"
         )
+    all_faces_to_matched_spaces["ASG_OLDER_THAN_POS"] = (
+        all_faces_to_matched_spaces.S_DATE > all_faces_to_matched_spaces.DUTY_ASG_DT
+    )
     return all_faces_to_matched_spaces
 
 
@@ -277,6 +282,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
         spaces_index_labels.append("PARNO")
         spaces_index_labels.append("LN")
         
+    age_matters = criteria.AGE_MATTERS.loc[stage]
+        
     counter = 0
     stage_matched = 0 #Increase if match found
     exception_count = 0 #Increase if exception thrown
@@ -284,12 +291,14 @@ def match(criteria, faces, spaces, stage, face_space_match):
     s_ix = 0 #Spaces index
     faces = faces.reset_index(drop = True)
     spaces = spaces.reset_index(drop = True)
+    spaces_index_labels.append("POSITION_AGE")
+    faces_index_labels.append("ASSIGNMENT_AGE")
     spaces_index_labels.append("FMID") #This will be the last column in the list
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
     if(stage == 1): #Overwrite the index labels for perfect matching stage 1
-        face_list = faces_index_labels = ["UIC_PAR_LN", "SSN_MASK"]
-        space_list = spaces_index_labels = ["UIC_PAR_LN", "FMID"]
+        face_list = faces_index_labels = ["UIC_PAR_LN", "ASSIGNMENT_AGE", "SSN_MASK"]
+        space_list = spaces_index_labels = ["UIC_PAR_LN", "POSITION_AGE", "FMID"]
     
     print(" - Matching stage ", str(stage))
                 
@@ -308,7 +317,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
     f_total = len(face_list)
     s_total = len(space_list)
     
-    compare_ix = len(faces_index_labels) - 1   #Number of columns for comparison
+    compare_ix = len(faces_index_labels) - 2   #Number of columns for comparison
+    age_ix = len(faces_index_labels) - 2       #Column index # for AGE
     fmid_ix = len(spaces_index_labels) - 1     #Column index # for FMID
     mask_ix = len(faces_index_labels)  - 1     #Column index # for SSN MASK
     
@@ -320,11 +330,15 @@ def match(criteria, faces, spaces, stage, face_space_match):
         comparison_count += 1
         if VERBOSE and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix), "Match:", str(stage_matched))
         if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
-            face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
-            face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
-            f_ix += 1
-            s_ix += 1
-            stage_matched += 1
+            if(face_list[age_ix] <= space_list[age_ix] or not age_matters):
+                face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
+                face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
+                f_ix += 1
+                s_ix += 1
+                stage_matched += 1
+            else:
+                f_ix += 1
+                exception_count += 1
             counter += 1
         elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
             f_ix += 1
