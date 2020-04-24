@@ -16,7 +16,9 @@ import analytics.cmd_match_metrics_table
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS = False
+LOAD_AND_PROCESS_MAPS = False
+LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
 EXPORT_F2S = False
 EXPORT_UNMATCHED = False
@@ -27,26 +29,32 @@ def main():
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
+    global cmd_metrics
         
     if(LOAD_MATCH_PHASES):
+        print(" - Loading match phases")
         match_phases = load_data.load_match_phases()
-    if(LOAD_AND_PROCESS):
+    if(LOAD_AND_PROCESS_MAPS):
+        print(" - Loading and processing mapping files")
         uic_hd_map = load_data.load_uic_hd_map()
         rank_grade_xwalk = load_data.load_rank_grade_xwalk()
         grade_mismatch_xwalk = load_data.load_grade_mismatch_xwalk()
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
         rmk_codes = load_data.load_rmk_codes()
         cmd_description_xwalk = load_data.load_cmd_description_xwalk()
-        
+    if(LOAD_AND_PROCESS_SPACES):        
+        print(" - Loading and processing spaces files")
         drrsa = load_data.load_drrsa_file()
-        
         spaces = load_data.load_army_command_aos_billets()
         spaces = process_data.process_aos_billet_export(spaces)
         spaces = process_data.add_expected_hsduic(spaces, uic_hd_map, "NA")
         spaces = process_data.add_drrsa_data(spaces, drrsa)
         spaces = process_data.categorical_spaces(spaces)
-        spaces = process_data.calculate_age(spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION")
-
+        spaces = process_data.calculate_age(
+            spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
+        )
+    if(LOAD_AND_PROCESS_FACES):
+        print(" - Loading and processing faces files")
         faces = process_data.process_emilpo_assignments(
                 load_data.load_emilpo(), 
                 rank_grade_xwalk,
@@ -56,24 +64,26 @@ def main():
         faces = process_data.add_templet_columns(faces)
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         faces = process_data.categorical_faces(faces)
-        faces = process_data.calculate_age(faces, utility.get_local_time_as_datetime(), "DUTY_ASG_DT", "ASSIGNMENT")
+        faces = process_data.calculate_age(
+            faces, utility.get_local_time_as_datetime(), "DUTY_ASG_DT", "ASSIGNMENT"
+        )
             
     # Full run for AC faces and spaces:
     unmatched_faces, remaining_spaces, face_space_match = full_run(
-            match_phases, 
-            faces, 
-            spaces[[
-                "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
-                "POSCO", "SQI1", "stage_matched", "SSN_MASK",
-                "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
-                "DRRSA_ASGMT", "S_DATE", "T_DATE", "POSITION_AGE"
-            ]],
-            include_only_cmds = [],
-            exclude_cmds = ["AR"],
-            exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
-                .dropna(how = "all")
-                .index.to_list()
-            )
+        match_phases, 
+        faces, 
+        spaces[[
+            "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
+            "POSCO", "SQI1", "stage_matched", "SSN_MASK",
+            "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
+            "DRRSA_ASGMT", "S_DATE", "T_DATE", "POSITION_AGE"
+        ]],
+        include_only_cmds = [],
+        exclude_cmds = ["AR"],
+        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
+            .dropna(how = "all")
+            .index.to_list()
+    )
     
     all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
     all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)

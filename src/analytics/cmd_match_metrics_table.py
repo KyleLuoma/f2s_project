@@ -57,5 +57,23 @@ def make_cmd_f2s_metric_df(all_faces_to_matched_spaces):
         on = "STRUC_CMD_CD"
     )
     cmd_metrics.UICS_NOT_IN_AOS.fillna(0, inplace = True)
+    
+    cmd_metrics = cmd_metrics.join(
+        all_faces_to_matched_spaces.where(
+                all_faces_to_matched_spaces.ASG_OLDER_THAN_POS
+        ).dropna(
+            how = "all"
+        )[["STRUC_CMD_CD", "SSN_MASK"]].groupby(
+            ["STRUC_CMD_CD"],
+            as_index = False,
+            axis = 0
+        ).count().rename(
+            columns = {"SSN_MASK" : "MATCHED_ASG_OLDER_THAN_POS"}
+        ).set_index(
+            "STRUC_CMD_CD"
+        ),
+        on = "STRUC_CMD_CD"
+    )
+    cmd_metrics.MATCHED_ASG_OLDER_THAN_POS.fillna(0, inplace = True)
         
     return cmd_metrics
