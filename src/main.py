@@ -17,19 +17,21 @@ import analytics.cmd_match_metrics_table
 
 LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS_MAPS = False
+LOAD_COMMAND_CONSIDERATIONS = True
+PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
-EXPORT_F2S = False
-EXPORT_UNMATCHED = False
-UPDATE_CONNECTIONS = True
+EXPORT_F2S = True
+EXPORT_UNMATCHED = True
+UPDATE_CONNECTIONS = False
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
-    global cmd_metrics
+    global cmd_metrics, af_uic_list
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
@@ -42,6 +44,8 @@ def main():
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
         rmk_codes = load_data.load_rmk_codes()
         cmd_description_xwalk = load_data.load_cmd_description_xwalk()
+    if(LOAD_COMMAND_CONSIDERATIONS):
+        af_uic_list = load_data.load_af_uics()
     if(LOAD_AND_PROCESS_SPACES):        
         print(" - Loading and processing spaces files")
         drrsa = load_data.load_drrsa_file()
@@ -51,8 +55,8 @@ def main():
         spaces = process_data.add_drrsa_data(spaces, drrsa)
         spaces = process_data.categorical_spaces(spaces)
         spaces = process_data.calculate_age(
-            spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
-        )
+             spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
+         )
     if(LOAD_AND_PROCESS_FACES):
         print(" - Loading and processing faces files")
         faces = process_data.process_emilpo_assignments(
@@ -67,6 +71,10 @@ def main():
         faces = process_data.calculate_age(
             faces, utility.get_local_time_as_datetime(), "DUTY_ASG_DT", "ASSIGNMENT"
         )
+        if(PROCESS_COMMAND_CONSIDERATIONS):
+            faces = process_data.convert_cmd_code_for_uic_in_faces(
+                faces, af_uic_list, uic_col_name = "UICOD", cmd_col_name = "MACOM"
+            )
             
     # Full run for AC faces and spaces:
     unmatched_faces, remaining_spaces, face_space_match = full_run(

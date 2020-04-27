@@ -22,6 +22,27 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
+""" uic_cod_update should include UIC and CODE series"""
+def convert_cmd_code_for_uic_in_faces(
+    faces_target, uic_code_file, 
+    uic_col_name = "UICOD", 
+    cmd_col_name = "MACOM",
+    new_cmd_cd = "AF"
+):
+    print("Converting command codes in faces file")
+    uic_cmd_codes = uic_code_file[[uic_col_name, cmd_col_name]].set_index(uic_col_name) 
+    ssn_mask_updates = faces_target.where(
+        faces_target.UIC.isin(uic_cmd_codes.index)
+    ).dropna(how = "all")[[
+            "SSN_MASK", "STRUC_CMD_CD"
+    ]].set_index("SSN_MASK")
+    
+    ssn_mask_updates.STRUC_CMD_CD = new_cmd_cd
+    faces_target.set_index("SSN_MASK", inplace = True)
+    faces_target.update(ssn_mask_updates)
+    faces_target.reset_index(inplace = True)
+    return faces_target
+
 def calculate_age(target, today, time_column, age_column_prefix = ""):
     print("Calculating target column age with prefix", age_column_prefix)
     target_column = age_column_prefix + "_AGE"

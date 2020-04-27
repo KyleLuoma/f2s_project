@@ -18,6 +18,10 @@ def load_uic_hd_map():
 def load_drrsa_file():
     return pd.read_csv("../data/drrsa/DRRSA_Data_20200114.csv")
 
+""" Retrieve AF UIC list from Ed """
+def load_af_uics():
+    return pd.read_excel("../data/command_considerations/AFC_MASTER_UIC_LISTING.xlsx")
+
 """ Retrieve partitioned command tree and return a single DF of all Army Commands"""
 def load_and_append_warcff_billet_export(num_partitions):
     cmd_uic = "WARCF"
