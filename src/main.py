@@ -60,9 +60,19 @@ def main():
     if(LOAD_AND_PROCESS_FACES):
         print(" - Loading and processing faces files")
         faces = process_data.process_emilpo_assignments(
-                load_data.load_emilpo(), 
-                rank_grade_xwalk,
-                grade_mismatch_xwalk)
+            load_data.load_emilpo(), 
+            rank_grade_xwalk,
+            grade_mismatch_xwalk,
+            consolidate = False
+        )
+        rcms_faces = load_data.load_rcms()
+        rcms_faces = process_data.process_emilpo_assignments(
+            rcms_faces,
+            rank_grade_xwalk,
+            grade_mismatch_xwalk, 
+            consolidate = False
+        )
+        faces = faces.append(rcms_faces, ignore_index = True)
         faces = process_data.add_drrsa_data(faces, drrsa)
         faces = process_data.check_uic_in_aos(faces, aos_ouid_uic_xwalk, "DRRSA_ADCON")
         faces = process_data.add_templet_columns(faces)
@@ -87,7 +97,7 @@ def main():
             "DRRSA_ASGMT", "S_DATE", "T_DATE", "POSITION_AGE"
         ]],
         include_only_cmds = [],
-        exclude_cmds = ["AR"],
+        exclude_cmds = [],
         exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
             .dropna(how = "all")
             .index.to_list()
@@ -318,12 +328,16 @@ def match(criteria, faces, spaces, stage, face_space_match):
         space_list = spaces_index_labels = ["UIC_PAR_LN", "POSITION_AGE", "FMID"]
     
     print(" - Matching stage ", str(stage))
-                
+    #Force type conversion before sorting and matching:
+    faces["UIC_PAR_LN"] = faces["UIC_PAR_LN"].astype("str")
     faces["PARNO"] = faces["PARNO"].astype("str")
     faces["LN"] = faces["LN"].astype("str")
     faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
     faces["TMP_LN"] = faces["TMP_LN"].astype("str")
     faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
+    faces["SSN_MASK"] = faces["SSN_MASK"].astype("str")
+    faces["ASSIGNMENT_AGE"] = faces["ASSIGNMENT_AGE"].astype("int64")
+    faces["GRADE"] = faces["GRADE"].astype("str")
     spaces["LDUIC"] = spaces["LDUIC"].astype("str")
     spaces["PARNO"] = spaces["PARNO"].astype("str")
     spaces["LN"] = spaces["LN"].astype("str")

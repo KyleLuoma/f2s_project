@@ -72,6 +72,13 @@ def add_command_title(target, cmd_description_xwalk, cmd_col_name = "STRUC_CMD_C
 def add_drrsa_data(target, drrsa):
     drrsa = drrsa.reset_index().set_index("UIC")
     print("Mapping DRRSA data to target data frame")    
+    column_check_list = [
+        "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
+        "DRRSA_ASGMT"
+    ]
+    for column in column_check_list:
+        if column in target.columns:
+            target = target.drop(column, axis = 1)
     target = target.join(
         drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA"]],
         on = "UIC",
@@ -246,7 +253,12 @@ def process_aos_billet_export(aos_billet_export):
 " ASI10,ASI11,ASI12,ASI13,ASI14
 "
 """
-def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk, grade_mismatch_xwalk):
+def process_emilpo_assignments(
+    emilpo_assignments, 
+    rank_grade_xwalk, 
+    grade_mismatch_xwalk, 
+    consolidate = True
+   ):
     print("Processing EMILPO assignments file")
     emilpo_assignments["stage_matched"] = 0    
     print("  - Renaming columns")
@@ -278,69 +290,70 @@ def process_emilpo_assignments(emilpo_assignments, rank_grade_xwalk, grade_misma
             axis = 1
             )    
     
-    print("  - Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
-    emilpo_assignments["ASI_LIST"] = emilpo_assignments.apply(
-            lambda row: pd.Series(data = [
-                    row.ASI1,
-                    row.ASI2,
-                    row.ASI3,
-                    row.ASI4,
-                    row.ASI5,
-                    row.ASI6,
-                    row.ASI7,
-                    row.ASI8,
-                    row.ASI9,
-                    row.ASI10,
-                    row.ASI11,
-                    row.ASI12,
-                    row.ASI13,
-                    row.ASI14
-                    ]).dropna().to_list(),
-                    axis = 1
-            )
-    
-    print("  - Consolidating SQIs into SQI_LIST column in the eMILPO assignments file")
-    emilpo_assignments["SQI_LIST"] = emilpo_assignments.apply(
-            lambda row: pd.Series(data = [
-                    row.SQI1,
-                    row.SQI2,
-                    row.SQI3,
-                    row.SQI4,
-                    row.SQI5,
-                    row.SQI6,
-                    row.SQI7,
-                    row.SQI8,
-                    row.SQI9,
-                    row.SQI10,
-                    row.SQI11,
-                    row.SQI12,
-                    row.SQI13,
-                    row.SQI14,
-                    row.SQI15,
-                    row.SQI16
-                    ]).dropna().to_list(),
-                    axis = 1
-            )
-    
-    print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the eMILPO assignments file")
-    emilpo_assignments["MOS_AOC_LIST"] = emilpo_assignments.apply(
-            lambda row: pd.Series(data = [
-                    row.MOS_AOC1,
-                    row.MOS_AOC2,
-                    row.MOS_AOC3,
-                    row.MOS_AOC4,
-                    row.MOS_AOC5,
-                    row.MOS_AOC6,
-                    row.MOS_AOC7,
-                    row.MOS_AOC8,
-                    row.MOS_AOC9,
-                    row.MOS_AOC10,
-                    row.MOS_AOC11,
-                    row.MOS_AOC12,
-                    row.MOS_AOC13
-                    ]).dropna().to_list(),
-                    axis = 1
-            )
+    if(consolidate):
+        print("  - Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
+        emilpo_assignments["ASI_LIST"] = emilpo_assignments.apply(
+                lambda row: pd.Series(data = [
+                        row.ASI1,
+                        row.ASI2,
+                        row.ASI3,
+                        row.ASI4,
+                        row.ASI5,
+                        row.ASI6,
+                        row.ASI7,
+                        row.ASI8,
+                        row.ASI9,
+                        row.ASI10,
+                        row.ASI11,
+                        row.ASI12,
+                        row.ASI13,
+                        row.ASI14
+                        ]).dropna().to_list(),
+                        axis = 1
+                )
+        
+        print("  - Consolidating SQIs into SQI_LIST column in the eMILPO assignments file")
+        emilpo_assignments["SQI_LIST"] = emilpo_assignments.apply(
+                lambda row: pd.Series(data = [
+                        row.SQI1,
+                        row.SQI2,
+                        row.SQI3,
+                        row.SQI4,
+                        row.SQI5,
+                        row.SQI6,
+                        row.SQI7,
+                        row.SQI8,
+                        row.SQI9,
+                        row.SQI10,
+                        row.SQI11,
+                        row.SQI12,
+                        row.SQI13,
+                        row.SQI14,
+                        row.SQI15,
+                        row.SQI16
+                        ]).dropna().to_list(),
+                        axis = 1
+                )
+        
+        print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the eMILPO assignments file")
+        emilpo_assignments["MOS_AOC_LIST"] = emilpo_assignments.apply(
+                lambda row: pd.Series(data = [
+                        row.MOS_AOC1,
+                        row.MOS_AOC2,
+                        row.MOS_AOC3,
+                        row.MOS_AOC4,
+                        row.MOS_AOC5,
+                        row.MOS_AOC6,
+                        row.MOS_AOC7,
+                        row.MOS_AOC8,
+                        row.MOS_AOC9,
+                        row.MOS_AOC10,
+                        row.MOS_AOC11,
+                        row.MOS_AOC12,
+                        row.MOS_AOC13
+                        ]).dropna().to_list(),
+                        axis = 1
+                )
     
     print("  - Converting duty assignment date to date_time format")
     emilpo_assignments["DUTY_ASG_DT"] = pd.to_datetime(

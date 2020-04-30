@@ -139,6 +139,45 @@ def load_army_command_aos_billets():
                     skipfooter = 1
                 )
             ).drop_duplicates("FMID")
+                
+def load_rcms():
+    rcms = pd.read_excel(
+        "../data/rcmsr/USAR_FacestoSpaces_28Apr_Final.xlsx",
+        dtype = {
+            "SSN_MASK_HASH" : str,
+            "Parag" : str,
+            "Line" : str,
+            "Rank" : str,
+            "PMOS" : str,
+            "SMOS" : str,
+            "AMOS" : str,
+            "Primary ASI" : str,
+            "Secondary ASI" : str,
+            "Additional ASI" : str
+        }
+    ).rename(columns = {
+        "SSN_MASK_HASH" : "SSN_MASK",
+        "Parag" : "PARNO",
+        "Line" : "LN",
+        "POSN ASG DATE" : "DUTY_ASG_DT",
+        "Rank" : "RANK_AB",
+        "PMOS" : "MOS_AOC1",
+        "SMOS" : "MOS_AOC2",
+        "AMOS" : "MOS_AOC3",
+        "Primary ASI" : "ASI1",
+        "Secondary ASI" : "ASI2",
+        "Additional ASI" : "ASI3"
+    })
+    rcms = rcms.drop(
+        ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],
+        axis = 1, 
+        errors = "ignore"
+    )
+    rcms["UIC_PAR_LN"] = rcms.apply(
+        lambda row: row.UIC + row.PARNO + row.LN,
+        axis = 1
+    )
+    return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
