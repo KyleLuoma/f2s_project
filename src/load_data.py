@@ -10,22 +10,24 @@ import pandas as pd
 import numpy as np
 
 WARCFF_PARTITION_COUNT = 5
+DATA_PATH = "X:/AOS/master_files"
 
 def load_uic_hd_map():
-    return pd.read_csv("../data/uic_hd_map/UIC_HD_MAP.csv")
+    return pd.read_csv(DATA_PATH + "/uic_hd_map/UIC_HD_MAP.csv")
 
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
-    return pd.read_csv("../data/drrsa/DRRSA_Data_20200114.csv")
+    return pd.read_csv(DATA_PATH + "/drrsa/DRRSA_Data_20200114.csv")
 
 """ Retrieve AF UIC list from Ed """
 def load_af_uics():
     return pd.read_excel("../data/command_considerations/AFC_MASTER_UIC_LISTING.xlsx")
 
 """ Retrieve partitioned command tree and return a single DF of all Army Commands"""
+
 def load_and_append_warcff_billet_export(num_partitions):
     cmd_uic = "WARCF"
-    file_path = "../data/aos_billet_export/WARCFF/"
+    file_path = DATA_PATH + "/aos/billet_tree/WARCFF/"
     file_name_end = " C2 BILLET EXPORT 4-6-2021.xlsx"
     
     cmd_billet_export = pd.read_excel(
@@ -88,7 +90,7 @@ def load_and_append_warcff_billet_export(num_partitions):
 def load_army_command_aos_billets():
     return load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
                 pd.read_excel(
-                    "../data/aos_billet_export/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
+                    DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    
@@ -114,7 +116,7 @@ def load_army_command_aos_billets():
                 )
             ).append(
                 pd.read_excel(
-                    "../data/aos_billet_export/WSTAFF/WSTAFF C2 BILLET EXPORT 4-6-2021.xlsx",
+                    DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT 4-6-2021.xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    
@@ -142,7 +144,7 @@ def load_army_command_aos_billets():
                 
 def load_rcms():
     rcms = pd.read_excel(
-        "../data/rcmsr/USAR_FacestoSpaces_28Apr_Final.xlsx",
+        DATA_PATH + "/rcmsr/assignments/USAR_FacestoSpaces_28Apr_Final.xlsx",
         dtype = {
             "SSN_MASK_HASH" : str,
             "Parag" : str,
@@ -182,7 +184,7 @@ def load_rcms():
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
     return pd.read_csv(
-            "../data/emilpo/EMILPO_ASSIGNMENTS_4-6-20.csv",
+            DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_4-30-20.csv",
             dtype = {
                     "PARNO": str,
                     "LN": str,
@@ -236,7 +238,7 @@ def load_emilpo():
 
 """ Retreive match phases file """
 def load_match_phases():
-    return pd.read_csv("../data/phases/match_phases.csv").set_index("STAGE")
+    return pd.read_csv(DATA_PATH + "/phases/match_phases.csv").set_index("STAGE")
 
 """ Retrieve rank grade crosswalk file """
 def load_rank_grade_xwalk():
@@ -244,7 +246,7 @@ def load_rank_grade_xwalk():
 
 """ Retrieve grade mismatch crosswalk file """
 def load_grade_mismatch_xwalk():
-    return pd.read_csv("../data/xwalks/grade_mismatch_xwalk.csv").set_index("GRADE")
+    return pd.read_csv(DATA_PATH + "/xwalks/grade_mismatch_xwalk.csv").set_index("GRADE")
 
 """ Retrieve OUID to UIC mapping file """
 def load_ouid_uic_xwalk():
@@ -253,14 +255,14 @@ def load_ouid_uic_xwalk():
 """ Retrieve RMK Domain Codes """
 def load_rmk_codes():
     rmk_codes = pd.read_excel(
-        "../data/domain_codes/Standard Personnel RMK Codes 4-14-2020.xlsx"
+        DATA_PATH + "/domain_codes/Standard Personnel RMK Codes 4-14-2020.xlsx"
     )[["PERMK", "NO_AC", "SPTXT"]].set_index("PERMK")
     return rmk_codes
     
 """ Retrieve CMD Codes and Titles Crosswalk """
 def load_cmd_description_xwalk():
     cmd_description_xwalk = pd.read_excel(
-        "../data/xwalks/CMD_code_CMD_title_xwalk.xlsx"
+        DATA_PATH + "/xwalks/CMD_code_CMD_title_xwalk.xlsx"
     )[["CMDCD", "CMDTITLE"]].set_index("CMDCD")
     return cmd_description_xwalk
 

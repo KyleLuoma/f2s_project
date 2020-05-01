@@ -15,12 +15,12 @@ import pyodbc as db
 import analytics.cmd_match_metrics_table
 #import sqlalchemy
 
-LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS_MAPS = False
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_FACES = False
+LOAD_AND_PROCESS_SPACES = True
+LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -55,8 +55,8 @@ def main():
         spaces = process_data.add_drrsa_data(spaces, drrsa)
         spaces = process_data.categorical_spaces(spaces)
         spaces = process_data.calculate_age(
-             spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
-         )
+            spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
+        )
     if(LOAD_AND_PROCESS_FACES):
         print(" - Loading and processing faces files")
         faces = process_data.process_emilpo_assignments(
@@ -103,9 +103,15 @@ def main():
             .index.to_list()
     )
     
-    all_faces_to_matched_spaces = face_space_match_analysis(faces, face_space_match, spaces)
-    all_faces_to_matched_spaces = process_data.add_match_phase_description(all_faces_to_matched_spaces, match_phases)
-    all_faces_to_matched_spaces = diagnose_mismatch_in_target(all_faces_to_matched_spaces, unmatched_faces, spaces)
+    all_faces_to_matched_spaces = face_space_match_analysis(
+        faces, face_space_match, spaces
+    )
+    all_faces_to_matched_spaces = process_data.add_match_phase_description(
+        all_faces_to_matched_spaces, match_phases
+    )
+    all_faces_to_matched_spaces = diagnose_mismatch_in_target(
+        all_faces_to_matched_spaces, unmatched_faces, spaces
+    )
     
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(all_faces_to_matched_spaces)
     
@@ -128,11 +134,12 @@ def reload_spaces():
 
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
-    all_faces_to_matched_spaces = faces[["SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
-                           "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
-                           "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
-                           "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE"
-                           ]].set_index("SSN_MASK", drop = True)
+    all_faces_to_matched_spaces = faces[[
+        "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD",
+        "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
+        "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
+        "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE"
+    ]].set_index("SSN_MASK", drop = True)
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         face_space_match.reset_index(
             drop = True
@@ -141,8 +148,10 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         )[["stage_matched", "FMID"]],
         lsuffix = "_emilpo",
         rsuffix = "_f2s"
-        )
-    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().set_index("FMID").join(
+    )
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().set_index(
+        "FMID"
+    ).join(
         spaces.reset_index(
             drop = True
         ).set_index(
@@ -150,7 +159,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         )[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE"]],
         lsuffix = "_emilpo",
         rsuffix = "_aos"
-        )
+    )
     all_faces_to_matched_spaces["ASG_OLDER_THAN_POS"] = (
         all_faces_to_matched_spaces.S_DATE > all_faces_to_matched_spaces.DUTY_ASG_DT
     )
@@ -162,8 +171,7 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     unmatched_analysis = unmatched_faces[[
              "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "PARNO", "LN", 
              "MIL_POSN_RPT_NR", "RANK_AB", "GRADE", "ASI_LIST", "SQI_LIST", "MOS_AOC_LIST"
-        ]
-    ]
+    ]]
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
@@ -187,7 +195,10 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
 "          spaces - remaining available spaces
 "          face_space_match - DF of FMID-SSN_MASK pairing with stage matched indicator
 """
-def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [], exclude_rmks = []):
+def full_run(
+    criteria, faces, spaces, 
+    include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
+):
     print("Executing full matching run")
     face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
@@ -195,22 +206,34 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [],
     
     if(len(include_only_cmds) > 0):
         print(" - for commands:", include_only_cmds)
-        spaces = spaces.where(spaces.DRRSA_ASGMT.isin(include_only_cmds)).dropna(how = "all")
-        faces = faces.where(faces.STRUC_CMD_CD.isin(include_only_cmds)).dropna(how = "all")
+        spaces = spaces.where(
+            spaces.DRRSA_ASGMT.isin(include_only_cmds)
+        ).dropna(how = "all")
+        faces = faces.where(
+            faces.STRUC_CMD_CD.isin(include_only_cmds)
+        ).dropna(how = "all")
         
     if(len(exclude_cmds) > 0):
         print(" - excluding commands:", exclude_cmds)
-        spaces = spaces.where(~spaces.DRRSA_ASGMT.isin(exclude_cmds)).dropna(how = "all")
-        faces = faces.where(~faces.STRUC_CMD_CD.isin(exclude_cmds)).dropna(how = "all")
+        spaces = spaces.where(
+            ~spaces.DRRSA_ASGMT.isin(exclude_cmds)
+        ).dropna(how = "all")
+        faces = faces.where(
+            ~faces.STRUC_CMD_CD.isin(exclude_cmds)
+        ).dropna(how = "all")
     
     for i in range(1, match_phases.shape[0] + 1):
         print(" - Calling match() for stage", str(i))
         faces, spaces, face_space_match = match(
             match_phases,  
-            faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"),
+            faces.where(
+                ~faces.SSN_MASK.isin(face_space_match.SSN_MASK)
+            ).dropna(how = "all"),
             spaces.where(
                 spaces.FMID.isin(
-                    face_space_match.where(face_space_match.stage_matched == 0).dropna(how = "all").FMID
+                    face_space_match.where(
+                        face_space_match.stage_matched == 0
+                    ).dropna(how = "all").FMID
                 )
             ).dropna(how = "all"), 
             i,
@@ -223,10 +246,18 @@ def full_run(criteria, faces, spaces, include_only_cmds = [], exclude_cmds = [],
         #Runs after phase 1 to enable perfect match on all positions regardless of RMK code
         if(not rmks_excluded and len(exclude_rmks) > 0):
             print(" - excluding billets with remarks:", exclude_rmks)
-            spaces = spaces.where(~spaces.RMK1.isin(exclude_rmks)).dropna(how = "all")
-            spaces = spaces.where(~spaces.RMK2.isin(exclude_rmks)).dropna(how = "all")
-            spaces = spaces.where(~spaces.RMK3.isin(exclude_rmks)).dropna(how = "all")
-            spaces = spaces.where(~spaces.RMK4.isin(exclude_rmks)).dropna(how = "all")
+            spaces = spaces.where(
+                ~spaces.RMK1.isin(exclude_rmks)
+            ).dropna(how = "all")
+            spaces = spaces.where(
+                ~spaces.RMK2.isin(exclude_rmks)
+            ).dropna(how = "all")
+            spaces = spaces.where(
+                ~spaces.RMK3.isin(exclude_rmks)
+            ).dropna(how = "all")
+            spaces = spaces.where(
+                ~spaces.RMK4.isin(exclude_rmks)
+            ).dropna(how = "all")
             rmks_excluded = True
     return faces, spaces, face_space_match
     
@@ -385,6 +416,8 @@ def match(criteria, faces, spaces, stage, face_space_match):
         " Assignment Age Rejects:", str(asgn_age_reject_count)
     )
     
-    return faces.where(~faces.SSN_MASK.isin(face_space_match.SSN_MASK)).dropna(how = "all"), spaces, face_space_match
+    return faces.where(
+        ~faces.SSN_MASK.isin(face_space_match.SSN_MASK)
+    ).dropna(how = "all"), spaces, face_space_match
 
 if (__name__ == "__main__"): main()
