@@ -136,6 +136,11 @@ def main():
             "..\export\\all_faces_to_matched_spaces" 
             + utility.get_file_timestamp() 
             + ".csv"
+        )
+        cmd_metrics.to_csv(
+            "../export/command_metrics"
+            + utility.get_file_timestamp()
+            + ".csv"
         )                
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv(
