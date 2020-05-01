@@ -23,8 +23,31 @@ def load_drrsa_file():
 def load_af_uics():
     return pd.read_excel("../data/command_considerations/AFC_MASTER_UIC_LISTING.xlsx")
 
-""" Retrieve partitioned command tree and return a single DF of all Army Commands"""
+""" Retrieve UIC tree files """
+def load_uics_from_uic_trees():
+    uics = pd.read_excel(
+        DATA_PATH + "/aos/uic_tree/WARCFF C2 UIC TREE 4-6-2021.xlsx",
+        header = 2,
+        skipfooter = 1
+    )
+    uics = uics.append(
+        pd.read_excel(
+            DATA_PATH + "/aos/uic_tree/WSTAFF C2 UIC TREE 4-6-2021.xlsx",
+            header = 2,
+            skipfooter = 1 
+        )
+    )
+    uics = uics.append(
+        pd.read_excel(
+            DATA_PATH + "/aos/uic_tree/W00EFF C2 UIC TREE 4-6-2021.xlsx",
+            header = 2,
+            skipfooter = 1    
+        )
+    )
+    uics = uics.drop_duplicates("UIC")["UIC"]
+    return uics
 
+""" Retrieve partitioned command tree and return a single DF of all Army Commands"""
 def load_and_append_warcff_billet_export(num_partitions):
     cmd_uic = "WARCF"
     file_path = DATA_PATH + "/aos/billet_tree/WARCFF/"

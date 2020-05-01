@@ -13,6 +13,7 @@ import process_data
 import utility
 import pyodbc as db
 import analytics.cmd_match_metrics_table
+import unmask
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = True
@@ -24,6 +25,7 @@ LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 
 def main():
@@ -31,7 +33,7 @@ def main():
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
-    global cmd_metrics, af_uic_list
+    global cmd_metrics, af_uic_list, remaining_spaces, all_uics
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
@@ -56,6 +58,9 @@ def main():
         spaces = process_data.categorical_spaces(spaces)
         spaces = process_data.calculate_age(
             spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
+        )
+        all_uics = spaces.UIC.drop_duplicates().append(
+            load_data.load_uics_from_uic_trees()
         )
     if(LOAD_AND_PROCESS_FACES):
         print(" - Loading and processing faces files")
@@ -114,7 +119,7 @@ def main():
         all_faces_to_matched_spaces, match_phases
     )
     all_faces_to_matched_spaces = diagnose_mismatch_in_target(
-        all_faces_to_matched_spaces, unmatched_faces, spaces
+        all_faces_to_matched_spaces, unmatched_faces, all_uics
     )
     
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
@@ -143,6 +148,11 @@ def main():
             "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
         )
         cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
+        
+    if(EXPORT_UNMASKED):
+        unmask.unmask_and_export(
+            all_faces_to_matched_spaces, utility.get_file_timestamp()
+        )
         
 def reload_spaces():
     spaces = load_army_command_aos_billets()
@@ -190,17 +200,16 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     return all_faces_to_matched_spaces
 
 
-def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
+def diagnose_mismatch_in_target(target, unmatched_faces, all_uics):
     print("Analyzing unmatched faces")
     unmatched_analysis = unmatched_faces[[
         "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "PARNO", "LN", 
-        "MIL_POSN_RPT_NR", "RANK_AB", "GRADE", "ASI_LIST", "SQI_LIST", 
-        "MOS_AOC_LIST"
+        "MIL_POSN_RPT_NR", "RANK_AB", "GRADE"
     ]]
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
-    target.ADD_UIC_TO_AOS = (~target.UIC_emilpo.isin(spaces.UIC))
+    target.ADD_UIC_TO_AOS = (~target.UIC_emilpo.isin(all_uics))
     
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
