@@ -74,16 +74,20 @@ def main():
         )
         faces = faces.append(rcms_faces, ignore_index = True)
         faces = process_data.add_drrsa_data(faces, drrsa)
-        faces = process_data.check_uic_in_aos(faces, aos_ouid_uic_xwalk, "DRRSA_ADCON")
+        faces = process_data.check_uic_in_aos(
+            faces, aos_ouid_uic_xwalk, "DRRSA_ADCON"
+        )
         faces = process_data.add_templet_columns(faces)
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         faces = process_data.categorical_faces(faces)
         faces = process_data.calculate_age(
-            faces, utility.get_local_time_as_datetime(), "DUTY_ASG_DT", "ASSIGNMENT"
+            faces, utility.get_local_time_as_datetime(), 
+            "DUTY_ASG_DT", "ASSIGNMENT"
         )
         if(PROCESS_COMMAND_CONSIDERATIONS):
             faces = process_data.convert_cmd_code_for_uic_in_faces(
-                faces, af_uic_list, uic_col_name = "UICOD", cmd_col_name = "MACOM"
+                faces, af_uic_list, uic_col_name = "UICOD", 
+                cmd_col_name = "MACOM"
             )
             
     # Full run for AC faces and spaces:
@@ -113,15 +117,31 @@ def main():
         all_faces_to_matched_spaces, unmatched_faces, spaces
     )
     
-    cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(all_faces_to_matched_spaces)
+    cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
+        all_faces_to_matched_spaces
+    )
     
     if(EXPORT_F2S): 
-        face_space_match.to_csv("..\export\\face_space_matches" + utility.get_file_timestamp() + ".csv")
-        all_faces_to_matched_spaces.to_csv("..\export\\all_faces_to_matched_spaces" + utility.get_file_timestamp() + ".csv")                
+        face_space_match.to_csv(
+            "..\export\\face_space_matches" 
+            + utility.get_file_timestamp() 
+            + ".csv"
+        )
+        all_faces_to_matched_spaces.to_csv(
+            "..\export\\all_faces_to_matched_spaces" 
+            + utility.get_file_timestamp() 
+            + ".csv"
+        )                
     if(EXPORT_UNMATCHED): 
-        unmatched_faces.to_csv("..\export\\unmatched_faces" + utility.get_file_timestamp() + ".csv")
+        unmatched_faces.to_csv(
+            "..\export\\unmatched_faces" 
+            + utility.get_file_timestamp() 
+            + ".csv"
+        )
     if(UPDATE_CONNECTIONS):
-        all_faces_to_matched_spaces.to_csv("..\export\\for_connections\\all_faces_to_matched_space_latest.csv")
+        all_faces_to_matched_spaces.to_csv(
+            "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
+        )
         cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
         
 def reload_spaces():
@@ -149,14 +169,18 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         lsuffix = "_emilpo",
         rsuffix = "_f2s"
     )
-    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().set_index(
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index(
+    ).set_index(
         "FMID"
     ).join(
         spaces.reset_index(
             drop = True
         ).set_index(
             "FMID"
-        )[["UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE"]],
+        )[[
+            "UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", 
+            "S_DATE", "T_DATE", "POSITION_AGE"
+        ]],
         lsuffix = "_emilpo",
         rsuffix = "_aos"
     )
@@ -169,8 +193,9 @@ def face_space_match_analysis(faces, face_space_match, spaces):
 def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     print("Analyzing unmatched faces")
     unmatched_analysis = unmatched_faces[[
-             "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "PARNO", "LN", 
-             "MIL_POSN_RPT_NR", "RANK_AB", "GRADE", "ASI_LIST", "SQI_LIST", "MOS_AOC_LIST"
+        "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "PARNO", "LN", 
+        "MIL_POSN_RPT_NR", "RANK_AB", "GRADE", "ASI_LIST", "SQI_LIST", 
+        "MOS_AOC_LIST"
     ]]
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
@@ -184,17 +209,11 @@ def diagnose_mismatch_in_target(target, unmatched_faces, spaces):
     )
     return target
 
-"""
-" Iterates through all rows of match phases and calls the core match function
-" for each combination. Eliminates matched spaces and faces with each call to 
-" match().
-" Parameters: criteria - DF of matching criteria
-"             faces - DF eMILPO faces file
-"             spaces - DF AOS billet detail file
-" Returns: faces - unmatched faces after all runs complete
-"          spaces - remaining available spaces
-"          face_space_match - DF of FMID-SSN_MASK pairing with stage matched indicator
-"""
+# =============================================================================
+# Iterates through all rows of match phases and calls the core match function
+# for each combination. Eliminates matched spaces and faces with each call to 
+# match().
+# =============================================================================
 def full_run(
     criteria, faces, spaces, 
     include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
@@ -240,7 +259,9 @@ def full_run(
             face_space_match
         )
         print(" - match() returned", 
-            str(face_space_match.where(face_space_match.stage_matched == i).dropna(how = "all").shape[0]), 
+            str(face_space_match.where(
+                face_space_match.stage_matched == i
+            ).dropna(how = "all").shape[0]), 
             " matches."
         )
         #Runs after phase 1 to enable perfect match on all positions regardless of RMK code
@@ -261,22 +282,21 @@ def full_run(
             rmks_excluded = True
     return faces, spaces, face_space_match
     
-"""
-" Core matching function that iterates through available spaces and aligns
-" faces based on matching criteria passed in the criteria list
-" Parameters: Pandas series of matching criteria, 
-"             Pandas DF of available spaces, 
-"             Pandas DF of available faces,
-"             step integer indicating how many previous match runs have occured
-" Returns: updated spaces and faces DFs with matched faces removed from faces
-" and matching SSN mask added to spaces DF
-"""
+# =============================================================================
+# Core matching function that iterates through available spaces and aligns
+# faces based on matching criteria passed in the criteria list
+# =============================================================================
 def match(criteria, faces, spaces, stage, face_space_match):
-    print(" - Stage ", str(stage), "Faces File Shape:", faces.shape, "Spaces File Shape:", spaces.shape)
+    print(
+        " - Stage ", str(stage), "Faces File Shape:", faces.shape, 
+        "Spaces File Shape:", spaces.shape
+    )
     faces_index_labels = []
     spaces_index_labels = []
     
-    face_space_match.set_index(face_space_match.FMID, drop = False, inplace = True)
+    face_space_match.set_index(
+        face_space_match.FMID, drop = False, inplace = True
+    )
     face_space_match.sort_index()
     
     #Analyze match criteria and set multi index array for spaces and faces files
@@ -355,8 +375,12 @@ def match(criteria, faces, spaces, stage, face_space_match):
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
     if(stage == 1): #Overwrite the index labels for perfect matching stage 1
-        face_list = faces_index_labels = ["UIC_PAR_LN", "ASSIGNMENT_AGE", "SSN_MASK"]
-        space_list = spaces_index_labels = ["UIC_PAR_LN", "POSITION_AGE", "FMID"]
+        face_list = faces_index_labels = [
+            "UIC_PAR_LN", "ASSIGNMENT_AGE", "SSN_MASK"
+        ]
+        space_list = spaces_index_labels = [
+            "UIC_PAR_LN", "POSITION_AGE", "FMID"
+        ]
     
     print(" - Matching stage ", str(stage))
     #Force type conversion before sorting and matching:
@@ -387,6 +411,9 @@ def match(criteria, faces, spaces, stage, face_space_match):
     print("  - Comparing faces", faces_index_labels[0:compare_ix], 
           "to", spaces_index_labels[0:compare_ix])            
     
+# =============================================================================
+#     This is the matching algorithm!!!
+# =============================================================================
     comparison_count = 0
     while(f_ix < f_total and s_ix < s_total): 
         comparison_count += 1
