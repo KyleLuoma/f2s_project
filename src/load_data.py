@@ -175,8 +175,8 @@ def load_rcms():
         DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
         dtype = {
             "SSN_MASK_HASH" : str,
-            "Parag" : str,
-            "Line" : str,
+            "Paragraph" : str,
+            "Line Number" : str,
             "Rank" : str,
             "PMOS" : str,
             "SMOS" : str,
@@ -187,8 +187,8 @@ def load_rcms():
         }
     ).rename(columns = {
         "SSN_MASK_HASH" : "SSN_MASK",
-        "Parag" : "PARNO",
-        "Line" : "LN",
+        "Paragraph" : "PARNO",
+        "Line Number" : "LN",
         "POSN ASG DATE" : "DUTY_ASG_DT",
         "Rank" : "RANK_AB",
         "PMOS" : "MOS_AOC1",
@@ -203,10 +203,11 @@ def load_rcms():
         axis = 1, 
         errors = "ignore"
     )
-    rcms["UIC_PAR_LN"] = rcms.apply(
+    rcms["UIC_PAR_LN"] = rcms.fillna("").apply(
         lambda row: row.UIC + row.PARNO + row.LN,
         axis = 1
     )
+    rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
     return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")
 
 """ Retrieve EMILPO position level assignment file """

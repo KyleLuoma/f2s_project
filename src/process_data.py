@@ -36,7 +36,9 @@ def convert_cmd_code_for_uic_in_faces(
     ).dropna(how = "all")[[
             "SSN_MASK", "STRUC_CMD_CD"
     ]].set_index("SSN_MASK")
-    
+    ssn_mask_updates = ssn_mask_updates.where(
+        ssn_mask_updates.STRUC_CMD_CD != "AR"
+    )
     ssn_mask_updates.STRUC_CMD_CD = new_cmd_cd
     faces_target.set_index("SSN_MASK", inplace = True)
     faces_target.update(ssn_mask_updates)
@@ -46,6 +48,7 @@ def convert_cmd_code_for_uic_in_faces(
 def calculate_age(target, today, time_column, age_column_prefix = ""):
     print("Calculating target column age with prefix", age_column_prefix)
     target_column = age_column_prefix + "_AGE"
+    target[target_column] = 0
     target[target_column] = target.apply(
         lambda row: (today - row[time_column]).days, 
         axis = 1

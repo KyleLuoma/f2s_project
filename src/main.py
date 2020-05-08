@@ -68,7 +68,7 @@ def main():
             load_data.load_emilpo(), 
             rank_grade_xwalk,
             grade_mismatch_xwalk,
-            consolidate = False
+            consolidate = True
         )
         rcms_faces = load_data.load_rcms()
         rcms_faces = process_data.process_emilpo_assignments(
