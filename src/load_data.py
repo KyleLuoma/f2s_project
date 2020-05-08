@@ -12,6 +12,11 @@ import numpy as np
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
+RCMS_FILE = "USAR_Faces_05May.xlsx"
+AOS_FILE_DATE = "4-6-2021"
+UIC_TREE_DATE = "4-6-2021"
+EMILPO_FILE_DATE = "4-30-20"
+
 def load_uic_hd_map():
     return pd.read_csv(DATA_PATH + "/uic_hd_map/UIC_HD_MAP.csv")
 
@@ -26,20 +31,20 @@ def load_af_uics():
 """ Retrieve UIC tree files """
 def load_uics_from_uic_trees():
     uics = pd.read_excel(
-        DATA_PATH + "/aos/uic_tree/WARCFF C2 UIC TREE 4-6-2021.xlsx",
+        DATA_PATH + "/aos/uic_tree/WARCFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx",
         header = 2,
         skipfooter = 1
     )
     uics = uics.append(
         pd.read_excel(
-            DATA_PATH + "/aos/uic_tree/WSTAFF C2 UIC TREE 4-6-2021.xlsx",
+            DATA_PATH + "/aos/uic_tree/WSTAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx",
             header = 2,
             skipfooter = 1 
         )
     )
     uics = uics.append(
         pd.read_excel(
-            DATA_PATH + "/aos/uic_tree/W00EFF C2 UIC TREE 4-6-2021.xlsx",
+            DATA_PATH + "/aos/uic_tree/W00EFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx",
             header = 2,
             skipfooter = 1    
         )
@@ -51,7 +56,7 @@ def load_uics_from_uic_trees():
 def load_and_append_warcff_billet_export(num_partitions):
     cmd_uic = "WARCF"
     file_path = DATA_PATH + "/aos/billet_tree/WARCFF/"
-    file_name_end = " C2 BILLET EXPORT 4-6-2021.xlsx"
+    file_name_end = " C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"
     
     cmd_billet_export = pd.read_excel(
             file_path + cmd_uic + str(1) + file_name_end,
@@ -113,7 +118,7 @@ def load_and_append_warcff_billet_export(num_partitions):
 def load_army_command_aos_billets():
     return load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
                 pd.read_excel(
-                    DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT 4-6-2021.xlsx",
+                    DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    
@@ -139,7 +144,7 @@ def load_army_command_aos_billets():
                 )
             ).append(
                 pd.read_excel(
-                    DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT 4-6-2021.xlsx",
+                    DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    
@@ -167,7 +172,7 @@ def load_army_command_aos_billets():
                 
 def load_rcms():
     rcms = pd.read_excel(
-        DATA_PATH + "/rcmsr/assignments/USAR_FacestoSpaces_28Apr_Final.xlsx",
+        DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
         dtype = {
             "SSN_MASK_HASH" : str,
             "Parag" : str,
@@ -207,7 +212,7 @@ def load_rcms():
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
     return pd.read_csv(
-            DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_4-30-20.csv",
+            DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv",
             dtype = {
                     "PARNO": str,
                     "LN": str,
