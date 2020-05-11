@@ -21,7 +21,7 @@ LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_FACES = True
+LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -82,7 +82,7 @@ def main():
         faces = process_data.check_uic_in_aos(
             faces, aos_ouid_uic_xwalk, "DRRSA_ADCON"
         )
-        faces = process_data.add_templet_columns(faces)
+        faces = process_data.add_templet_columns(faces, parno = "999")
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
         faces = process_data.categorical_faces(faces)
         faces = process_data.calculate_age(
@@ -100,7 +100,7 @@ def main():
         match_phases, 
         faces, 
         spaces[[
-            "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "FMID", "LN", "GRADE", 
+            "UIC_PAR_LN","UIC", "LDUIC", "PARNO", "PARNO_3_CHAR", "FMID", "LN", "GRADE", 
             "POSCO", "SQI1", "stage_matched", "SSN_MASK",
             "ASI_LIST", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", 
             "DRRSA_ASGMT", "S_DATE", "T_DATE", "POSITION_AGE"
@@ -111,7 +111,7 @@ def main():
             .dropna(how = "all")
             .index.to_list()
     )
-    
+        
     all_faces_to_matched_spaces = face_space_match_analysis(
         faces, face_space_match, spaces
     )
@@ -290,6 +290,18 @@ def full_run(
             ).dropna(how = "all")
             rmks_excluded = True
     return faces, spaces, face_space_match
+
+def test_stage(
+    stage, criteria = match_phases, faces = faces, spaces = spaces, 
+    include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
+):
+    match(
+            match_phases,  
+            faces,
+            spaces, 
+            stage,
+            face_space_match
+    )
     
 # =============================================================================
 # Core matching function that iterates through available spaces and aligns
@@ -367,7 +379,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     if(criteria.TEMPLET.loc[stage]):
         faces_index_labels.append("TMP_PARNO")
         faces_index_labels.append("TMP_LN")
-        spaces_index_labels.append("PARNO")
+        spaces_index_labels.append("PARNO_3_CHAR")
         spaces_index_labels.append("LN")
         
     counter = 0
@@ -404,6 +416,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     faces["GRADE"] = faces["GRADE"].astype("str")
     spaces["LDUIC"] = spaces["LDUIC"].astype("str")
     spaces["PARNO"] = spaces["PARNO"].astype("str")
+    spaces["PARNO_3_CHAR"] = spaces["PARNO_3_CHAR"].astype("str")
     spaces["LN"] = spaces["LN"].astype("str")
 
     face_list = sorted(faces[faces_index_labels].values.tolist())
