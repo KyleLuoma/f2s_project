@@ -198,11 +198,13 @@ def load_rcms():
         "Secondary ASI" : "ASI2",
         "Additional ASI" : "ASI3"
     })
-    rcms = rcms.drop(
-        ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],
-        axis = 1, 
-        errors = "ignore"
-    )
+# =============================================================================
+#     rcms = rcms.drop(
+#         ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],
+#         axis = 1, 
+#         errors = "ignore"
+#     )
+# =============================================================================
     rcms["UIC_PAR_LN"] = rcms.fillna("").apply(
         lambda row: row.UIC + row.PARNO + row.LN,
         axis = 1
