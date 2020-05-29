@@ -12,7 +12,7 @@ import numpy as np
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
-RCMS_FILE = "USAR_Faces_05May.xlsx"
+RCMS_FILE = "USAR_Faces_28May.xlsx"
 AOS_FILE_DATE = "4-6-2021"
 UIC_TREE_DATE = "4-6-2021"
 EMILPO_FILE_DATE = "4-30-20"
@@ -174,7 +174,9 @@ def load_rcms():
     rcms = pd.read_excel(
         DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
         dtype = {
-            "SSN_MASK_HASH" : str,
+            "GFC" : str,
+            "GFC 1 Name" : str,
+            "Hash" : str,
             "Paragraph" : str,
             "Line Number" : str,
             "Rank" : str,
@@ -186,10 +188,11 @@ def load_rcms():
             "Additional ASI" : str
         }
     ).rename(columns = {
-        "SSN_MASK_HASH" : "SSN_MASK",
+        "Hash" : "SSN_MASK",
+        "UPC" : "UIC",
         "Paragraph" : "PARNO",
         "Line Number" : "LN",
-        "POSN ASG DATE" : "DUTY_ASG_DT",
+        "Position Assigned Date" : "DUTY_ASG_DT",
         "Rank" : "RANK_AB",
         "PMOS" : "MOS_AOC1",
         "SMOS" : "MOS_AOC2",
