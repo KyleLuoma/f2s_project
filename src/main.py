@@ -169,7 +169,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
         "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE", "RCC",
-        "UNITNAME", "UPC"
+        "UNITNAME"
     ]].set_index("SSN_MASK", drop = True)
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         face_space_match.reset_index(

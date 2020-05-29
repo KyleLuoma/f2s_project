@@ -199,7 +199,8 @@ def load_rcms():
         "AMOS" : "MOS_AOC3",
         "Primary ASI" : "ASI1",
         "Secondary ASI" : "ASI2",
-        "Additional ASI" : "ASI3"
+        "Additional ASI" : "ASI3",
+        "Unit Name" : "UNITNAME"
     })
 # =============================================================================
 #     rcms = rcms.drop(
