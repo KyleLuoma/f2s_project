@@ -20,7 +20,7 @@ LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_SPACES = True
 LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
@@ -288,7 +288,7 @@ def full_run(
     return faces, spaces, face_space_match
 
 def test_stage(
-    stage, criteria = match_phases, faces = faces, spaces = spaces, 
+    stage, criteria, faces, spaces, 
     include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
 ):
     match(
