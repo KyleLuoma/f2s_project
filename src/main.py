@@ -33,7 +33,7 @@ def main():
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
-    global cmd_metrics, af_uic_list, remaining_spaces, all_uics
+    global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
@@ -121,6 +121,12 @@ def main():
         all_faces_to_matched_spaces
     )
     
+    ar_cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
+        all_faces_to_matched_spaces,
+        group_by = "GFC",
+        include_columns = ["GFC 1 Name"]
+    )
+    
     if(EXPORT_F2S): 
         face_space_match.to_csv(
             "..\export\\face_space_matches" 
@@ -137,6 +143,11 @@ def main():
             + utility.get_file_timestamp()
             + ".csv"
         )                
+        ar_cmd_metrics.to_csv(
+            "../export/ar_command_metrics"
+            + utility.get_file_timestamp()
+            + ".csv"
+        )     
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv(
             "..\export\\unmatched_faces" 
@@ -148,6 +159,7 @@ def main():
             "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
         )
         cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
+        ar_cmd_metrics.to_csv("..\export\\for_connections\\ar_cmd_metrics.csv")
         
     if(EXPORT_UNMASKED):
         unmask.unmask_and_export(
