@@ -276,6 +276,12 @@ def process_emilpo_assignments(
     emilpo_assignments = emilpo_assignments.rename(columns = {
                         "UIC_CD" : "UIC"
             })
+        
+    print("  - Creating 3 Char PARNO Column")    
+    emilpo_assignments["PARNO_3_CHAR"] = emilpo_assignments.apply(
+        lambda row: row.PARNO[0:3],
+        axis = 1
+    )
     
     print("  - Mapping grade to rank in the eMILPO assignments file")
     emilpo_assignments["GRADE"] = emilpo_assignments.apply(

@@ -13,8 +13,8 @@ WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
 RCMS_FILE = "USAR_Faces_28May.xlsx"
-AOS_FILE_DATE = "4-6-2021"
-UIC_TREE_DATE = "4-6-2021"
+AOS_FILE_DATE = "6-4-2021"
+UIC_TREE_DATE = "6-4-2021"
 EMILPO_FILE_DATE = "4-30-20"
 
 def load_uic_hd_map():
@@ -145,6 +145,32 @@ def load_army_command_aos_billets():
             ).append(
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
+                    header = 2,
+                    dtype = {
+                        'PARENT_PARNO': str,    
+                        'FMID': str,
+                        'PERLN': str,
+                        'GRADE': str,
+                        'POSCO': str,
+                        'ASI1': str,
+                        'ASI2': str,
+                        'ASI3': str,
+                        'ASI4': str,
+                        'SQI1': str,
+                        'RMK1': str,
+                        'RMK2': str,
+                        'RMK3': str,
+                        'RMK4': str,
+                        'AMSCO': str,
+                        'MDEP': str,
+                        'BRANCH': str,
+                        'CTYPE': str
+                        },
+                    skipfooter = 1
+                )
+            ).append(
+                pd.read_excel(
+                    DATA_PATH + "/aos/billet_tree/WUSAFF/WUSAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
                     dtype = {
                         'PARENT_PARNO': str,    

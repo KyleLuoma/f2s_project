@@ -20,8 +20,8 @@ LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = True
-LOAD_AND_PROCESS_FACES = True
+LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -404,6 +404,7 @@ def match(criteria, faces, spaces, stage, face_space_match):
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
     if(stage == 1): #Overwrite the index labels for perfect matching stage 1
+        
         face_list = faces_index_labels = [
             "UIC_PAR_LN", "ASSIGNMENT_AGE", "SSN_MASK"
         ]
