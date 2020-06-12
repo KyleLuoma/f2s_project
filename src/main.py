@@ -13,6 +13,7 @@ import process_data
 import utility
 import pyodbc as db
 import analytics.cmd_match_metrics_table
+import analytics.cmd_metrics_package
 import unmask
 #import sqlalchemy
 
@@ -20,13 +21,14 @@ LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_SPACES = True
 LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
+UPDATE_CONNECTIONS = True
+EXPORT_CMD_SPECS = True
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -147,13 +149,15 @@ def main():
             "../export/ar_command_metrics"
             + utility.get_file_timestamp()
             + ".csv"
-        )     
+        )
+        
     if(EXPORT_UNMATCHED): 
         unmatched_faces.to_csv(
             "..\export\\unmatched_faces" 
             + utility.get_file_timestamp() 
             + ".csv"
         )
+        
     if(UPDATE_CONNECTIONS):
         all_faces_to_matched_spaces.to_csv(
             "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
@@ -164,6 +168,13 @@ def main():
     if(EXPORT_UNMASKED):
         unmask.unmask_and_export(
             all_faces_to_matched_spaces, utility.get_file_timestamp()
+        )
+    
+    if(EXPORT_CMD_SPECS):
+        analytics.cmd_metrics_package.create_cmd_metrics_packages(
+            all_faces_to_matched_spaces,
+            unmask = EXPORT_UNMASKED,
+            date_time_string = utility.get_file_timestamp()
         )
         
 def reload_spaces():
