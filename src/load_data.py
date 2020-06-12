@@ -13,9 +13,9 @@ WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
 RCMS_FILE = "USAR_Faces_28May.xlsx"
-AOS_FILE_DATE = "6-4-2021"
-UIC_TREE_DATE = "6-4-2021"
-EMILPO_FILE_DATE = "4-30-20"
+AOS_FILE_DATE = "6-10-2021"
+UIC_TREE_DATE = "6-10-2021"
+EMILPO_FILE_DATE = "6-10-20"
 
 def load_uic_hd_map():
     return pd.read_csv(DATA_PATH + "/uic_hd_map/UIC_HD_MAP.csv")

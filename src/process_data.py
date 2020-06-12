@@ -278,6 +278,7 @@ def process_emilpo_assignments(
             })
         
     print("  - Creating 3 Char PARNO Column")    
+    emilpo_assignments.PARNO = emilpo_assignments.PARNO.astype("str")
     emilpo_assignments["PARNO_3_CHAR"] = emilpo_assignments.apply(
         lambda row: row.PARNO[0:3],
         axis = 1
@@ -375,6 +376,13 @@ def process_emilpo_assignments(
     print("  - Converting duty assignment date to date_time format")
     emilpo_assignments["DUTY_ASG_DT"] = pd.to_datetime(
         emilpo_assignments.DUTY_ASG_DT, infer_datetime_format = True, errors = "ignore"
+    )
+    
+    print("  - Adding leading 0 to LN for single digit LNs")
+    emilpo_assignments.LN = emilpo_assignments.LN.astype("str")
+    emilpo_assignments.LN = emilpo_assignments.apply(
+        lambda row: "0" + row.LN if len(row.LN) == 1 else row.LN, 
+        axis = 1        
     )
         
     return emilpo_assignments

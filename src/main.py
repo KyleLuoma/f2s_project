@@ -21,7 +21,7 @@ LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_FACES = False
+LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = True
@@ -349,6 +349,10 @@ def match(criteria, faces, spaces, stage, face_space_match):
     if(criteria.PARNO.loc[stage]):
         faces_index_labels.append("PARNO")
         spaces_index_labels.append("PARNO")
+        
+    if(criteria.PARNO_3_CHAR.loc[stage]):
+        faces_index_labels.append("PARNO_3_CHAR")
+        spaces_index_labels.append("PARNO_3_CHAR")
         
     if(criteria.LN.loc[stage]):
         faces_index_labels.append("LN")
