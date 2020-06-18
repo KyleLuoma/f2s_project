@@ -81,7 +81,7 @@ def create_cmd_metrics_packages(
         # export to a file
         print(" - Saving " + cmd + " metrics as file")
         with pd.ExcelWriter(
-            "../../export/cmd_metrics/" + 
+            "X:/AOS/f2s_project/export/cmd_metrics/" + 
             cmd + 
             "_f2s_metrics" + 
             date_time_string + 
