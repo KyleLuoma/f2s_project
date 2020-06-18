@@ -13,9 +13,10 @@ WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
 RCMS_FILE = "USAR_Faces_28May.xlsx"
+RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "6-10-2021"
 UIC_TREE_DATE = "6-10-2021"
-EMILPO_FILE_DATE = "6-10-20"
+EMILPO_FILE_DATE = "6-12-20"
 
 def load_uic_hd_map():
     return pd.read_csv(DATA_PATH + "/uic_hd_map/UIC_HD_MAP.csv")
@@ -213,21 +214,46 @@ def load_rcms():
             "Secondary ASI" : str,
             "Additional ASI" : str
         }
-    ).rename(columns = {
-        "Hash" : "SSN_MASK",
-        "UPC" : "UIC",
-        "Paragraph" : "PARNO",
-        "Line Number" : "LN",
-        "Position Assigned Date" : "DUTY_ASG_DT",
-        "Rank" : "RANK_AB",
-        "PMOS" : "MOS_AOC1",
-        "SMOS" : "MOS_AOC2",
-        "AMOS" : "MOS_AOC3",
-        "Primary ASI" : "ASI1",
-        "Secondary ASI" : "ASI2",
-        "Additional ASI" : "ASI3",
-        "Unit Name" : "UNITNAME"
-    })
+    ).rename(
+        columns = {
+            "Hash" : "SSN_MASK",
+            "UPC" : "UIC",
+            "Paragraph" : "PARNO",
+            "Line Number" : "LN",
+            "Position Assigned Date" : "DUTY_ASG_DT",
+            "Rank" : "RANK_AB",
+            "PMOS" : "MOS_AOC1",
+            "SMOS" : "MOS_AOC2",
+            "AMOS" : "MOS_AOC3",
+            "Primary ASI" : "ASI1",
+            "Secondary ASI" : "ASI2",
+            "Additional ASI" : "ASI3",
+            "Unit Name" : "UNITNAME"
+        }
+    )
+    
+    rcms_ima = pd.read_excel(
+        DATA_PATH + "/rcmsr/assignments/" + RCMS_IMA_FILE,
+    ).rename(
+        columns = {
+            "Hash" : "SSN_MASK",
+            "PARA" : "PARNO",
+            "LINE" : "LN",
+            "RANK" : "RANK_AB",
+            "S_PMOS" : "MOS_AOC1",
+            "S_SMOS" : "MOS_AOC2",
+            "S_ASI" : "ASI1",
+            "COMD" : "IMA_ASGD_CMD"
+        }        
+    )
+    
+    rcms_ima["DUTY_ASG_DT"] = "6/18/2020"
+    rcms_ima["STRUC_CMD_CD"] = "AR"
+    
+    rcms = rcms.append(rcms_ima[[
+        "SSN_MASK", "UIC", "PARNO", "LN", "RANK_AB", "MOS_AOC1", "MOS_AOC2",
+        "ASI1", "IMA_ASGD_CMD", "RCC", "DUTY_ASG_DT", "STRUC_CMD_CD"        
+    ]])
 # =============================================================================
 #     rcms = rcms.drop(
 #         ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],
