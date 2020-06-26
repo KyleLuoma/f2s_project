@@ -24,11 +24,11 @@ PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_FACES = True
 VERBOSE = False
-EXPORT_F2S = True
-EXPORT_UNMATCHED = True
+EXPORT_F2S = False
+EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = True
-EXPORT_CMD_SPECS = True
+UPDATE_CONNECTIONS = False
+EXPORT_CMD_SPECS = False
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 

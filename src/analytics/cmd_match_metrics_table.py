@@ -2,6 +2,7 @@
 
 def make_cmd_f2s_metric_df(
     all_faces_to_matched_spaces, group_by = "STRUC_CMD_CD",
+    timestamp,
     include_columns = []
     ):
     cmd_metrics = all_faces_to_matched_spaces.groupby(
@@ -9,6 +10,8 @@ def make_cmd_f2s_metric_df(
     ).size().reset_index().rename(
         columns = {0 : "ASSIGNED"}
     )
+    
+    cmd_metrics["METRIC_DATE"] = timestamp
     
     non_matches = all_faces_to_matched_spaces.copy().where(
         all_faces_to_matched_spaces.stage_matched == 0

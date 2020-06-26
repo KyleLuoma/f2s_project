@@ -8,15 +8,17 @@ Sources include DRRSA UIC file and AOS tree export
 
 import pandas as pd
 import numpy as np
+import os
 
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "X:/AOS/master_files"
 
 RCMS_FILE = "USAR_Faces_28May.xlsx"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
-AOS_FILE_DATE = "6-10-2021"
-UIC_TREE_DATE = "6-10-2021"
+AOS_FILE_DATE = "6-16-2021"
+UIC_TREE_DATE = "6-16-2021"
 EMILPO_FILE_DATE = "6-12-20"
+
 
 def load_uic_hd_map():
     return pd.read_csv(DATA_PATH + "/uic_hd_map/UIC_HD_MAP.csv")
