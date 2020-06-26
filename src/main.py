@@ -120,11 +120,13 @@ def main():
     )
     
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
-        all_faces_to_matched_spaces
+        all_faces_to_matched_spaces,
+        utility.get_date_string()
     )
     
     ar_cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
         all_faces_to_matched_spaces,
+        utility.get_date_string(),
         group_by = "GFC",
         include_columns = ["GFC 1 Name"]
     )

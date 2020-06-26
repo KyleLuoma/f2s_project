@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 def make_cmd_f2s_metric_df(
-    all_faces_to_matched_spaces, group_by = "STRUC_CMD_CD",
+    all_faces_to_matched_spaces, 
     timestamp,
+    group_by = "STRUC_CMD_CD",
     include_columns = []
     ):
     cmd_metrics = all_faces_to_matched_spaces.groupby(

@@ -254,7 +254,8 @@ def load_rcms():
     
     rcms = rcms.append(rcms_ima[[
         "SSN_MASK", "UIC", "PARNO", "LN", "RANK_AB", "MOS_AOC1", "MOS_AOC2",
-        "ASI1", "IMA_ASGD_CMD", "RCC", "DUTY_ASG_DT", "STRUC_CMD_CD"        
+        "ASI1", "IMA_ASGD_CMD", "RCC", "DUTY_ASG_DT", "STRUC_CMD_CD", "GFC", 
+        "GFC 1 Name"
     ]])
 # =============================================================================
 #     rcms = rcms.drop(

@@ -22,6 +22,10 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
+TEMPLET_PARNOS = ["999", "9GO", "9AD", "9RF","9ER", 
+                  "9TM", "9AI", "9PF", "9SA"]
+
+
 """ uic_cod_update should include UIC and CODE series"""
 def convert_cmd_code_for_uic_in_faces(
     faces_target, uic_code_file, 
@@ -120,7 +124,13 @@ def add_templet_columns(target, parno = "999E", ln = "99"):
     target["TMP_PARNO"] = parno
     target["TMP_LN"] = ln
     return target
-        
+
+def add_is_templet_column(spaces):
+    spaces["IS_TEMPLET"] = spaces.apply(
+        lambda row: row.PARNO[0:3] in TEMPLET_PARNOS,
+        axis = 1
+    )
+    return spaces        
 
 """Converts faces columns to categorical values for indexing"""
 def categorical_faces(faces):
