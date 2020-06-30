@@ -16,7 +16,8 @@ def match_phases_pivot(faces_matches, cmd = ["ALL"], width = 800, height = 400):
                   accumulate_phase_counts(phase_values).to_list(),
                   calculate_remaining_faces(phase_values).to_list()]
     
-    output_file("../output/match_phases_pivot.html")
+    #output_file("../output/match_phases_pivot.html")
+    output_file("X:/AOS/f2s_project/output/match_phases_pivot.html")
     plt = figure(
         plot_width = width, 
         plot_height = height,

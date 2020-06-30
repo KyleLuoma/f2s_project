@@ -22,7 +22,7 @@ LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_FACES = True
+LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
 EXPORT_F2S = False
 EXPORT_UNMATCHED = False
@@ -61,6 +61,7 @@ def main():
         spaces = process_data.calculate_age(
             spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
         )
+        spaces = process_data.add_is_templet_column(spaces)
         all_uics = spaces.UIC.drop_duplicates().append(
             load_data.load_uics_from_uic_trees()
         )
@@ -176,7 +177,8 @@ def main():
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             unmask = EXPORT_UNMASKED,
-            date_time_string = utility.get_file_timestamp()
+            date_time_string = utility.get_file_timestamp(),
+            commands = ["CB"]
         )
         
 def reload_spaces():

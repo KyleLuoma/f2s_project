@@ -5,8 +5,16 @@ import pandas as pd
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
     unmask = False,
-    date_time_string = ""
+    date_time_string = "",
+    commands = []
 ):
+    if(len(commands) > 0):
+        print(type(commands))
+        assert type(commands) == list
+        all_faces_to_matched_spaces = all_faces_to_matched_spaces.where(
+            all_faces_to_matched_spaces.STRUC_CMD_CD.isin(commands)        
+        ).dropna(how = "all")
+        
     # for each command in match file
     cmd_list = all_faces_to_matched_spaces[["STRUC_CMD_CD"]].groupby(
         "STRUC_CMD_CD"
