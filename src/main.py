@@ -40,6 +40,12 @@ def main():
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
         match_phases = load_data.load_match_phases()
+        
+    # Find last stage that uses templets:
+    last_templet_stage = match_phases.where(
+        match_phases.TEMPLET
+    ).dropna(how = "all").tail(1).index[0]
+        
     if(LOAD_AND_PROCESS_MAPS):
         print(" - Loading and processing mapping files")
         uic_hd_map = load_data.load_uic_hd_map()
@@ -48,8 +54,10 @@ def main():
         aos_ouid_uic_xwalk = load_data.load_ouid_uic_xwalk()
         rmk_codes = load_data.load_rmk_codes()
         cmd_description_xwalk = load_data.load_cmd_description_xwalk()
+        
     if(LOAD_COMMAND_CONSIDERATIONS):
         af_uic_list = load_data.load_af_uics()
+        
     if(LOAD_AND_PROCESS_SPACES):        
         print(" - Loading and processing spaces files")
         drrsa = load_data.load_drrsa_file()
@@ -65,6 +73,7 @@ def main():
         all_uics = spaces.UIC.drop_duplicates().append(
             load_data.load_uics_from_uic_trees()
         )
+        
     if(LOAD_AND_PROCESS_FACES):
         print(" - Loading and processing faces files")
         faces = process_data.process_emilpo_assignments(
@@ -92,6 +101,7 @@ def main():
             faces, utility.get_local_time_as_datetime(), 
             "DUTY_ASG_DT", "ASSIGNMENT"
         )
+        
         if(PROCESS_COMMAND_CONSIDERATIONS):
             faces = process_data.convert_cmd_code_for_uic_in_faces(
                 faces, af_uic_list, uic_col_name = "UICOD", 
@@ -117,7 +127,9 @@ def main():
         all_faces_to_matched_spaces, match_phases
     )
     all_faces_to_matched_spaces = diagnose_mismatch_in_target(
-        all_faces_to_matched_spaces, all_uics
+        all_faces_to_matched_spaces, 
+        all_uics, 
+        last_templet_stage
     )
     
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
@@ -228,7 +240,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     return all_faces_to_matched_spaces
 
 
-def diagnose_mismatch_in_target(target, all_uics):
+def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
     print("Analyzing unmatched faces")
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
@@ -236,7 +248,11 @@ def diagnose_mismatch_in_target(target, all_uics):
     target.ADD_UIC_TO_AOS = (~target.UIC_emilpo.isin(all_uics))
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
-        lambda row: True if (not row.ADD_UIC_TO_AOS and row.stage_matched == 0) else False,
+        lambda row: True if (
+            not row.ADD_UIC_TO_AOS and (
+                row.stage_matched == 0 or row.stage_matched > last_templet_stage
+            )
+        ) else False,
         axis = 1
     )
     return target
@@ -274,7 +290,7 @@ def full_run(
         ).dropna(how = "all")
     
     for i in range(1, match_phases.shape[0] + 1):
-        print(" - Calling match() for stage", str(i))
+        print(" *** Calling match() for stage ***", str(i))
         faces, spaces, face_space_match = match(
             match_phases,  
             faces.where(

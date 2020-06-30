@@ -8,6 +8,21 @@ def create_cmd_metrics_packages(
     date_time_string = "",
     commands = []
 ):
+    uic_templets_needed = all_faces_to_matched_spaces.where(
+            all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
+    ).dropna(how = "all")[["UIC_emilpo", "SSN_MASK"]]  
+    
+    uic_templets_needed = uic_templets_needed.groupby(
+        ["UIC_emilpo"],
+        observed = True,
+        as_index = False
+    ).count().rename(
+        columns = {
+            "UIC_emilpo" : "UIC",
+            "SSN_MASK" : "All Command Templet Requirement"
+        }        
+    )   
+    
     if(len(commands) > 0):
         print(type(commands))
         assert type(commands) == list
@@ -56,9 +71,15 @@ def create_cmd_metrics_packages(
         ).count().rename(
             columns = {
                 "UIC_emilpo" : "UICs requiring templets",
-                "SSN_MASK" : "Num templets to build"
+                "SSN_MASK" : cmd + " Templet Requirement"
             }        
         )
+        
+        cmd_templets_needed = cmd_templets_needed.set_index(
+            "UICs requiring templets"
+        ).join(
+            uic_templets_needed.set_index("UIC")
+        ).reset_index()
         
         # create a DF with a list of positions with assignment age > position age
         cmd_asg_age = cmd_df.where(
