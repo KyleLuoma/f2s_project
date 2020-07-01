@@ -88,15 +88,13 @@ def make_cmd_f2s_metric_df(
 def merge_AC_RC_cmd_metrics(cmd_metrics, ar_cmd_metrics):
     cmd_metrics["COMPONENT"] = "AC"
     ar_cmd_metrics["COMPONENT"] = "AR"
-    
     ar_cmd_metrics = ar_cmd_metrics.rename(
         columns = {
             'GFC' : 'STRUC_CMD_CD'        
         }        
     )
-    
     ACRC_metrics = cmd_metrics.append(ar_cmd_metrics)
-    
+    ACRC_metrics.loc[ACRC_metrics["STRUC_CMD_CD"] == "AR", "COMPONENT"] = "AR"
     return ACRC_metrics
 
 
