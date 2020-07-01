@@ -29,6 +29,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
+COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -144,6 +145,10 @@ def main():
         include_columns = ["GFC 1 Name"]
     )
     
+    ac_ar_metrics = analytics.cmd_match_metrics_table.merge_AC_RC_cmd_metrics(
+        cmd_metrics, ar_cmd_metrics
+    )
+    
     if(EXPORT_F2S): 
         face_space_match.to_csv(
             "..\export\\face_space_matches" 
@@ -162,6 +167,11 @@ def main():
         )                
         ar_cmd_metrics.to_csv(
             "../export/ar_command_metrics"
+            + utility.get_file_timestamp()
+            + ".csv"
+        )
+        ac_ar_metrics.to_csv(
+            "../export/ac_ar_command_metrics"
             + utility.get_file_timestamp()
             + ".csv"
         )
@@ -190,7 +200,7 @@ def main():
             all_faces_to_matched_spaces,
             unmask = EXPORT_UNMASKED,
             date_time_string = utility.get_file_timestamp(),
-            commands = ["CB"]
+            commands = COMMAND_EXPORT_LIST
         )
         
 def reload_spaces():

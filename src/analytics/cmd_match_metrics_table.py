@@ -84,3 +84,21 @@ def make_cmd_f2s_metric_df(
     cmd_metrics.MATCHED_ASG_OLDER_THAN_POS.fillna(0, inplace = True)
         
     return cmd_metrics
+
+def merge_AC_RC_cmd_metrics(cmd_metrics, ar_cmd_metrics):
+    cmd_metrics["COMPONENT"] = "AC"
+    ar_cmd_metrics["COMPONENT"] = "AR"
+    
+    ar_cmd_metrics = ar_cmd_metrics.rename(
+        columns = {
+            'GFC' : 'STRUC_CMD_CD'        
+        }        
+    )
+    
+    ACRC_metrics = cmd_metrics.append(ar_cmd_metrics)
+    
+    return ACRC_metrics
+
+
+
+
