@@ -44,3 +44,22 @@ def get_sql_engine():
 # Installing packages:
 # pip install --trusted-host pypi.python.org  --trusted-host pypi.org --trusted-host files.pythonhosted.org sqlalchemy-access
     
+def reload_spaces():
+    spaces = load_army_command_aos_billets()
+    spaces = process_aos_billet_export(spaces)
+    spaces = add_expected_hsduic(spaces, uic_hd_map, "NA")
+    spaces = add_drrsa_data(spaces, drrsa)
+    spaces = categorical_spaces(spaces)
+    return spaces
+
+def test_stage(
+    stage, criteria, faces, spaces, 
+    include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
+):
+    match.match(
+            match_phases,  
+            faces,
+            spaces, 
+            stage,
+            face_space_match
+    )

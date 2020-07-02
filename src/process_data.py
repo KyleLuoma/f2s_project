@@ -38,11 +38,11 @@ def convert_cmd_code_for_uic_in_faces(
     ssn_mask_updates = faces_target.where(
         faces_target.UIC.isin(uic_cmd_codes.index)
     ).dropna(how = "all")[[
-            "SSN_MASK", "STRUC_CMD_CD"
+        "SSN_MASK", "STRUC_CMD_CD"
     ]].set_index("SSN_MASK")
     ssn_mask_updates = ssn_mask_updates.where(
         ssn_mask_updates.STRUC_CMD_CD != "AR"
-    )
+    ).dropna(how = "all").copy()
     ssn_mask_updates.STRUC_CMD_CD = new_cmd_cd
     faces_target.set_index("SSN_MASK", inplace = True)
     faces_target.update(ssn_mask_updates)
