@@ -4,6 +4,7 @@ import pandas as pd
 
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
+    uic_templets,
     unmask = False,
     date_time_string = "",
     commands = []
@@ -21,7 +22,7 @@ def create_cmd_metrics_packages(
             "UIC_emilpo" : "UIC",
             "SSN_MASK" : "All Command Templet Requirement"
         }        
-    )   
+    )
     
     if(len(commands) > 0):
         print(type(commands))
@@ -80,6 +81,13 @@ def create_cmd_metrics_packages(
         ).join(
             uic_templets_needed.set_index("UIC")
         ).reset_index()
+# =============================================================================
+#         cmd_templets_needed = cmd_templets_needed.set_index(
+#             "UICs requiring templets"
+#         ).join(
+#             uic_templets.set_index("UIC")        
+#         ).reset_index()
+# =============================================================================
         
         # create a DF with a list of positions with assignment age > position age
         cmd_asg_age = cmd_df.where(

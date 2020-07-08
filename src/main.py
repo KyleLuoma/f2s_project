@@ -17,6 +17,7 @@ import analytics.cmd_metrics_package
 import unmask
 import diagnostics
 import match
+import templet_analysis
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = True
@@ -31,7 +32,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["FC"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -39,6 +40,7 @@ def main():
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
+    global all_spaces_to_matched_faces, uic_templets
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
@@ -135,6 +137,14 @@ def main():
         last_templet_stage
     )
     
+    all_spaces_to_matched_faces = diagnostics.space_available_analysis(
+        faces, face_space_match, spaces        
+    )
+    
+    uic_templets = templet_analysis.templet_usage_by_uic(
+        all_spaces_to_matched_faces
+    )
+    
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
         all_faces_to_matched_spaces,
         utility.get_date_string()
@@ -200,6 +210,7 @@ def main():
     if(EXPORT_CMD_SPECS):
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
+            uic_templets,
             unmask = EXPORT_UNMASKED,
             date_time_string = utility.get_file_timestamp(),
             commands = COMMAND_EXPORT_LIST

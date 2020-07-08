@@ -54,3 +54,36 @@ def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
     )
     return target# -*- coding: utf-8 -*-
 
+def space_available_analysis(faces, face_space_match, spaces):
+    #Return a DF with information about all spaces
+    all_spaces_to_matched_faces = spaces.copy()
+    all_spaces_to_matched_faces = all_spaces_to_matched_faces.reset_index(
+        ).set_index(
+            "FMID"
+        ).join(
+            face_space_match.reset_index(drop = True).set_index("FMID"),
+            lsuffix = "_spaces",
+            rsuffix = "_face_space_match"
+        )
+    faces_subset = faces[[
+        "GFC", "GFC 1 Name", "IMA_ASGD_CMD", "GRADE", "MOS_AOC_LIST", "SQI_LIST", 
+        "STRUC_CMD_CD", "UIC", "PARNO", "LN", "MIL_POSN_RPT_NR", "SSN_MASK"
+    ]].set_index("SSN_MASK")
+    all_spaces_to_matched_faces = all_spaces_to_matched_faces.join(
+        faces_subset,
+        on = "SSN_MASK_face_space_match",
+        lsuffix = "_spaces",
+        rsuffix = "_faces"
+    )
+    
+    return all_spaces_to_matched_faces
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
