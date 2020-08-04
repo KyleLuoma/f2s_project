@@ -63,3 +63,15 @@ def test_stage(
             stage,
             face_space_match
     )
+    
+# Shell script to add zip to all_faces_to_matched_spaces
+# =============================================================================
+# all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().join(
+#     drrsa.reset_index().set_index("UIC")["UNPRSNTLOCZIP"],
+#     on = "UIC_emilpo"
+# )    
+# all_faces_to_matched_spaces.UNPRSNTLOCZIP = all_faces_to_matched_spaces.apply(
+#     lambda row: str(row.UNPRSNTLOCZIP)[0:5],
+#     axis = 1      
+# )
+# =============================================================================

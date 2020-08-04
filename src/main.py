@@ -17,7 +17,7 @@ import analytics.cmd_metrics_package
 import unmask
 import diagnostics
 import match
-import templet_analysis
+import analytics.templet_analysis
 #import sqlalchemy
 
 LOAD_MATCH_PHASES = True
@@ -27,12 +27,12 @@ PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
-EXPORT_F2S = False
+EXPORT_F2S = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ["FC"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ['P1', 'TW'] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -141,7 +141,7 @@ def main():
         faces, face_space_match, spaces        
     )
     
-    uic_templets = templet_analysis.templet_usage_by_uic(
+    uic_templets = analytics.templet_analysis.templet_usage_by_uic(
         all_spaces_to_matched_faces
     )
     
@@ -218,3 +218,12 @@ def main():
         
 
 if (__name__ == "__main__"): main()
+
+all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().join(
+    drrsa.reset_index().set_index("UIC")["UNPRSNTLOCZIP"],
+    on = "UIC_emilpo"
+)    
+all_faces_to_matched_spaces.UNPRSNTLOCZIP = all_faces_to_matched_spaces.apply(
+    lambda row: str(row.UNPRSNTLOCZIP)[0:5],
+    axis = 1      
+)

@@ -76,10 +76,13 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
         spaces_index_labels.append("SQI1")  
         
     if(criteria.TEMPLET.loc[stage]):
-        faces_index_labels.append("TMP_PARNO")
-        faces_index_labels.append("TMP_LN")
-        spaces_index_labels.append("PARNO_3_CHAR")
-        spaces_index_labels.append("LN")
+        #faces_index_labels.append("TMP_PARNO")
+        #faces_index_labels.append("TMP_LN")
+        #spaces_index_labels.append("PARNO_3_CHAR")
+        #spaces_index_labels.append("LN")
+        spaces_index_labels.append("IS_TEMPLET")
+        faces["TRUE"] = True
+        faces_index_labels.append("TRUE")
         
     counter = 0
     stage_matched = 0 #Increase if match found

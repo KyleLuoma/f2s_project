@@ -23,7 +23,7 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
 TEMPLET_PARNOS = ["999", "9GO", "9AD", "9RF","9ER", 
-                  "9TM", "9AI", "9PF", "9SA"]
+                  "9TM", "9AI", "9PF", "9SA", "9ST"]
 
 
 """ uic_cod_update should include UIC and CODE series"""
