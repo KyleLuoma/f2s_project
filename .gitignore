@@ -1,6 +1,7 @@
 # Spyer project settings
 .spyderproject
 .spyproject
+.pyc
 
 #directories
 /data/*

@@ -332,7 +332,7 @@ def load_match_phases():
 
 """ Retrieve rank grade crosswalk file """
 def load_rank_grade_xwalk():
-    return pd.read_csv("../data/xwalks/rank_grade_xwalk.csv").set_index("RANK")
+    return pd.read_csv(DATA_PATH + "/xwalks/rank_grade_xwalk.csv").set_index("RANK")
 
 """ Retrieve grade mismatch crosswalk file """
 def load_grade_mismatch_xwalk():
@@ -340,7 +340,7 @@ def load_grade_mismatch_xwalk():
 
 """ Retrieve OUID to UIC mapping file """
 def load_ouid_uic_xwalk():
-    return pd.read_csv("../data/xwalks/OUID_UIC_FY21.CSV")
+    return pd.read_csv(DATA_PATH + "/xwalks/OUID_UIC_FY21.CSV")
 
 """ Retrieve RMK Domain Codes """
 def load_rmk_codes():
