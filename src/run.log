@@ -1,0 +1,23 @@
+ - Loading match phases
+ - Loading and processing mapping files
+ - Loading and processing faces files
+Processing EMILPO assignments file
+  - Renaming columns
+  - Creating 3 Char PARNO Column
+  - Mapping grade to rank in the eMILPO assignments file
+[4;33mReloaded modules[24m: load_data, process_data, utility, analytics.cmd_match_metrics_table, analytics.cmd_metrics_package, unmask, diagnostics, match, analytics.templet_analysis[0m
+ - Loading match phases
+ - Loading and processing mapping files
+ - Loading and processing faces files
+Processing EMILPO assignments file
+  - Renaming columns
+  - Creating 3 Char PARNO Column
+  - Mapping grade to rank in the eMILPO assignments file
+  - Mapping grade to one-up grade in the eMILPO assignments file
+[4;33mReloaded modules[24m: load_data, process_data, utility, analytics.cmd_match_metrics_table, analytics.cmd_metrics_package, unmask, diagnostics, match, analytics.templet_analysis[0m
+ - Loading match phases
+ - Loading and processing mapping files
+ - Loading and processing faces files
+Processing EMILPO assignments file
+  - Renaming columns
+  - Creating 3 Char PARNO Column

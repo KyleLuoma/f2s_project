@@ -10,10 +10,11 @@ import pandas as pd
 import numpy as np
 import os
 
-WARCFF_PARTITION_COUNT = 5
-DATA_PATH = "X:/AOS/master_files"
 
-RCMS_FILE = "USAR_Faces_28May.xlsx"
+WARCFF_PARTITION_COUNT = 5
+DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
+
+RCMS_FILE = "USAR_SELRES_F2S_11Aug.xlsx"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "7-31-2021"
 UIC_TREE_DATE = "7-31-2021"
@@ -205,7 +206,7 @@ def load_rcms():
         dtype = {
             "GFC" : str,
             "GFC 1 Name" : str,
-            "Hash" : str,
+            "Mask" : str,
             "Paragraph" : str,
             "Line Number" : str,
             "Rank" : str,
@@ -218,8 +219,8 @@ def load_rcms():
         }
     ).rename(
         columns = {
-            "Hash" : "SSN_MASK",
-            "UPC" : "UIC",
+            "Mask" : "SSN_MASK",
+            #"UPC" : "UIC",
             "Paragraph" : "PARNO",
             "Line Number" : "LN",
             "Position Assigned Date" : "DUTY_ASG_DT",
@@ -234,29 +235,7 @@ def load_rcms():
         }
     )
     
-    rcms_ima = pd.read_excel(
-        DATA_PATH + "/rcmsr/assignments/" + RCMS_IMA_FILE,
-    ).rename(
-        columns = {
-            "Hash" : "SSN_MASK",
-            "PARA" : "PARNO",
-            "LINE" : "LN",
-            "RANK" : "RANK_AB",
-            "S_PMOS" : "MOS_AOC1",
-            "S_SMOS" : "MOS_AOC2",
-            "S_ASI" : "ASI1",
-            "COMD" : "IMA_ASGD_CMD"
-        }        
-    )
-    
-    rcms_ima["DUTY_ASG_DT"] = "6/18/2020"
-    rcms_ima["STRUC_CMD_CD"] = "AR"
-    
-    rcms = rcms.append(rcms_ima[[
-        "SSN_MASK", "UIC", "PARNO", "LN", "RANK_AB", "MOS_AOC1", "MOS_AOC2",
-        "ASI1", "IMA_ASGD_CMD", "RCC", "DUTY_ASG_DT", "STRUC_CMD_CD", "GFC", 
-        "GFC 1 Name"
-    ]])
+   
 # =============================================================================
 #     rcms = rcms.drop(
 #         ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],

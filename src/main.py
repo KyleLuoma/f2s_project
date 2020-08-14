@@ -7,7 +7,8 @@ Created on Mon Feb 10 13:45:26 2020
 import pandas as pd
 from pandas.api.types import CategoricalDtype
 import numpy as np
-#import math
+import os
+os.chdir('\\\\ba-anvl-fs05\\FMDShare\\AOS\\f2s_project\\src')
 import load_data
 import process_data
 import utility
@@ -18,7 +19,6 @@ import unmask
 import diagnostics
 import match
 import analytics.templet_analysis
-#import sqlalchemy
 
 LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
@@ -32,7 +32,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ['P1', 'TW'] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ['AR'] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
