@@ -32,7 +32,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ['AR'] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ['TC', 'TA'] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -204,17 +204,30 @@ def main():
         
     if(EXPORT_UNMASKED):
         unmask.unmask_and_export(
-            all_faces_to_matched_spaces, utility.get_file_timestamp()
+            all_faces_to_matched_spaces, utility.get_file_timestamp(),
+            emilpo_key_date = "7-24-2020"
         )
     
     if(EXPORT_CMD_SPECS):
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             uic_templets,
+            drrsa,
             unmask = EXPORT_UNMASKED,
             date_time_string = utility.get_file_timestamp(),
             commands = COMMAND_EXPORT_LIST
         )
+        if(EXPORT_UNMASKED):
+            unmask.unmask_and_export(
+                all_faces_to_matched_spaces.where(
+                    all_faces_to_matched_spaces.STRUC_CMD_CD.isin(
+                        COMMAND_EXPORT_LIST
+                    )
+                ).dropna(how = "all"),
+                utility.get_file_timestamp(),
+                cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
+                emilpo_key_date = "7-24-2020"
+            )
         
 
 if (__name__ == "__main__"): main()

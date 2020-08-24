@@ -5,6 +5,7 @@ import pandas as pd
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
     uic_templets,
+    drrsa,
     unmask = False,
     date_time_string = "",
     commands = []
@@ -59,6 +60,17 @@ def create_cmd_metrics_packages(
                 "SSN_MASK" : "Num Soldiers assigned to UIC"
             }        
         )
+        
+        cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
+            lambda row: row["UIC not in AOS"] in drrsa.UIC.tolist(),
+            axis = 1
+        )
+        
+        cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
+            drrsa.reset_index().set_index("UIC")[[
+                "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
+            ]]
+        ).reset_index()
         
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.where(

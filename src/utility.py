@@ -64,6 +64,12 @@ def test_stage(
             face_space_match
     )
     
+def make_commands_label(command_export_list):
+    label = ""
+    for cmd in command_export_list:
+        label = cmd + "_" + label
+    return label
+    
 # Shell script to add zip to all_faces_to_matched_spaces
 # =============================================================================
 # all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().join(
