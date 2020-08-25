@@ -61,16 +61,17 @@ def create_cmd_metrics_packages(
             }        
         )
         
-        cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
-            lambda row: row["UIC not in AOS"] in drrsa.UIC.tolist(),
-            axis = 1
-        )
-        
-        cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
-            drrsa.reset_index().set_index("UIC")[[
-                "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
-            ]]
-        ).reset_index()
+        if(cmd_uics_needed.shape[0] > 0):
+            cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
+                lambda row: row["UIC not in AOS"] in drrsa.UIC.tolist(),
+                axis = 1
+            )
+            
+            cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
+                drrsa.reset_index().set_index("UIC")[[
+                    "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
+                ]]
+            ).reset_index()
         
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.where(
