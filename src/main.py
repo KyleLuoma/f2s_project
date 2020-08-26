@@ -154,7 +154,7 @@ def main():
         all_faces_to_matched_spaces,
         utility.get_date_string(),
         group_by = "GFC",
-        include_columns = ["test1", "GFC 1 Name", "Test"]
+        include_columns = ["test1", "GFC 1 Name"]
     )
     
     ac_ar_metrics = analytics.cmd_match_metrics_table.merge_AC_RC_cmd_metrics(

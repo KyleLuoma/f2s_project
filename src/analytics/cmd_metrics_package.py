@@ -37,14 +37,21 @@ def create_cmd_metrics_packages(
         "STRUC_CMD_CD"
     ).count().index.to_list()
     
-    uic_gfcs = all_faces_to_matched_spaces[["UIC_emilpo", "GFC", "GFC 1 Name"]].groupby(
-        ["UIC_emilpo", "GFC"], as_index = False
-    ).count()[["UIC_emilpo", "GFC"]]
-    uic_gfcs = uic_gfcs.set_index("UIC_emilpo").join(
-        all_faces_to_matched_spaces[["UIC_emilpo", "GFC 1 Name", "GFC"]].groupby(
-            ["UIC_emilpo", "GFC 1 Name"], as_index = False
-        ).count()[["UIC_emilpo", "GFC 1 Name"]].set_index("UIC_emilpo")
-    ).reset_index()
+    uic_gfcs = pd.DataFrame()
+    if "AR" in commands:    
+        ar_faces_spaces = all_faces_to_matched_spaces.where(
+            all_faces_to_matched_spaces.STRUC_CMD_CD == "AR"        
+        ).dropna(how = "all").copy()       
+        
+        uic_gfcs = ar_faces_spaces.groupby(
+            ["GFC", "UIC_emilpo"], observed = True, as_index = False
+        ).count()[["UIC_emilpo", "GFC"]]
+        
+        uic_gfcs = uic_gfcs.set_index("UIC_emilpo").join(
+            ar_faces_spaces[["UIC_emilpo", "GFC 1 Name", "GFC"]].groupby(
+                ["GFC 1 Name", "UIC_emilpo"], observed = True, as_index = False
+            ).count()[["UIC_emilpo", "GFC 1 Name"]].set_index("UIC_emilpo")
+        ).reset_index()
     
     
     for cmd in cmd_list:
@@ -82,13 +89,15 @@ def create_cmd_metrics_packages(
                     "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
                 ]]
             ).reset_index()
+            del cmd_uics_needed["index"]
             
         if(cmd == "AR"):
-            cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
-                uic_gfcs.reset_index().set_index("UIC_emilpo"),
+            cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index("UIC not in AOS").join(
+                uic_gfcs.reset_index(drop = True).set_index("UIC_emilpo"),
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
+            
         
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.where(
@@ -113,10 +122,10 @@ def create_cmd_metrics_packages(
         ).reset_index()
         
         if(cmd == "AR"):
-            cmd_templets_needed = cmd_templets_needed.reset_index().set_index(
+            cmd_templets_needed = cmd_templets_needed.reset_index(drop = True).set_index(
                 "UICs requiring templets"
             ).join(
-                uic_gfcs.reset_index().set_index("UIC_emilpo"),
+                uic_gfcs.reset_index(drop = True).set_index("UIC_emilpo"),
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
