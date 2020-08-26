@@ -37,6 +37,16 @@ def create_cmd_metrics_packages(
         "STRUC_CMD_CD"
     ).count().index.to_list()
     
+    uic_gfcs = all_faces_to_matched_spaces[["UIC_emilpo", "GFC", "GFC 1 Name"]].groupby(
+        ["UIC_emilpo", "GFC"], as_index = False
+    ).count()[["UIC_emilpo", "GFC"]]
+    uic_gfcs = uic_gfcs.set_index("UIC_emilpo").join(
+        all_faces_to_matched_spaces[["UIC_emilpo", "GFC 1 Name", "GFC"]].groupby(
+            ["UIC_emilpo", "GFC 1 Name"], as_index = False
+        ).count()[["UIC_emilpo", "GFC 1 Name"]].set_index("UIC_emilpo")
+    ).reset_index()
+    
+    
     for cmd in cmd_list:
         print(" - Procesing command metrics file for: " + cmd)
         
@@ -60,6 +70,13 @@ def create_cmd_metrics_packages(
                 "SSN_MASK" : "Num Soldiers assigned to UIC"
             }        
         )
+        
+        if(cmd == "AR"):
+            cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
+                uic_gfcs.reset_index().set_index("UIC_emilpo"),
+                lsuffix = "_cmd_uics_needed",
+                rsuffix = "_uic_gfcs"
+            ).reset_index()
         
         if(cmd_uics_needed.shape[0] > 0):
             cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
@@ -88,6 +105,15 @@ def create_cmd_metrics_packages(
                 "SSN_MASK" : cmd + " Templet Requirement"
             }        
         )
+        
+        if(cmd == "AR"):
+            cmd_templets_needed = cmd_templets_needed.reset_index().set_index(
+                "UICs requiring templets"
+            ).join(
+                uic_gfcs.reset_index().set_index("UIC_emilpo"),
+                lsuffix = "_cmd_uics_needed",
+                rsuffix = "_uic_gfcs"
+            ).reset_index()
         
         cmd_templets_needed = cmd_templets_needed.set_index(
             "UICs requiring templets"
