@@ -71,13 +71,6 @@ def create_cmd_metrics_packages(
             }        
         )
         
-        if(cmd == "AR"):
-            cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
-                uic_gfcs.reset_index().set_index("UIC_emilpo"),
-                lsuffix = "_cmd_uics_needed",
-                rsuffix = "_uic_gfcs"
-            ).reset_index()
-        
         if(cmd_uics_needed.shape[0] > 0):
             cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
                 lambda row: row["UIC not in AOS"] in drrsa.UIC.tolist(),
@@ -88,6 +81,13 @@ def create_cmd_metrics_packages(
                 drrsa.reset_index().set_index("UIC")[[
                     "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
                 ]]
+            ).reset_index()
+            
+        if(cmd == "AR"):
+            cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
+                uic_gfcs.reset_index().set_index("UIC_emilpo"),
+                lsuffix = "_cmd_uics_needed",
+                rsuffix = "_uic_gfcs"
             ).reset_index()
         
         # create a DF with a list of UICs that require templets
@@ -106,6 +106,12 @@ def create_cmd_metrics_packages(
             }        
         )
         
+        cmd_templets_needed = cmd_templets_needed.set_index(
+            "UICs requiring templets"
+        ).join(
+            uic_templets_needed.set_index("UIC")
+        ).reset_index()
+        
         if(cmd == "AR"):
             cmd_templets_needed = cmd_templets_needed.reset_index().set_index(
                 "UICs requiring templets"
@@ -114,12 +120,6 @@ def create_cmd_metrics_packages(
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
-        
-        cmd_templets_needed = cmd_templets_needed.set_index(
-            "UICs requiring templets"
-        ).join(
-            uic_templets_needed.set_index("UIC")
-        ).reset_index()
 # =============================================================================
 #         cmd_templets_needed = cmd_templets_needed.set_index(
 #             "UICs requiring templets"

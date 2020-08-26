@@ -30,7 +30,7 @@ def load_drrsa_file():
 
 """ Retrieve AF UIC list from Ed """
 def load_af_uics():
-    return pd.read_excel("../data/command_considerations/AFC_MASTER_UIC_LISTING.xlsx")
+    return pd.read_excel(DATA_PATH + "/command_considerations/AFC_MASTER_UIC_LISTING.xlsx")
 
 """ Retrieve UIC tree files """
 def load_uics_from_uic_trees():

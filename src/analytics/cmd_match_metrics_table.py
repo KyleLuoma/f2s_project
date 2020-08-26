@@ -12,6 +12,18 @@ def make_cmd_f2s_metric_df(
         columns = {0 : "ASSIGNED"}
     )
     
+    for column in include_columns:
+        if column not in all_faces_to_matched_spaces.columns:
+            print("Column " + str(column) + " not available in all_faces_to_matched_spaces.")
+            continue
+        cmd_metrics = cmd_metrics.reset_index().set_index(group_by).join(
+            all_faces_to_matched_spaces.groupby(
+                [group_by, column], as_index = False
+            ).count().set_index(group_by)[[column]]
+        ).reset_index()
+        del cmd_metrics["index"]
+            
+    
     cmd_metrics["METRIC_DATE"] = timestamp
     
     non_matches = all_faces_to_matched_spaces.copy().where(
