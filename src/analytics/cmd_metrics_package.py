@@ -38,7 +38,8 @@ def create_cmd_metrics_packages(
     ).count().index.to_list()
     
     uic_gfcs = pd.DataFrame()
-    if "AR" in commands:    
+    if "AR" in cmd_list:
+        print(" - AR selected for export, processing AR-specific data frames")
         ar_faces_spaces = all_faces_to_matched_spaces.where(
             all_faces_to_matched_spaces.STRUC_CMD_CD == "AR"        
         ).dropna(how = "all").copy()       

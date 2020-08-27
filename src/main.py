@@ -32,7 +32,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -209,6 +209,7 @@ def main():
         )
     
     if(EXPORT_CMD_SPECS):
+        import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             uic_templets,
