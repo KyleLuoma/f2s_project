@@ -217,17 +217,18 @@ def main():
             date_time_string = utility.get_file_timestamp(),
             commands = COMMAND_EXPORT_LIST
         )
-        if(EXPORT_UNMASKED):
-            unmask.unmask_and_export(
-                all_faces_to_matched_spaces.where(
-                    all_faces_to_matched_spaces.STRUC_CMD_CD.isin(
-                        COMMAND_EXPORT_LIST
-                    )
-                ).dropna(how = "all"),
-                utility.get_file_timestamp(),
-                cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
-                emilpo_key_date = "7-24-2020"
-            )
+        
+    if(EXPORT_UNMASKED and EXPORT_CMD_SPECS):
+        unmask.unmask_and_export(
+            all_faces_to_matched_spaces.where(
+                all_faces_to_matched_spaces.STRUC_CMD_CD.isin(
+                    COMMAND_EXPORT_LIST
+                )
+            ).dropna(how = "all"),
+            utility.get_file_timestamp(),
+            cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
+            emilpo_key_date = "7-24-2020"
+        )
         
 
 if (__name__ == "__main__"): main()

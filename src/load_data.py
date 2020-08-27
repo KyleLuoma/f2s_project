@@ -19,6 +19,7 @@ RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "8-17-2021"
 UIC_TREE_DATE = "8-17-2021"
 EMILPO_FILE_DATE = "7-24-20"
+DRRSA_FILE_DATE = "8-24-2020"
 
 
 def load_uic_hd_map():
@@ -26,7 +27,7 @@ def load_uic_hd_map():
 
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
-    return pd.read_csv(DATA_PATH + "/drrsa/DRRSA_Data_20200114.csv")
+    return pd.read_excel(DATA_PATH + "/drrsa/drrsa " + DRRSA_FILE_DATE + ".xlsx")
 
 """ Retrieve AF UIC list from Ed """
 def load_af_uics():
