@@ -27,7 +27,9 @@ def load_uic_hd_map():
 
 """ Retrieve the DRRSA UIC / Location file """
 def load_drrsa_file():
-    return pd.read_excel(DATA_PATH + "/drrsa/drrsa " + DRRSA_FILE_DATE + ".xlsx")
+    drrsa = pd.read_excel(DATA_PATH + "/drrsa/drrsa " + DRRSA_FILE_DATE + ".xlsx")
+    drrsa["DRRSA_FILE_DATE"] = DRRSA_FILE_DATE
+    return drrsa
 
 """ Retrieve AF UIC list from Ed """
 def load_af_uics():
@@ -121,7 +123,7 @@ def load_and_append_warcff_billet_export(num_partitions):
 
 """ Retrieve AOS Billet Export for USAR and AC """
 def load_army_command_aos_billets():
-    return load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
+    aos_file =  load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
@@ -200,6 +202,8 @@ def load_army_command_aos_billets():
                     skipfooter = 1
                 )
             ).drop_duplicates("FMID")
+    aos_file["AOS_FILE_DATE"] = AOS_FILE_DATE
+    return aos_file
                 
 def load_rcms():
     rcms = pd.read_excel(
@@ -235,8 +239,6 @@ def load_rcms():
             "Unit Name" : "UNITNAME"
         }
     )
-    
-   
 # =============================================================================
 #     rcms = rcms.drop(
 #         ["UPC", "UNITNAME", "Position", "OVERSTRENGTH", "POSN MOS", "RCC"],
@@ -248,12 +250,13 @@ def load_rcms():
         lambda row: row.UIC + row.PARNO + row.LN,
         axis = 1
     )
+    rcms["RCMS_FILE"] = RCMS_FILE
     rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
     return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():
-    return pd.read_csv(
+    emilpo_file = pd.read_csv(
             DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv",
             dtype = {
                     "PARNO": str,
@@ -305,6 +308,8 @@ def load_emilpo():
                     "ASI14": str
                     }
             ).rename(columns = {"SSN_MASK_HASH" : "SSN_MASK"})
+    emilpo_file["EMILPO_FILE_DATE"] = EMILPO_FILE_DATE
+    return emilpo_file
 
 """ Retreive match phases file """
 def load_match_phases():

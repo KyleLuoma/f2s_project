@@ -24,14 +24,14 @@ LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = True
-LOAD_AND_PROCESS_FACES = True
+LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_FACES = False
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = True
+EXPORT_CMD_SPECS = False
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 def main():
@@ -209,7 +209,7 @@ def main():
         )
     
     if(EXPORT_CMD_SPECS):
-        import analytics.cmd_metrics_package #Uncomment for debugging
+        #import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             uic_templets,
