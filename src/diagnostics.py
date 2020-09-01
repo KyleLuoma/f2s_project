@@ -2,7 +2,8 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[[
         "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "GFC", "GFC 1 Name",
-        "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT","RANK_AB", "GRADE",
+        "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT", "MOS_AOC1", "MOS_AOC2", 
+        "RANK_AB", "GRADE",
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
         "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE", "RCC",
         "UNITNAME", "EMILPO_FILE_DATE", "RCMS_FILE"

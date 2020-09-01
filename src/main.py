@@ -25,14 +25,15 @@ LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_FACES = False
+LOAD_EMILPO_FACES = False
+LOAD_RCMS_FACES = True
 VERBOSE = False
 EXPORT_F2S = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -40,7 +41,7 @@ def main():
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
-    global all_spaces_to_matched_faces, uic_templets
+    global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
@@ -79,22 +80,27 @@ def main():
             load_data.load_uics_from_uic_trees()
         )
         
-    if(LOAD_AND_PROCESS_FACES):
-        print(" - Loading and processing faces files")
-        faces = process_data.process_emilpo_assignments(
+    if(LOAD_EMILPO_FACES):
+        print(" - Loading and processing emilpo file")
+        emilpo_faces = process_data.process_emilpo_assignments(
             load_data.load_emilpo(), 
             rank_grade_xwalk,
             grade_mismatch_xwalk,
             consolidate = True
         )
+        
+    if(LOAD_RCMS_FACES):
+        print(" - Loading and processing rcms file")
         rcms_faces = load_data.load_rcms()
         rcms_faces = process_data.process_emilpo_assignments(
             rcms_faces,
             rank_grade_xwalk,
             grade_mismatch_xwalk, 
             consolidate = False
-        )
-        faces = faces.append(rcms_faces, ignore_index = True)
+        )       
+        
+    if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
+        faces = emilpo_faces.append(rcms_faces, ignore_index = True)
         faces = process_data.add_drrsa_data(faces, drrsa)
         faces = process_data.check_uic_in_aos(
             faces, aos_ouid_uic_xwalk, "DRRSA_ADCON"
@@ -106,7 +112,6 @@ def main():
             faces, utility.get_local_time_as_datetime(), 
             "DUTY_ASG_DT", "ASSIGNMENT"
         )
-        
         if(PROCESS_COMMAND_CONSIDERATIONS):
             faces = process_data.convert_cmd_code_for_uic_in_faces(
                 faces, af_uic_list, uic_col_name = "UICOD", 
@@ -154,7 +159,7 @@ def main():
         all_faces_to_matched_spaces,
         utility.get_date_string(),
         group_by = "GFC",
-        include_columns = ["test1", "GFC 1 Name"]
+        include_columns = ["GFC 1 Name"]
     )
     
     ac_ar_metrics = analytics.cmd_match_metrics_table.merge_AC_RC_cmd_metrics(
