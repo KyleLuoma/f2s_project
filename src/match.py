@@ -125,8 +125,9 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
     face_list = sorted(faces[faces_index_labels].values.tolist())
     space_list = sorted(spaces[spaces_index_labels].values.tolist())
     
-    f_total = len(face_list)
-    s_total = len(space_list)
+    
+    f_ix = len(face_list) - 1
+    s_ix = len(space_list) - 1
     
     compare_ix = len(faces_index_labels) - 2   #Number of columns for comparison
     age_ix = len(faces_index_labels) - 2       #Column index # for AGE
@@ -140,27 +141,27 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
 #     This is the matching algorithm!!!
 # =============================================================================
     comparison_count = 0
-    while(f_ix < f_total and s_ix < s_total): 
+    while(f_ix >= 0 and s_ix >= 0): 
         comparison_count += 1
         if verbose and comparison_count % 2000 == 0: print("    Compared", str(comparison_count), "face_ix:", str(f_ix), "space_ix:", str(s_ix), "Match:", str(stage_matched))
         if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
             if(int(face_list[f_ix][age_ix]) <= int(space_list[s_ix][age_ix]) or ~criteria.AGE_MATTERS.loc[stage]):
                 face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
                 face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
-                f_ix += 1
-                s_ix += 1
+                f_ix -= 1
+                s_ix -= 1
                 stage_matched += 1
             else:
-                f_ix += 1
+                f_ix -= 1
                 exception_count += 1
                 asgn_age_reject_count += 1
             counter += 1
-        elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
-            f_ix += 1
+        elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
+            f_ix -= 1
             exception_count += 1
             counter += 1
-        elif(face_list[f_ix][0:compare_ix] > space_list[s_ix][0:compare_ix]):
-            s_ix += 1
+        elif(face_list[f_ix][0:compare_ix] < space_list[s_ix][0:compare_ix]):
+            s_ix -= 1
             
     print(" - STAGE", str(stage), "Total records reviewed:", str(counter), 
         " Matched:", str(stage_matched),
