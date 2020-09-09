@@ -12,15 +12,15 @@ def create_cmd_metrics_packages(
 ):
     uic_templets_needed = all_faces_to_matched_spaces.where(
             all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
-    ).dropna(how = "all")[["UIC_emilpo", "SSN_MASK"]]  
+    ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]  
     
     uic_templets_needed = uic_templets_needed.groupby(
-        ["UIC_emilpo"],
+        ["UIC_facesfile"],
         observed = True,
         as_index = False
     ).count().rename(
         columns = {
-            "UIC_emilpo" : "UIC",
+            "UIC_facesfile" : "UIC",
             "SSN_MASK" : "All Command Templet Requirement"
         }        
     )
@@ -45,13 +45,13 @@ def create_cmd_metrics_packages(
         ).dropna(how = "all").copy()       
         
         uic_gfcs = ar_faces_spaces.groupby(
-            ["GFC", "UIC_emilpo"], observed = True, as_index = False
-        ).count()[["UIC_emilpo", "GFC"]]
+            ["GFC", "UIC_facesfile"], observed = True, as_index = False
+        ).count()[["UIC_facesfile", "GFC"]]
         
-        uic_gfcs = uic_gfcs.set_index("UIC_emilpo").join(
-            ar_faces_spaces[["UIC_emilpo", "GFC 1 Name", "GFC"]].groupby(
-                ["GFC 1 Name", "UIC_emilpo"], observed = True, as_index = False
-            ).count()[["UIC_emilpo", "GFC 1 Name"]].set_index("UIC_emilpo")
+        uic_gfcs = uic_gfcs.set_index("UIC_facesfile").join(
+            ar_faces_spaces[["UIC_facesfile", "GFC 1 Name", "GFC"]].groupby(
+                ["GFC 1 Name", "UIC_facesfile"], observed = True, as_index = False
+            ).count()[["UIC_facesfile", "GFC 1 Name"]].set_index("UIC_facesfile")
         ).reset_index()
     
     
@@ -66,15 +66,15 @@ def create_cmd_metrics_packages(
         # create a DF with a list of UICs needing to be built
         cmd_uics_needed = cmd_df.where(
             cmd_df.ADD_UIC_TO_AOS == 1.0
-        ).dropna(how = "all")[["UIC_emilpo", "SSN_MASK"]]
+        ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]
         
         cmd_uics_needed = cmd_uics_needed.groupby(
-            ["UIC_emilpo"],
+            ["UIC_facesfile"],
             observed = True,
             as_index = False
         ).count().rename(
             columns = {
-                "UIC_emilpo" : "UIC not in AOS",
+                "UIC_facesfile" : "UIC not in AOS",
                 "SSN_MASK" : "Num Soldiers assigned to UIC"
             }        
         )
@@ -94,24 +94,30 @@ def create_cmd_metrics_packages(
             
         if(cmd == "AR"):
             cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index("UIC not in AOS").join(
-                uic_gfcs.reset_index(drop = True).set_index("UIC_emilpo"),
+                uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
-            
+            #Reorder the AR columns
+            ar_columns = cmd_uics_needed.columns.to_list()
+            ar_columns.remove("GFC")
+            ar_columns.remove("GFC 1 Name")
+            ar_columns.insert(0, "GFC 1 Name")
+            ar_columns.insert(0, "GFC")
+            cmd_uics_needed = cmd_uics_needed[ar_columns]
         
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.where(
             cmd_df.CREATE_TEMPLET == 1.0
-        ).dropna(how = "all")[["UIC_emilpo", "SSN_MASK"]]
+        ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]
         
         cmd_templets_needed = cmd_templets_needed.groupby(
-            ["UIC_emilpo"],
+            ["UIC_facesfile"],
             observed = True,
             as_index = False
         ).count().rename(
             columns = {
-                "UIC_emilpo" : "UICs requiring templets",
+                "UIC_facesfile" : "UICs requiring templets",
                 "SSN_MASK" : cmd + " Templet Requirement"
             }        
         )
@@ -126,10 +132,16 @@ def create_cmd_metrics_packages(
             cmd_templets_needed = cmd_templets_needed.reset_index(drop = True).set_index(
                 "UICs requiring templets"
             ).join(
-                uic_gfcs.reset_index(drop = True).set_index("UIC_emilpo"),
+                uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
+            ar_columns = cmd_templets_needed.columns.to_list()
+            ar_columns.remove("GFC")
+            ar_columns.remove("GFC 1 Name")
+            ar_columns.insert(0, "GFC 1 Name")
+            ar_columns.insert(0, "GFC")
+            cmd_templets_needed = cmd_templets_needed[ar_columns]
 # =============================================================================
 #         cmd_templets_needed = cmd_templets_needed.set_index(
 #             "UICs requiring templets"
@@ -142,9 +154,9 @@ def create_cmd_metrics_packages(
         cmd_asg_age = cmd_df.where(
             cmd_df.ASG_OLDER_THAN_POS == 1.0
         ).dropna(how = "all")[[
-            "UIC_emilpo", 
-            "PARNO_emilpo",
-            "LN_emilpo",
+            "UIC_facesfile", 
+            "PARNO_facesfile",
+            "LN_facesfile",
             "FMID",
             "S_DATE",
             "POSITION_AGE",
@@ -152,9 +164,9 @@ def create_cmd_metrics_packages(
             "ASSIGNMENT_AGE",
             "SSN_MASK"
         ]].rename(columns = {
-            "UIC_emilpo" : "UIC",
-            "PARNO_emilpo" : "PARNO",
-            "LN_emilpo" : "LN",
+            "UIC_facesfile" : "UIC",
+            "PARNO_facesfile" : "PARNO",
+            "LN_facesfile" : "LN",
             "FMID" : "Position FMID",
             "S_DATE" : "Position Start Date",
             "DUTY_ASG_DT" : "Assignment Start Date"

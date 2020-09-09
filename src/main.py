@@ -129,6 +129,34 @@ def main():
             .dropna(how = "all")
             .index.to_list()
     )
+    # Full run for AR AGR faces and spaces
+    agr_faces = faces.where(faces.RCC == "AGR").dropna(how = "all")
+    agr_spaces = spaces.where(spaces.RMK1 == "92").dropna(how = "all")
+    for i in range(2, 5):
+        agr_spaces = agr_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
+        )
+    unmatched_agr_faces, remaining_agr_spaces, agr_face_space_match = match.full_run(
+        match_phases,
+        agr_faces.where(
+            ~agr_faces.SSN_MASK.isin(face_space_match.SSN_MASK)
+        ).dropna(how = "all"),
+        agr_spaces.where(
+            ~agr_spaces.FMID.isin(
+                face_space_match.where(
+                    face_space_match.stage_matched > 0
+                ).dropna(how = "all").FMID
+            )        
+        ).dropna(how = "all"),
+        include_only_cmds = [],
+        exclude_cmds = [],
+        exclude_rmks = []
+    )
+                
+    #Merge AGR matches into all matches
+    face_space_match = face_space_match.where(
+        ~face_space_match.FMID.isin(agr_face_space_match.FMID)
+    ).dropna(how = "all").append(agr_face_space_match)          
         
     all_faces_to_matched_spaces = diagnostics.face_space_match_analysis(
         faces, face_space_match, spaces
