@@ -213,7 +213,7 @@ def main():
         )
     
     if(EXPORT_CMD_SPECS):
-        #import analytics.cmd_metrics_package #Uncomment for debugging
+        import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             uic_templets,
