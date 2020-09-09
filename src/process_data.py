@@ -81,23 +81,29 @@ def add_drrsa_data(target, drrsa):
     print("Mapping DRRSA data to target data frame")    
     column_check_list = [
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
-        "DRRSA_ASGMT"
+        "DRRSA_ASGMT", "DRRSA_UNPRSNTLOCZIP", "DRRSA_PPA"
     ]
     for column in column_check_list:
         if column in target.columns:
             target = target.drop(column, axis = 1)
     target = target.join(
-        drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA"]],
+        drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA", "UNPRSNTLOCZIP"]],
         on = "UIC",
-        lsuffix = "AOS_",
-        rsuffix = "DRRSA_"
+        lsuffix = "_AOS",
+        rsuffix = "_DRRSA"
     ).rename(columns = {
         "ADCON" : "DRRSA_ADCON",
         "HOGEO" : "DRRSA_HOGEO",
         "ARLOC" : "DRRSA_ARLOC",
         "GEOLOCATIONNAME" : "DRRSA_GEOLOCATIONNAME",
-        "ASGMT" : "DRRSA_ASGMT"
+        "ASGMT" : "DRRSA_ASGMT",
+        "UNPRSNTLOCZIP" : "DRRSA_UNPRSNTLOCZIP",
+        "PPA_DRRSA" : "DRRSA_PPA"
         }
+    )
+    target.DRRSA_UNPRSNTLOCZIP = target.apply(
+        lambda row: str(row.DRRSA_UNPRSNTLOCZIP)[0:5],
+        axis = 1      
     )
     return target
 
