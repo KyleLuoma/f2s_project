@@ -32,7 +32,7 @@ EXPORT_F2S = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = True
+EXPORT_CMD_SPECS = False
 COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
@@ -141,7 +141,6 @@ def main():
         all_uics, 
         last_templet_stage
     )
-    
     all_spaces_to_matched_faces = diagnostics.space_available_analysis(
         faces, face_space_match, spaces        
     )
@@ -239,11 +238,5 @@ def main():
 
 if (__name__ == "__main__"): main()
 
-all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().join(
-    drrsa.reset_index().set_index("UIC")["UNPRSNTLOCZIP"],
-    on = "UIC_emilpo"
-)    
-all_faces_to_matched_spaces.UNPRSNTLOCZIP = all_faces_to_matched_spaces.apply(
-    lambda row: str(row.UNPRSNTLOCZIP)[0:5],
-    axis = 1      
-)
+
+

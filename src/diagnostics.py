@@ -14,7 +14,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         ).set_index(
             "SSN_MASK"
         )[["stage_matched", "FMID"]],
-        lsuffix = "_emilpo",
+        lsuffix = "_facesfile",
         rsuffix = "_f2s"
     )
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index(
@@ -29,7 +29,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
             "UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", 
             "S_DATE", "T_DATE", "POSITION_AGE", "AOS_FILE_DATE"
         ]],
-        lsuffix = "_emilpo",
+        lsuffix = "_facesfile",
         rsuffix = "_aos"
     )
     all_faces_to_matched_spaces["ASG_OLDER_THAN_POS"] = (
@@ -43,7 +43,7 @@ def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
-    target.ADD_UIC_TO_AOS = (~target.UIC_emilpo.isin(all_uics))
+    target.ADD_UIC_TO_AOS = (~target.UIC_facesfile.isin(all_uics))
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
         lambda row: True if (
