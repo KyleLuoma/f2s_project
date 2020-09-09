@@ -62,14 +62,14 @@ def make_cmd_f2s_metric_df(
             non_matches.ADD_UIC_TO_AOS == 1.0
         ).dropna(
             how = "all"
-        )[[group_by, "UIC_emilpo"]].drop_duplicates(
-            "UIC_emilpo"
+        )[[group_by, "UIC_facesfile"]].drop_duplicates(
+            "UIC_facesfile"
         ).groupby(
             [group_by],
             as_index = False,
             axis = 0
         ).count().rename(
-            columns = {"UIC_emilpo" : "UICS_NOT_IN_AOS"}        
+            columns = {"UIC_facesfile" : "UICS_NOT_IN_AOS"}        
         ).set_index(
             group_by        
         ),

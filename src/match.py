@@ -181,12 +181,7 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
 def full_run(
     criteria, faces, spaces, verbose = False,
     include_only_cmds = [], exclude_cmds = [], exclude_rmks = []
-):
-    print("Executing full matching run")
-    face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
-    face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
-    rmks_excluded = False
-    
+):  
     if(len(include_only_cmds) > 0):
         print(" - for commands:", include_only_cmds)
         spaces = spaces.where(
