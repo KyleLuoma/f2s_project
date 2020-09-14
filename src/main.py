@@ -20,10 +20,10 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS_MAPS = True
-LOAD_COMMAND_CONSIDERATIONS = True
-PROCESS_COMMAND_CONSIDERATIONS = True
+LOAD_MATCH_PHASES = False
+LOAD_AND_PROCESS_MAPS = False
+LOAD_COMMAND_CONSIDERATIONS = False
+PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_EMILPO_FACES = False
 LOAD_RCMS_FACES = False
@@ -134,16 +134,17 @@ def main():
     )
         
     # Full run for AC faces and spaces:
-    unmatched_faces, remaining_spaces, face_space_match = match.full_run(
+    ac_only_faces = faces.where(faces.STRUC_CMD_CD != "AR").dropna(how = "all")
+    unmatched_faces, remaining_spaces, ac_face_space_match = match.full_run(
         match_phases, 
         faces.where(
-            ~faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
+            ~ac_only_faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
         ).dropna(how = "all"), 
         spaces.where(
             ~spaces.FMID.isin(
                 agr_face_space_match.where(
                     agr_face_space_match.stage_matched > 0        
-                ).dropna(how = "all"),
+                ).dropna(how = "all").FMID,
             )             
         ),
         include_only_cmds = [],
@@ -153,10 +154,36 @@ def main():
             .index.to_list()
     )
                 
-    #Merge AGR matches into all matches
-    face_space_match = face_space_match.where(
-        ~face_space_match.FMID.isin(agr_face_space_match.FMID)
-    ).dropna(how = "all").append(agr_face_space_match)          
+    #Merge AGR matches into ac matches
+    ac_agr_face_space_match = ac_face_space_match.where(
+        ~ac_face_space_match.FMID.isin(agr_face_space_match.FMID)
+    ).dropna(how = "all").append(agr_face_space_match)  
+                
+    # Full run for AR faces and spaces:
+    ar_only_faces = faces.where(faces.STRUC_CMD_CD == "AR").dropna(how = "all")
+    unmatched_faces, remaining_spaces, ar_face_space_match = match.full_run(
+        match_phases, 
+        faces.where(
+            ~ar_only_faces.SSN_MASK.isin(ac_agr_face_space_match.SSN_MASK)        
+        ).dropna(how = "all"), 
+        spaces.where(
+            ~spaces.FMID.isin(
+                ac_agr_face_space_match.where(
+                    ac_agr_face_space_match.stage_matched > 0        
+                ).dropna(how = "all").FMID,
+            )             
+        ),
+        include_only_cmds = [],
+        exclude_cmds = [],
+        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
+            .dropna(how = "all")
+            .index.to_list()
+    )
+    
+    #Merge AR matches into AC and AGR matches
+    face_space_match = ac_agr_face_space_match.where(
+        ~ac_agr_face_space_match.FMID.isin(ar_face_space_match.FMID)
+    ).dropna(how = "all").append(ar_face_space_match)          
         
     all_faces_to_matched_spaces = diagnostics.face_space_match_analysis(
         faces, face_space_match, spaces
