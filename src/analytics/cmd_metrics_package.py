@@ -28,21 +28,21 @@ def create_cmd_metrics_packages(
     if(len(commands) > 0):
         print(type(commands))
         assert type(commands) == list
-        all_faces_to_matched_spaces = all_faces_to_matched_spaces.where(
+        only_cmd_faces = all_faces_to_matched_spaces.where(
             all_faces_to_matched_spaces.STRUC_CMD_CD.isin(commands)        
         ).dropna(how = "all")
         
     # for each command in match file
-    cmd_list = all_faces_to_matched_spaces[["STRUC_CMD_CD"]].groupby(
+    cmd_list = only_cmd_faces[["STRUC_CMD_CD"]].groupby(
         "STRUC_CMD_CD"
     ).count().index.to_list()
     
     uic_gfcs = pd.DataFrame()
     if "AR" in cmd_list:
         print(" - AR selected for export, processing AR-specific data frames")
-        ar_faces_spaces = all_faces_to_matched_spaces.where(
-            all_faces_to_matched_spaces.STRUC_CMD_CD == "AR"        
-        ).dropna(how = "all").copy()       
+        ar_faces_spaces = all_faces_to_matched_spaces.query(
+            'STRUC_CMD_CD == "AR" or DRRSA_ASGMT == "AR"'
+        )
         
         uic_gfcs = ar_faces_spaces.groupby(
             ["GFC", "UIC_facesfile"], observed = True, as_index = False
@@ -59,15 +59,23 @@ def create_cmd_metrics_packages(
         print(" - Procesing command metrics file for: " + cmd)
         
         # create a DF with all match data included
-        cmd_df = all_faces_to_matched_spaces.copy().where(
-            all_faces_to_matched_spaces.STRUC_CMD_CD == cmd
-        ).dropna(how = "all").reset_index()
+        cmd_df = all_faces_to_matched_spaces.query(
+            'STRUC_CMD_CD == "' + cmd + '" or DRRSA_ASGMT == "' + cmd + '"'
+        ).copy().reset_index()
+# =============================================================================
+#         copy().where(
+#             all_faces_to_matched_spaces.STRUC_CMD_CD == cmd or
+#             all_faces_to_matched_spaces.DRRSA_ASGMT == cmd
+#         ).dropna(how = "all").reset_index()
+# =============================================================================
         
         # create a DF with a list of UICs needing to be built
         cmd_uics_needed = cmd_df.where(
             cmd_df.ADD_UIC_TO_AOS == 1.0
         ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]
-        
+        cmd_uics_needed = cmd_uics_needed.where(
+            ~cmd_uics_needed.SSN_MASK.isna()
+        ).dropna(how = "all")
         cmd_uics_needed = cmd_uics_needed.groupby(
             ["UIC_facesfile"],
             observed = True,
@@ -107,10 +115,9 @@ def create_cmd_metrics_packages(
             cmd_uics_needed = cmd_uics_needed[ar_columns]
         
         # create a DF with a list of UICs that require templets
-        cmd_templets_needed = cmd_df.where(
-            cmd_df.CREATE_TEMPLET == 1.0
-        ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]
-        
+        cmd_templets_needed = cmd_df.query(
+            'CREATE_TEMPLET == 1.0 and STRUC_CMD_CD == "' + cmd + '"' 
+        )[["UIC_facesfile", "SSN_MASK"]]
         cmd_templets_needed = cmd_templets_needed.groupby(
             ["UIC_facesfile"],
             observed = True,

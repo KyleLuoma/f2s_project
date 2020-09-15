@@ -37,13 +37,45 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     )
     return all_faces_to_matched_spaces
 
-
+def add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    ):
+    import pandas as pd
+    print(" - Adding vacant positions to all_faces_to_matched_spaces")
+    vacant_spaces = spaces.where(
+        ~spaces.FMID.isin(all_faces_to_matched_spaces.reset_index().FMID)
+    ).dropna(how = "all")
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().append(
+        vacant_spaces.rename(columns = {       
+            "UIC" : "UIC_aos",
+            "PARNO" : "PARNO_aos",
+            "LN" : "LN_aos",
+            "GRADE" : "GRADE_aos"
+        })[[
+            "FMID", "UIC_aos", "PARNO_aos", "LN_aos", "PARENT_TITLE",
+            "GRADE_aos", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE", 
+            "AOS_FILE_DATE", "DRRSA_ADCON", "DRRSA_ARLOC", "DRRSA_ASGMT",
+            "DRRSA_GEOLOCATIONNAME", "DRRSA_HOGEO"
+        ]]
+    )
+    print("  - Merging UICs from faces and spaces into one column")
+    all_faces_to_matched_spaces["UIC"] = all_faces_to_matched_spaces.apply(
+        lambda row: row.UIC_facesfile if not pd.isna(row.UIC_facesfile)    
+        else row.UIC_aos,
+        axis = 1
+    )
+    return all_faces_to_matched_spaces
+    
+    
 def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
+    import pandas as pd
     print("Analyzing unmatched faces")
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
     target.ADD_UIC_TO_AOS = (~target.UIC_facesfile.isin(all_uics))
+    
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
         lambda row: True if (
@@ -76,11 +108,26 @@ def space_available_analysis(faces, face_space_match, spaces):
         lsuffix = "_spaces",
         rsuffix = "_faces"
     )
-    
     return all_spaces_to_matched_faces
     
-    
-    
+def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
+    return all_faces_to_matched_spaces[[
+        'DRRSA_ASGMT', 'STRUC_CMD_CD',
+        'GFC', 'GFC 1 Name', 'RCC', 'PARENT_UIC_CD', 
+        'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
+        'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
+        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'FMID',
+        'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
+        'GRADE_aos', 'POSCO', 'SSN_MASK', 
+        'stage_matched', 'MATCH_DESCRIPTION', 
+        'DUTY_ASG_DT', 'S_DATE', 'T_DATE', 
+        'ASSIGNMENT_AGE', 'POSITION_AGE', 'ASG_OLDER_THAN_POS',
+        'ADD_UIC_TO_AOS', 'CREATE_TEMPLET',
+        'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE',
+        'DRRSA_ADCON', 'DRRSA_ADCON_IN_AOS',
+        'DRRSA_ARLOC',  'DRRSA_GEOLOCATIONNAME', 'DRRSA_HOGEO',
+        'PPA'
+    ]]
     
     
     

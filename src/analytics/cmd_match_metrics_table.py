@@ -11,6 +11,11 @@ def make_cmd_f2s_metric_df(
     ).size().reset_index().rename(
         columns = {0 : "ASSIGNED"}
     )
+    print(" - Generating command metrics rollup")
+    print("  - Dropping unencumbered positions from all_faces_to_matched_spaces")
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.where(
+        ~all_faces_to_matched_spaces.SSN_MASK.isna()        
+    )
     
     for column in include_columns:
         if column not in all_faces_to_matched_spaces.columns:

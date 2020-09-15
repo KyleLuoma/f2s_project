@@ -198,6 +198,14 @@ def main():
         all_uics, 
         last_templet_stage
     )
+    all_faces_to_matched_spaces = diagnostics.add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    )    
+    all_faces_to_matched_spaces = diagnostics.reorder_all_faces_to_matched_spaces_columns(
+        all_faces_to_matched_spaces        
+    )
+    
     all_spaces_to_matched_faces = diagnostics.space_available_analysis(
         faces, face_space_match, spaces        
     )
@@ -270,7 +278,7 @@ def main():
         )
     
     if(EXPORT_CMD_SPECS):
-        #import analytics.cmd_metrics_package #Uncomment for debugging
+        import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
             uic_templets,
