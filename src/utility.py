@@ -69,6 +69,23 @@ def make_commands_label(command_export_list):
     for cmd in command_export_list:
         label = cmd + "_" + label
     return label
+
+def create_project_directories():
+    print(" - Checking project directory structure")
+    directory_list = [
+        "data",
+        "data/processed",
+        "export",
+        "export/cmd_metrics",
+        "export/for_connections"
+    ]
+    import os
+    import os.path as path
+    for directory in directory_list:
+        if not path.exists("../" + directory):
+            print("  - Creating " + directory + " folder")
+            os.makedirs("../" + directory)
+        
     
 # Shell script to add zip to all_faces_to_matched_spaces
 # =============================================================================
