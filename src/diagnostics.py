@@ -41,6 +41,7 @@ def add_vacant_positions(
         all_faces_to_matched_spaces,
         spaces        
     ):
+    print(" - Adding vacant positions to all_faces_to_matched_spaces")
     vacant_spaces = spaces.where(
         ~spaces.FMID.isin(all_faces_to_matched_spaces.reset_index().FMID)
     ).dropna(how = "all")
@@ -56,12 +57,19 @@ def add_vacant_positions(
             "AOS_FILE_DATE"
         ]]
     )
+    print("  - Merging UICs from faces and spaces into one column")
     all_faces_to_matched_spaces["UIC"] = all_faces_to_matched_spaces.apply(
-        lambda row: row.UIC_facesfile if len(row.UIC_facesfile) == 6    
+        lambda row: row.UIC_facesfile if not pd.isna(row.UIC_facesfile)    
         else row.UIC_aos,
         axis = 1
     )
-
+    print("  - Merging STRUC_CMD_CD and DRRSA_ASGMT into one Command column")
+    all_faces_to_matched_spaces["COMMAND"] = all_faces_to_matched_spaces.apply(
+        lambda row: row.STRUC_CMD_CD if not pd.isna(row.STRUC_CMD_CD)    
+        else row.DRRSA_ASGMT,
+        axis = 1
+    )
+    
 def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
     import pandas as pd
     print("Analyzing unmatched faces")
