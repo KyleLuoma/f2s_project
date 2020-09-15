@@ -41,6 +41,7 @@ def add_vacant_positions(
         all_faces_to_matched_spaces,
         spaces        
     ):
+    import pandas as pd
     print(" - Adding vacant positions to all_faces_to_matched_spaces")
     vacant_spaces = spaces.where(
         ~spaces.FMID.isin(all_faces_to_matched_spaces.reset_index().FMID)
@@ -54,7 +55,8 @@ def add_vacant_positions(
         })[[
             "FMID", "UIC_aos", "PARNO_aos", "LN_aos", "PARENT_TITLE",
             "GRADE_aos", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE", 
-            "AOS_FILE_DATE"
+            "AOS_FILE_DATE", "DRRSA_ADCON", "DRRSA_ARLOC", "DRRSA_ASGMT",
+            "DRRSA_GEOLOCATIONNAME", "DRRSA_HOGEO"
         ]]
     )
     print("  - Merging UICs from faces and spaces into one column")
@@ -63,12 +65,8 @@ def add_vacant_positions(
         else row.UIC_aos,
         axis = 1
     )
-    print("  - Merging STRUC_CMD_CD and DRRSA_ASGMT into one Command column")
-    all_faces_to_matched_spaces["COMMAND"] = all_faces_to_matched_spaces.apply(
-        lambda row: row.STRUC_CMD_CD if not pd.isna(row.STRUC_CMD_CD)    
-        else row.DRRSA_ASGMT,
-        axis = 1
-    )
+    return all_faces_to_matched_spaces
+    
     
 def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
     import pandas as pd
@@ -110,11 +108,26 @@ def space_available_analysis(faces, face_space_match, spaces):
         lsuffix = "_spaces",
         rsuffix = "_faces"
     )
-    
     return all_spaces_to_matched_faces
     
-    
-    
+def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
+    return all_faces_to_matched_spaces[[
+        'DRRSA_ASGMT', 'STRUC_CMD_CD',
+        'GFC', 'GFC 1 Name', 'RCC', 'PARENT_UIC_CD', 
+        'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
+        'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
+        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'FMID',
+        'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
+        'GRADE_aos', 'POSCO', 'SSN_MASK', 
+        'stage_matched', 'MATCH_DESCRIPTION', 
+        'DUTY_ASG_DT', 'S_DATE', 'T_DATE', 
+        'ASSIGNMENT_AGE', 'POSITION_AGE', 'ASG_OLDER_THAN_POS',
+        'ADD_UIC_TO_AOS', 'CREATE_TEMPLET',
+        'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE',
+        'DRRSA_ADCON', 'DRRSA_ADCON_IN_AOS',
+        'DRRSA_ARLOC',  'DRRSA_GEOLOCATIONNAME', 'DRRSA_HOGEO',
+        'PPA'
+    ]]
     
     
     
