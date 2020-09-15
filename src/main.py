@@ -42,6 +42,8 @@ def main():
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
+    
+    utility.create_project_directories()
         
     if(LOAD_MATCH_PHASES):
         print(" - Loading match phases")
