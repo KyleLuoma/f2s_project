@@ -3,6 +3,11 @@
 *.spyproject
 *.pyc
 
+# Data files
+*.csv
+*.xls
+*.xlsx
+
 #directories
 /data/*
 /export/*
