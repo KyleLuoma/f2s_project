@@ -196,6 +196,11 @@ def main():
         all_uics, 
         last_templet_stage
     )
+    all_faces_to_matched_spaces = diagnostics.add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    )    
+    
     all_spaces_to_matched_faces = diagnostics.space_available_analysis(
         faces, face_space_match, spaces        
     )

@@ -37,13 +37,39 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     )
     return all_faces_to_matched_spaces
 
+def add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    ):
+    vacant_spaces = spaces.where(
+        ~spaces.FMID.isin(all_faces_to_matched_spaces.reset_index().FMID)
+    ).dropna(how = "all")
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.reset_index().append(
+        vacant_spaces.rename(columns = {       
+            "UIC" : "UIC_aos",
+            "PARNO" : "PARNO_aos",
+            "LN" : "LN_aos",
+            "GRADE" : "GRADE_aos"
+        })[[
+            "FMID", "UIC_aos", "PARNO_aos", "LN_aos", "PARENT_TITLE",
+            "GRADE_aos", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE", 
+            "AOS_FILE_DATE"
+        ]]
+    )
+    all_faces_to_matched_spaces["UIC"] = all_faces_to_matched_spaces.apply(
+        lambda row: row.UIC_facesfile if len(row.UIC_facesfile) == 6    
+        else row.UIC_aos,
+        axis = 1
+    )
 
 def diagnose_mismatch_in_target(target, all_uics, last_templet_stage):
+    import pandas as pd
     print("Analyzing unmatched faces")
     target["ADD_UIC_TO_AOS"] = False
     target["CREATE_TEMPLET"] = False
     print(" - Checking if UICs are in AOS")
     target.ADD_UIC_TO_AOS = (~target.UIC_facesfile.isin(all_uics))
+    
     print(" - Checking if templets are needed")
     target.CREATE_TEMPLET = target.apply(
         lambda row: True if (
