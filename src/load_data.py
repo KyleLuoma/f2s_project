@@ -14,7 +14,7 @@ import os
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
 
-RCMS_FILE = "USAR_SELRES_F2S_31Aug.xlsx"
+RCMS_FILE = "USAR_SELRES_F2S_14Sep.xlsx"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "8-31-2021"
 UIC_TREE_DATE = "8-31-2021"
