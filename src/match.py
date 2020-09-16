@@ -189,18 +189,22 @@ def full_run(
     
     if(len(include_only_cmds) > 0):
         print(" - for commands:", include_only_cmds)
-        spaces = spaces.where(
-            spaces.DRRSA_ASGMT.isin(include_only_cmds)
-        ).dropna(how = "all")
+# =============================================================================
+#         spaces = spaces.where(
+#             spaces.DRRSA_ASGMT.isin(include_only_cmds)
+#         ).dropna(how = "all")
+# =============================================================================
         faces = faces.where(
             faces.STRUC_CMD_CD.isin(include_only_cmds)
         ).dropna(how = "all")
         
     if(len(exclude_cmds) > 0):
         print(" - excluding commands:", exclude_cmds)
-        spaces = spaces.where(
-            ~spaces.DRRSA_ASGMT.isin(exclude_cmds)
-        ).dropna(how = "all")
+# =============================================================================
+#         spaces = spaces.where(
+#             ~spaces.DRRSA_ASGMT.isin(exclude_cmds)
+#         ).dropna(how = "all")
+# =============================================================================
         faces = faces.where(
             ~faces.STRUC_CMD_CD.isin(exclude_cmds)
         ).dropna(how = "all")

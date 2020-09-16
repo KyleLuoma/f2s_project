@@ -136,21 +136,12 @@ def main():
     )
         
     # Full run for AC faces and spaces:
-    ac_only_faces = faces.where(faces.STRUC_CMD_CD != "AR").dropna(how = "all")
     unmatched_faces, remaining_spaces, ac_face_space_match = match.full_run(
         match_phases, 
-        faces.where(
-            ~ac_only_faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
-        ).dropna(how = "all"), 
-        spaces.where(
-            ~spaces.FMID.isin(
-                agr_face_space_match.where(
-                    agr_face_space_match.stage_matched > 0        
-                ).dropna(how = "all").FMID,
-            )             
-        ),
+        faces, 
+        spaces,
         include_only_cmds = [],
-        exclude_cmds = [],
+        exclude_cmds = ["AR"],
         exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
             .dropna(how = "all")
             .index.to_list()
@@ -162,11 +153,10 @@ def main():
     ).dropna(how = "all").append(agr_face_space_match)  
                 
     # Full run for AR faces and spaces:
-    ar_only_faces = faces.where(faces.STRUC_CMD_CD == "AR").dropna(how = "all")
     unmatched_faces, remaining_spaces, ar_face_space_match = match.full_run(
         match_phases, 
         faces.where(
-            ~ar_only_faces.SSN_MASK.isin(ac_agr_face_space_match.SSN_MASK)        
+            ~faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
         ).dropna(how = "all"), 
         spaces.where(
             ~spaces.FMID.isin(
@@ -174,12 +164,13 @@ def main():
                     ac_agr_face_space_match.stage_matched > 0        
                 ).dropna(how = "all").FMID,
             )             
-        ),
-        include_only_cmds = [],
+        ).dropna(how = "all"),
+        include_only_cmds = ["AR"],
         exclude_cmds = [],
         exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
             .dropna(how = "all")
-            .index.to_list()
+            .index.to_list(),
+        verbose = True
     )
     
     #Merge AR matches into AC and AGR matches
