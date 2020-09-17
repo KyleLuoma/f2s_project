@@ -6,6 +6,8 @@ def make_cmd_f2s_metric_df(
     group_by = "STRUC_CMD_CD",
     include_columns = []
     ):
+    import pandas as pd
+    print("yes, this change is reflected")
     cmd_metrics = all_faces_to_matched_spaces.groupby(
         [group_by]
     ).size().reset_index().rename(
@@ -43,6 +45,10 @@ def make_cmd_f2s_metric_df(
         ),
         on = group_by
     )
+    
+    # Because fillna() isn't working here, replace nan with 0s where commands
+    # get 100 percent matches
+    cmd_metrics.UNMATCHED.fillna(0, inplace = True)
         
     cmd_metrics["MATCHED"] = cmd_metrics.ASSIGNED - cmd_metrics.UNMATCHED
     cmd_metrics["PERCENT_MATCHED"] = cmd_metrics.MATCHED / cmd_metrics.ASSIGNED
