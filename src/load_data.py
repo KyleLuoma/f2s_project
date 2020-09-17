@@ -14,7 +14,8 @@ import os
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
 
-RCMS_FILE = "USAR_SELRES_F2S_16Sep.xlsx"
+RCMS_FILE = "USAR_SELRES_F2S_14Sep.xlsx"
+APART_FILE = "USAR_AGR_F2S_14Sep.xlsx"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "8-31-2021"
 UIC_TREE_DATE = "8-31-2021"
@@ -253,6 +254,26 @@ def load_rcms():
     rcms["RCMS_FILE"] = RCMS_FILE
     rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
     return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")
+
+""" Retrieve SSN_MASK, UIC, PARNO, LN POSN KEY from Apart AGR file"""
+def load_apart():
+    apart = pd.read_excel(DATA_PATH + "/rcmsr/assignments/" + APART_FILE,
+        dtype = {
+            "Mask" : str,
+            "UIC" : str,
+            "Paragraph" : str,
+            "Line Number" : str,
+            "APART_POSN_KEY" : str
+        }
+    ).rename(
+        columns = {
+            "Mask" : "SSN_MASK",
+            "Paragraph" : "PARNO",
+            "Line Number" : "LN",
+        }
+    )[["SSN_MASK", "UIC", "PARNO", "LN", "APART_POSN_KEY"]]
+    apart = apart.where(~apart.SSN_MASK.isna()).dropna(how = "all")
+    return apart
 
 """ Retrieve EMILPO position level assignment file """
 def load_emilpo():

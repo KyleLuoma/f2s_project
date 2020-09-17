@@ -400,5 +400,41 @@ def process_emilpo_assignments(
         lambda row: "0" + row.LN if len(row.LN) == 1 else row.LN, 
         axis = 1        
     )
-        
     return emilpo_assignments
+
+def update_para_ln(target, source, verbose = False):
+    target = target.reset_index().set_index("SSN_MASK")
+    source = source.reset_index().set_index("SSN_MASK")
+    uic_mismatch_count = 0
+    rcms_apart_mismatch_count = 0
+    target["APART_POSN_KEY"] = ""
+    for row in source.itertuples():
+        try:
+            if row.UIC == target.loc[row.Index].UIC:
+                target.at[row.Index, "PARNO"] = row.PARNO
+                target.at[row.Index, "LN"] = row.LN
+                target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
+            else:
+                if(verbose):
+                    print(
+                        "  - AGR member with SSN Mask " + row.Index + 
+                        " is assigned to " + row.UIC + " in APART and " +
+                        target.loc[row.Index].UIC + " in RCMS!!!"
+                    )
+                uic_mismatch_count += 1
+        except KeyError:
+            if(verbose):
+                print(
+                    "  - AGR member with SSN Mask " + row.Index +
+                    " is not in the RCMS SELRES file!!!"    
+                )
+            rcms_apart_mismatch_count += 1
+    print(" - Completed APART update to RCMS file and encountered:")
+    print("     " + str(uic_mismatch_count) + " UIC Mismatches")
+    print("     " + str(rcms_apart_mismatch_count) + " APART records not in RCMS")
+    return target.reset_index()
+
+
+
+
+

@@ -8,7 +8,7 @@ import pandas as pd
 from pandas.api.types import CategoricalDtype
 import numpy as np
 import os
-os.chdir('\\\\ba-anvl-fs05\\FMDShare\\Luoma\\repos\\f2s_project\\src') # Set to local git repo instance
+#os.chdir('\\\\ba-anvl-fs05\\FMDShare\\Luoma\\repos\\f2s_project\\src') # Set to local git repo instance
 import load_data
 import process_data
 import utility
@@ -27,13 +27,13 @@ LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_EMILPO_FACES = False
-LOAD_RCMS_FACES = True
+LOAD_RCMS_FACES = False
 VERBOSE = False
-EXPORT_F2S = False
+EXPORT_F2S = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
+EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
@@ -100,7 +100,9 @@ def main():
             rank_grade_xwalk,
             grade_mismatch_xwalk, 
             consolidate = False
-        )       
+        )
+        apart_data = load_data.load_apart()
+        rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
         
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
         faces = emilpo_faces.append(rcms_faces, ignore_index = True)
@@ -202,9 +204,11 @@ def main():
         faces, face_space_match, spaces        
     )
     
-    uic_templets = analytics.templet_analysis.templet_usage_by_uic(
-        all_spaces_to_matched_faces
-    )
+# =============================================================================
+#     uic_templets = analytics.templet_analysis.templet_usage_by_uic(
+#         all_spaces_to_matched_faces
+#     )
+# =============================================================================
     
     import analytics.cmd_match_metrics_table #for debugging
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
@@ -213,7 +217,9 @@ def main():
     )
     
     ar_cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
-        all_faces_to_matched_spaces,
+        all_faces_to_matched_spaces.where(
+            all_faces_to_matched_spaces.STRUC_CMD_CD == "AR"
+        ).dropna(how = "all"),
         utility.get_date_string(),
         group_by = "GFC",
         include_columns = ["GFC 1 Name"]
