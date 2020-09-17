@@ -95,14 +95,15 @@ def main():
     if(LOAD_RCMS_FACES):
         print(" - Loading and processing rcms file")
         rcms_faces = load_data.load_rcms()
+        apart_data = load_data.load_apart()
+        rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
         rcms_faces = process_data.process_emilpo_assignments(
             rcms_faces,
             rank_grade_xwalk,
             grade_mismatch_xwalk, 
             consolidate = False
         )
-        apart_data = load_data.load_apart()
-        rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
+        
         
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
         faces = emilpo_faces.append(rcms_faces, ignore_index = True)
@@ -170,9 +171,7 @@ def main():
         ).dropna(how = "all"),
         include_only_cmds = ["AR"],
         exclude_cmds = [],
-        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
-            .dropna(how = "all")
-            .index.to_list(),
+        exclude_rmks = ["89"],
         verbose = True
     )
     
