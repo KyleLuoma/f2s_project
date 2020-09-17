@@ -8,11 +8,12 @@ import pandas as pd
 from pandas.api.types import CategoricalDtype
 import numpy as np
 import os
-os.chdir('\\\\ba-anvl-fs05\\FMDShare\\AOS\\f2s_project\\src')
+os.chdir('\\\\ba-anvl-fs05\\FMDShare\\Luoma\\repos\\f2s_project\\src') # Set to local git repo instance
 import load_data
 import process_data
 import utility
 import pyodbc as db
+import analytics
 import analytics.cmd_match_metrics_table
 import analytics.cmd_metrics_package
 import unmask
@@ -21,7 +22,7 @@ import match
 import analytics.templet_analysis
 
 LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS_MAPS = True
+LOAD_AND_PROCESS_MAPS = False
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
@@ -205,6 +206,7 @@ def main():
         all_spaces_to_matched_faces
     )
     
+    import analytics.cmd_match_metrics_table #for debugging
     cmd_metrics = analytics.cmd_match_metrics_table.make_cmd_f2s_metric_df(
         all_faces_to_matched_spaces,
         utility.get_date_string()
