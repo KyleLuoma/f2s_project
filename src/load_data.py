@@ -251,6 +251,7 @@ def load_rcms():
         lambda row: row.UIC + row.PARNO + row.LN,
         axis = 1
     )
+    
     rcms["RCMS_FILE"] = RCMS_FILE
     rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
     return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")

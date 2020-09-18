@@ -2,7 +2,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[[
         "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "GFC", "GFC 1 Name",
-        "PARNO", "LN", "MIL_POSN_RPT_NR", "DUTY_ASG_DT", "MOS_AOC1", "MOS_AOC2", 
+        "PARNO", "LN", "MIL_POSN_RPT_NR", "APART_POSN_KEY", "DUTY_ASG_DT", "MOS_AOC1", "MOS_AOC2", 
         "RANK_AB", "GRADE",
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
         "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE", "RCC",
@@ -26,7 +26,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         ).set_index(
             "FMID"
         )[[
-            "UIC", "PARNO", "LN", "PARENT_TITLE", "GRADE", "POSCO", 
+            "UIC", "PARNO", "LN", "RMK_LIST", "PARENT_TITLE", "GRADE", "POSCO", 
             "S_DATE", "T_DATE", "POSITION_AGE", "AOS_FILE_DATE"
         ]],
         lsuffix = "_facesfile",
@@ -116,7 +116,7 @@ def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
         'GFC', 'GFC 1 Name', 'RCC', 'PARENT_UIC_CD', 
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
         'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
-        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'FMID',
+        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'RMK_LIST', 'FMID',
         'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
         'GRADE_aos', 'POSCO', 'SSN_MASK', 
         'stage_matched', 'MATCH_DESCRIPTION', 
@@ -126,7 +126,7 @@ def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
         'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE',
         'DRRSA_ADCON', 'DRRSA_ADCON_IN_AOS',
         'DRRSA_ARLOC',  'DRRSA_GEOLOCATIONNAME', 'DRRSA_HOGEO',
-        'PPA'
+        'PPA', 'APART_POSN_KEY'
     ]]
     
     

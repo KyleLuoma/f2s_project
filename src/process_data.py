@@ -302,9 +302,9 @@ def process_emilpo_assignments(
     
     print("  - Mapping grade to rank in the eMILPO assignments file")
     emilpo_assignments["GRADE"] = emilpo_assignments.apply(
-            lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, 
-            axis = 1
-            )
+        lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, 
+        axis = 1
+    )
     
     print("  - Mapping grade to one-up grade in the eMILPO assignments file")
     emilpo_assignments["ONE_UP"] = emilpo_assignments.apply(
@@ -409,26 +409,13 @@ def update_para_ln(target, source, verbose = False):
     rcms_apart_mismatch_count = 0
     target["APART_POSN_KEY"] = ""
     for row in source.itertuples():
-        try:
-            if row.UIC == target.loc[row.Index].UIC:
-                target.at[row.Index, "PARNO"] = row.PARNO
-                target.at[row.Index, "LN"] = row.LN
-                target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
-            else:
-                if(verbose):
-                    print(
-                        "  - AGR member with SSN Mask " + row.Index + 
-                        " is assigned to " + row.UIC + " in APART and " +
-                        target.loc[row.Index].UIC + " in RCMS!!!"
-                    )
-                uic_mismatch_count += 1
-        except KeyError:
-            if(verbose):
-                print(
-                    "  - AGR member with SSN Mask " + row.Index +
-                    " is not in the RCMS SELRES file!!!"    
-                )
-            rcms_apart_mismatch_count += 1
+        if(row.Index in target.index.to_list()):
+            target.at[row.Index, "UIC"] = row.UIC
+            target.at[row.Index, "PARNO"] = row.PARNO
+            target.at[row.Index, "LN"] = row.LN
+            target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
+            target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
+        
     print(" - Completed APART update to RCMS file and encountered:")
     print("     " + str(uic_mismatch_count) + " UIC Mismatches")
     print("     " + str(rcms_apart_mismatch_count) + " APART records not in RCMS")
