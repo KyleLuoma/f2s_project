@@ -403,11 +403,19 @@ def process_emilpo_assignments(
     return emilpo_assignments
 
 def update_para_ln(target, source, verbose = False):
+    print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")
     target = target.reset_index().set_index("SSN_MASK")
     source = source.reset_index().set_index("SSN_MASK")
-    uic_mismatch_count = 0
+    print("  - Generating a UIC data association dataframe to update UIC based attributes")
+    uic_updates = pd.DataFrame(
+        target[["UIC", "UNITNAME", "GFC", "GFC 1 Name"]].groupby(
+            ["UIC", "UNITNAME", "GFC", "GFC 1 Name"]
+        ).size()[["UIC", "UNITNAME", "GFC", "GFC 1 Name"]]
+    ).reset_index().set_index("UIC")
+    
     rcms_apart_mismatch_count = 0
     target["APART_POSN_KEY"] = ""
+    print("  - Iterating throuth APART file and updating RCMS Faces dataframe")
     for row in source.itertuples():
         if(row.Index in target.index.to_list()):
             target.at[row.Index, "UIC"] = row.UIC
@@ -415,9 +423,19 @@ def update_para_ln(target, source, verbose = False):
             target.at[row.Index, "LN"] = row.LN
             target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
             target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
+            if(row.UIC in uic_updates.index.to_list()):
+                target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
+                target.at[row.Index, "GFC"] = uic_updates.loc[row.UIC].GFC
+                target.at[row.Index, "GFC 1 Name"] = uic_updates.loc[row.UIC]["GFC 1 Name"]
+            else:
+                target.at[row.Index, "UNITNAME"] = "Not in RCMS file"
+                target.at[row.Index, "GFC"] = "Not in RCMS file"
+                target.at[row.Index, "GFC 1 Name"] = "Not in RCMS file"
+                
+        else:
+            rcms_apart_mismatch_count += 1
         
-    print(" - Completed APART update to RCMS file and encountered:")
-    print("     " + str(uic_mismatch_count) + " UIC Mismatches")
+    print("  - Completed APART update to RCMS file and encountered:")
     print("     " + str(rcms_apart_mismatch_count) + " APART records not in RCMS")
     return target.reset_index()
 
