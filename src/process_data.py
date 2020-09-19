@@ -410,7 +410,7 @@ def update_para_ln(target, source, verbose = False):
     uic_updates = pd.DataFrame(
         target[["UIC", "UNITNAME", "GFC", "GFC 1 Name"]].groupby(
             ["UIC", "UNITNAME", "GFC", "GFC 1 Name"]
-        ).size()[["UIC", "UNITNAME", "GFC", "GFC 1 Name"]]
+        ).size()
     ).reset_index().set_index("UIC")
     
     rcms_apart_mismatch_count = 0

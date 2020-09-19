@@ -27,13 +27,13 @@ LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_EMILPO_FACES = False
-LOAD_RCMS_FACES = False
+LOAD_RCMS_FACES = True
 VERBOSE = False
 EXPORT_F2S = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
+EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
