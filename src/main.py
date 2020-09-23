@@ -25,16 +25,16 @@ LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS_MAPS = False
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
-LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_SPACES = True
 LOAD_EMILPO_FACES = False
-LOAD_RCMS_FACES = True
+LOAD_RCMS_FACES = False
 VERBOSE = False
 EXPORT_F2S = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 

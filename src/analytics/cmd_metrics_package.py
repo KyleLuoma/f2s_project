@@ -31,6 +31,8 @@ def create_cmd_metrics_packages(
         only_cmd_faces = all_faces_to_matched_spaces.where(
             all_faces_to_matched_spaces.STRUC_CMD_CD.isin(commands)        
         ).dropna(how = "all")
+    else:
+        only_cmd_faces = all_faces_to_matched_spaces.copy()
         
     # for each command in match file
     cmd_list = only_cmd_faces[["STRUC_CMD_CD"]].groupby(
