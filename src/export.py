@@ -18,25 +18,31 @@ def run_export_jobs(
     uic_templets,
     drrsa
 ):
+    print(" - Running export jobs")
     if(EXPORT_F2S):
+        print("  - Exporting all_faces_to_matched_spaces and command metrics")
         export_matches(face_space_match, all_faces_to_matched_spaces)
         export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics)
         
     if(EXPORT_UNMATCHED):
+        print("  - Exporting unmatched faces")
         export_unmatched(unmatched_faces)
         
     if(UPDATE_CONNECTIONS):
+        print("  - Updating Access DB connection files")
         update_connections(
             all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics
         )
         
     if(EXPORT_UNMASKED):
+        print("  - Exporting unmasked files to local directory")
         unmask.unmask_and_export(
             all_faces_to_matched_spaces, utility.get_file_timestamp(),
             emilpo_key_date = "7-24-2020"
         )
     
     if(EXPORT_CMD_SPECS):
+        print("  - Exporting command metrics workbooks")
         import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
@@ -48,6 +54,7 @@ def run_export_jobs(
         )
         
     if(EXPORT_UNMASKED and EXPORT_CMD_SPECS):
+        print("  - Exporting unmasked command metrics workbooks to local directory")
         unmask.unmask_and_export(
             all_faces_to_matched_spaces.where(
                 all_faces_to_matched_spaces.STRUC_CMD_CD.isin(
