@@ -1,3 +1,36 @@
+import process_data
+
+
+def run_face_match_diagnostics(
+    faces,
+    face_space_match,
+    spaces,
+    last_templet_stage,
+    match_phases,
+    all_uics
+):
+    all_faces_to_matched_spaces = face_space_match_analysis(
+        faces, face_space_match, spaces
+    )
+    all_faces_to_matched_spaces = process_data.add_match_phase_description(
+        all_faces_to_matched_spaces, match_phases
+    )
+    all_faces_to_matched_spaces = diagnose_mismatch_in_target(
+        all_faces_to_matched_spaces, 
+        all_uics, 
+        last_templet_stage
+    )
+    all_faces_to_matched_spaces = add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    )    
+    all_faces_to_matched_spaces = reorder_all_faces_to_matched_spaces_columns(
+        all_faces_to_matched_spaces        
+    )
+    return all_faces_to_matched_spaces
+
+
+
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[[

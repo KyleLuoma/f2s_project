@@ -8,8 +8,8 @@ Sources include DRRSA UIC file and AOS tree export
 
 import pandas as pd
 import numpy as np
-import os
-
+import process_data
+import utility
 
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
@@ -21,6 +21,81 @@ AOS_FILE_DATE = "9-18-2021"
 UIC_TREE_DATE = "8-31-2021"
 EMILPO_FILE_DATE = "8-31-20"
 DRRSA_FILE_DATE = "8-24-2020"
+
+""" Drives the spaces file generation process; calls functions in this load_data
+module as well as in process_data.py"""
+def load_and_process_spaces():        
+    print(" - Loading and processing spaces files")
+    drrsa = load_drrsa_file()
+    spaces = load_army_command_aos_billets()
+    spaces = process_data.process_aos_billet_export(spaces)
+    spaces = process_data.add_expected_hsduic(spaces, uic_hd_map, "NA")
+    spaces = process_data.add_drrsa_data(spaces, drrsa)
+    spaces = process_data.categorical_spaces(spaces)
+    spaces = process_data.calculate_age(
+        spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
+    )
+    spaces = process_data.add_is_templet_column(spaces)
+    all_uics = spaces.UIC.drop_duplicates().append(
+        load_uics_from_uic_trees()
+    )
+    return spaces, drrsa, all_uics
+
+""" Drives the faces file generation process; calls functions in this load_data
+module as well as in process_data.py"""
+def load_and_process_faces(
+        LOAD_EMILPO_FACES,
+        LOAD_RCMS_FACES,
+        PROCESS_COMMAND_CONSIDERATIONS,
+        rank_grade_xwalk,
+        grade_mismatch_xwalk,
+        aos_ouid_uic_xwalk,
+        drrsa,
+        uic_hd_map,
+        af_uic_list
+    ):
+    
+    if(LOAD_EMILPO_FACES):
+        print(" - Loading and processing emilpo file")
+        emilpo_faces = process_data.process_emilpo_assignments(
+            load_emilpo(), 
+            rank_grade_xwalk,
+            grade_mismatch_xwalk,
+            consolidate = True
+        )
+        
+    if(LOAD_RCMS_FACES):
+        print(" - Loading and processing rcms file")
+        rcms_faces = load_rcms()
+        apart_data = load_apart()
+        rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
+        rcms_faces = process_data.process_emilpo_assignments(
+            rcms_faces,
+            rank_grade_xwalk,
+            grade_mismatch_xwalk, 
+            consolidate = False
+        )
+        
+    if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
+        print(" - Merging emilpo and rcms files and calculating additional fields")
+        faces = emilpo_faces.append(rcms_faces, ignore_index = True)
+        faces = process_data.add_drrsa_data(faces, drrsa)
+        faces = process_data.check_uic_in_aos(
+            faces, aos_ouid_uic_xwalk, "DRRSA_ADCON"
+        )
+        faces = process_data.add_templet_columns(faces, parno = "999")
+        faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
+        faces = process_data.categorical_faces(faces)
+        faces = process_data.calculate_age(
+            faces, utility.get_local_time_as_datetime(), 
+            "DUTY_ASG_DT", "ASSIGNMENT"
+        )
+        if(PROCESS_COMMAND_CONSIDERATIONS):
+            faces = process_data.convert_cmd_code_for_uic_in_faces(
+                faces, af_uic_list, uic_col_name = "UICOD", 
+                cmd_col_name = "MACOM"
+            )
+    return faces
 
 
 def load_uic_hd_map():
