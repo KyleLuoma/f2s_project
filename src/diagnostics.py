@@ -59,7 +59,8 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         ).set_index(
             "FMID"
         )[[
-            "UIC", "PARNO", "LN", "RMK_LIST", "PARENT_TITLE", "GRADE", "POSCO", 
+            "UIC", "PARNO", "LN", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4",
+            "PARENT_TITLE", "GRADE", "POSCO", 
             "S_DATE", "T_DATE", "POSITION_AGE", "AOS_FILE_DATE"
         ]],
         lsuffix = "_facesfile",
@@ -149,7 +150,8 @@ def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
         'GFC', 'GFC 1 Name', 'RCC', 'PARENT_UIC_CD', 
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
         'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
-        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'RMK_LIST', 'FMID',
+        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 
+        'RMK_LIST', "RMK1", "RMK2", "RMK3", "RMK4", 'FMID',
         'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
         'GRADE_aos', 'POSCO', 'SSN_MASK', 
         'stage_matched', 'MATCH_DESCRIPTION', 

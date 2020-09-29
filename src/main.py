@@ -11,7 +11,6 @@ import load_data
 import process_data
 import export
 import utility
-import pyodbc as db
 import analytics
 import analytics.analytics_driver
 import analytics.cmd_match_metrics_table
@@ -32,8 +31,8 @@ EXPORT_F2S = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+EXPORT_CMD_SPECS = True
+COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
