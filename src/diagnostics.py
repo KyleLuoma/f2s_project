@@ -1,3 +1,36 @@
+import process_data
+
+
+def run_face_match_diagnostics(
+    faces,
+    face_space_match,
+    spaces,
+    last_templet_stage,
+    match_phases,
+    all_uics
+):
+    all_faces_to_matched_spaces = face_space_match_analysis(
+        faces, face_space_match, spaces
+    )
+    all_faces_to_matched_spaces = process_data.add_match_phase_description(
+        all_faces_to_matched_spaces, match_phases
+    )
+    all_faces_to_matched_spaces = diagnose_mismatch_in_target(
+        all_faces_to_matched_spaces, 
+        all_uics, 
+        last_templet_stage
+    )
+    all_faces_to_matched_spaces = add_vacant_positions(
+        all_faces_to_matched_spaces,
+        spaces        
+    )    
+    all_faces_to_matched_spaces = reorder_all_faces_to_matched_spaces_columns(
+        all_faces_to_matched_spaces        
+    )
+    return all_faces_to_matched_spaces
+
+
+
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[[
@@ -26,7 +59,8 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         ).set_index(
             "FMID"
         )[[
-            "UIC", "PARNO", "LN", "RMK_LIST", "PARENT_TITLE", "GRADE", "POSCO", 
+            "UIC", "PARNO", "LN", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4",
+            "PARENT_TITLE", "GRADE", "POSCO", 
             "S_DATE", "T_DATE", "POSITION_AGE", "AOS_FILE_DATE"
         ]],
         lsuffix = "_facesfile",
@@ -116,7 +150,8 @@ def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
         'GFC', 'GFC 1 Name', 'RCC', 'PARENT_UIC_CD', 
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
         'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
-        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 'RMK_LIST', 'FMID',
+        'PARENT_TITLE', 'PARNO_aos', 'LN_aos', 
+        'RMK_LIST', "RMK1", "RMK2", "RMK3", "RMK4", 'FMID',
         'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
         'GRADE_aos', 'POSCO', 'SSN_MASK', 
         'stage_matched', 'MATCH_DESCRIPTION', 

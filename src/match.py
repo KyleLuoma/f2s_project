@@ -189,22 +189,12 @@ def full_run(
     
     if(len(include_only_cmds) > 0):
         print(" - for commands:", include_only_cmds)
-# =============================================================================
-#         spaces = spaces.where(
-#             spaces.DRRSA_ASGMT.isin(include_only_cmds)
-#         ).dropna(how = "all")
-# =============================================================================
         faces = faces.where(
             faces.STRUC_CMD_CD.isin(include_only_cmds)
         ).dropna(how = "all")
         
     if(len(exclude_cmds) > 0):
         print(" - excluding commands:", exclude_cmds)
-# =============================================================================
-#         spaces = spaces.where(
-#             ~spaces.DRRSA_ASGMT.isin(exclude_cmds)
-#         ).dropna(how = "all")
-# =============================================================================
         faces = faces.where(
             ~faces.STRUC_CMD_CD.isin(exclude_cmds)
         ).dropna(how = "all")
@@ -250,3 +240,73 @@ def full_run(
             ).dropna(how = "all")
             rmks_excluded = True
     return faces, spaces, face_space_match
+
+
+# =============================================================================
+# Calls full_run() for different AR and AC populations, merges the results 
+# and returns three files used as input into the analytics process
+# =============================================================================
+def split_population_full_runs(
+        faces,
+        spaces,
+        match_phases,
+        rmk_codes,
+    ):
+    # Full run for AR AGR faces and spaces
+    agr_faces = faces.where(faces.RCC == "AGR").dropna(how = "all")
+    agr_spaces = spaces.where(spaces.RMK1 == "92").dropna(how = "all")
+    for i in range(2, 5):
+        agr_spaces = agr_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
+        )
+    unmatched_agr_faces, remaining_agr_spaces, agr_face_space_match = full_run(
+        match_phases,
+        agr_faces,
+        agr_spaces,
+        include_only_cmds = [],
+        exclude_cmds = [],
+        exclude_rmks = []
+    )
+        
+    # Full run for AC faces and spaces:
+    unmatched_faces, remaining_spaces, ac_face_space_match = full_run(
+        match_phases, 
+        faces, 
+        spaces,
+        include_only_cmds = [],
+        exclude_cmds = ["AR"],
+        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
+            .dropna(how = "all")
+            .index.to_list()
+    )
+                
+    #Merge AGR matches into ac matches
+    ac_agr_face_space_match = ac_face_space_match.where(
+        ~ac_face_space_match.FMID.isin(agr_face_space_match.FMID)
+    ).dropna(how = "all").append(agr_face_space_match)  
+                
+    # Full run for AR faces and spaces:
+    unmatched_faces, remaining_spaces, ar_face_space_match = full_run(
+        match_phases, 
+        faces.where(
+            ~faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
+        ).dropna(how = "all"), 
+        spaces.where(
+            ~spaces.FMID.isin(
+                ac_agr_face_space_match.where(
+                    ac_agr_face_space_match.stage_matched > 0        
+                ).dropna(how = "all").FMID,
+            )             
+        ).dropna(how = "all"),
+        include_only_cmds = ["AR"],
+        exclude_cmds = [],
+        exclude_rmks = ["89"],
+        verbose = True
+    )
+    
+    #Merge AR matches into AC and AGR matches
+    face_space_match = ac_agr_face_space_match.where(
+        ~ac_agr_face_space_match.FMID.isin(ar_face_space_match.FMID)
+    ).dropna(how = "all").append(ar_face_space_match)
+
+    return unmatched_faces, remaining_spaces, face_space_match 
