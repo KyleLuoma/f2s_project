@@ -25,6 +25,53 @@ NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 TEMPLET_PARNOS = ["999", "9GO", "9AD", "9RF","9ER", 
                   "9TM", "9AI", "9PF", "9SA", "9ST"]
 
+def process_address_data(address_data, country_code_xwalk):
+    print(" - Creating address update file to join to UIC file")
+    address_update_file = address_data.copy()[[
+        "UIC",
+        "STACO",
+        "GELOC",
+        "CITY",
+        "STATE",
+        "ZIP",
+        "COUNTRY"
+    ]]
+    address_update_file["PH_COUNTRY_TXT"] = "NKN"
+    address_update_file = address_update_file.rename(
+        columns = {
+            "GELOC" : "ARLOC",
+            "CITY" : "PH_CITY_TXT",
+            "STATE" : "PH_GEO_TXT",
+            "ZIP" : "PH_POSTAL_CODE_TXT"
+        }        
+    )
+    country_code_xwalk = country_code_xwalk.reset_index().set_index("name")
+    country_key_errors = 0
+    for row in address_update_file.itertuples():
+        try:
+            address_update_file.at[
+                row.Index, "PH_COUNTRY_TXT"
+            ] = country_code_xwalk.loc[row.COUNTRY].three_char
+        except KeyError:
+            country_key_errors += 1
+    print(
+        "  - Encountered", 
+        str(country_key_errors), 
+        "KeyError exceptions when attempting to map country code to country field from location data"
+    )
+    address_update_file = address_update_file[[
+        "UIC", 
+        "STACO", 
+        "ARLOC", 
+        "PH_CITY_TXT",
+        "PH_GEO_TXT",
+        "PH_POSTAL_CODE_TXT",
+        "PH_COUNTRY_TXT"
+    ]]
+    address_update_file.STACO = address_update_file.STACO.astype("str")
+    address_update_file.ARLOC = address_update_file.ARLOC.astype("str")
+    address_update_file.PH_POSTAL_CODE_TXT = address_update_file.PH_POSTAL_CODE_TXT.astype("str")
+    return address_update_file
 
 """ uic_cod_update should include UIC and CODE series"""
 def convert_cmd_code_for_uic_in_faces(

@@ -21,10 +21,11 @@ AOS_FILE_DATE = "9-18-2021"
 UIC_TREE_DATE = "8-31-2021"
 EMILPO_FILE_DATE = "8-31-20"
 DRRSA_FILE_DATE = "8-24-2020"
+UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 
 """ Drives the spaces file generation process; calls functions in this load_data
 module as well as in process_data.py"""
-def load_and_process_spaces():        
+def load_and_process_spaces(uic_hd_map, country_code_xwalk):        
     print(" - Loading and processing spaces files")
     drrsa = load_drrsa_file()
     spaces = load_army_command_aos_billets()
@@ -40,6 +41,13 @@ def load_and_process_spaces():
         load_uics_from_uic_trees()
     )
     return spaces, drrsa, all_uics
+
+def load_and_process_address_data(country_code_xwalk):
+    address_data = load_uic_current_addresses()
+    address_data = process_data.process_address_data(
+        address_data, country_code_xwalk
+    )
+    return address_data
 
 """ Drives the faces file generation process; calls functions in this load_data
 module as well as in process_data.py"""
@@ -437,6 +445,30 @@ def load_cmd_description_xwalk():
         DATA_PATH + "/xwalks/CMD_code_CMD_title_xwalk.xlsx"
     )[["CMDCD", "CMDTITLE"]].set_index("CMDCD")
     return cmd_description_xwalk
+
+""" Load acronym list for GFM_LNAME generation """
+def load_gfm_lname_acronyms():
+    print(" - Loading GFIM LName Acronym List File")
+    return pd.read_excel(DATA_PATH + "/xwalks/gfm_lname_acronyms.xlsx")
+
+def load_uic_current_addresses():
+    print(" - Loading current UIC addresses")
+    address_data = pd.read_csv(
+        DATA_PATH + "/uic_location/" + UIC_ADDRESS_FILE,
+        sep = '\t'
+    )
+    address_data = address_data.where(
+        address_data.TFY == 9999
+    ).dropna(how = "all")
+    address_data = address_data.drop_duplicates(subset = ["UIC"])
+    return address_data
+
+def load_country_code_xwalk():
+    print(" - Loading the country code crosswalk")
+    country_code_xwalk = pd.read_csv(
+        DATA_PATH + "/domain_codes/genc_country_codes.csv"
+    )
+    return country_code_xwalk
 
 #emilpo: (17,29,30,31,32,46,47,48,49,50,51)
     

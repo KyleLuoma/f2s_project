@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import pandas as pd
+import analytics.lname_generator
 
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
     uic_templets,
     drrsa,
+    address_data,
+    acronym_list,
     unmask = False,
     date_time_string = "",
     commands = []
 ):
     uic_templets_needed = all_faces_to_matched_spaces.where(
-            all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
+        all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
     ).dropna(how = "all")[["UIC_facesfile", "SSN_MASK"]]  
     
     uic_templets_needed = uic_templets_needed.groupby(
@@ -97,10 +100,20 @@ def create_cmd_metrics_packages(
             
             cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
                 drrsa.reset_index().set_index("UIC")[[
-                    "ANAME", "LNAME", "ADCON", "GEOLOCATIONNAME"
+                    "ANAME", "LNAME", "ADCON"
                 ]]
+            )
+            cmd_uics_needed = cmd_uics_needed.join(
+                address_data.reset_index().set_index("UIC")[[
+                    "STACO", "ARLOC", "PH_CITY_TXT", "PH_GEO_TXT", 
+                    "PH_POSTAL_CODE_TXT", "PH_COUNTRY_TXT"        
+                ]]        
             ).reset_index()
             del cmd_uics_needed["index"]
+            
+            cmd_uics_needed = analytics.lname_generator.derive_gfm_lname(
+                cmd_uics_needed, acronym_list, from_column = "ANAME"       
+            )
             
         if(cmd == "AR"):
             cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index("UIC not in AOS").join(

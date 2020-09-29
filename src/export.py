@@ -16,7 +16,9 @@ def run_export_jobs(
     ac_ar_metrics,
     unmatched_faces,
     uic_templets,
-    drrsa
+    drrsa,
+    address_data,
+    acronym_list
 ):
     print(" - Running export jobs")
     if(EXPORT_F2S):
@@ -48,6 +50,8 @@ def run_export_jobs(
             all_faces_to_matched_spaces,
             uic_templets,
             drrsa,
+            address_data,
+            acronym_list,
             unmask = EXPORT_UNMASKED,
             date_time_string = utility.get_file_timestamp(),
             commands = COMMAND_EXPORT_LIST
