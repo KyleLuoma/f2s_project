@@ -87,7 +87,9 @@ def add_vacant_positions(
             "LN" : "LN_aos",
             "GRADE" : "GRADE_aos"
         })[[
-            "FMID", "UIC_aos", "PARNO_aos", "LN_aos", "PARENT_TITLE",
+            "FMID", "UIC_aos", "PARNO_aos", "LN_aos", 
+            "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4",
+            "PARENT_TITLE",
             "GRADE_aos", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE", 
             "AOS_FILE_DATE", "DRRSA_ADCON", "DRRSA_ARLOC", "DRRSA_ASGMT",
             "DRRSA_GEOLOCATIONNAME", "DRRSA_HOGEO"

@@ -29,13 +29,13 @@ LOAD_EMILPO_FACES = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
 RUN_MATCH = False
-EXPORT_F2S = False
+EXPORT_F2S = True
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["MC"] #Leave empty to export all commands
+EXPORT_CMD_SPECS = False
+COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
@@ -44,7 +44,7 @@ def main():
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
-    global ac_ar_metrics, address_data
+    global ac_ar_metrics, address_data, acronym_list
     
     utility.create_project_directories()
         
