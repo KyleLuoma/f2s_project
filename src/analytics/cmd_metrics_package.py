@@ -100,9 +100,9 @@ def create_cmd_metrics_packages(
             
             cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
                 drrsa.reset_index().set_index("UIC")[[
-                    "ANAME", "LNAME", "ADCON"
+                    "ADCON", "ANAME", "LNAME"
                 ]]
-            )
+            ).rename(columns = {"ADCON" : "ADCON_PARENT"})
             cmd_uics_needed = cmd_uics_needed.join(
                 address_data.reset_index().set_index("UIC")[[
                     "STACO", "ARLOC", "PH_CITY_TXT", "PH_GEO_TXT", 
@@ -114,6 +114,10 @@ def create_cmd_metrics_packages(
             cmd_uics_needed = analytics.lname_generator.derive_gfm_lname(
                 cmd_uics_needed, acronym_list, from_column = "ANAME"       
             )
+            
+            cmd_uics_needed = cmd_uics_needed.rename(columns = {
+                "ARLOC" : "HOGEO"        
+            })
             
         if(cmd == "AR"):
             cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index("UIC not in AOS").join(
