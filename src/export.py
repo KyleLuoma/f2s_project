@@ -40,7 +40,7 @@ def run_export_jobs(
         print("  - Exporting unmasked files to local directory")
         unmask.unmask_and_export(
             all_faces_to_matched_spaces, utility.get_file_timestamp(),
-            emilpo_key_date = "7-24-2020"
+            emilpo_key_date = "10-9-2020"
         )
     
     if(EXPORT_CMD_SPECS):
