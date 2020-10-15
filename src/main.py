@@ -26,19 +26,20 @@ PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_ADDRESS_DATA = False
 LOAD_EMILPO_FACES = False
+LOAD_EMILPO_TEMP_ASSIGNMENTS = True
 LOAD_RCMS_FACES = False
 VERBOSE = False
 RUN_MATCH = False
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 def main():
-    global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
+    global drrsa, spaces, faces, faces_tmp, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
@@ -80,9 +81,10 @@ def main():
         address_data = load_data.load_and_process_address_data(country_code_xwalk)
     
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
-        faces = load_data.load_and_process_faces(
+        faces, faces_tmp = load_data.load_and_process_faces(
             LOAD_EMILPO_FACES,
             LOAD_RCMS_FACES,
+            LOAD_EMILPO_TEMP_ASSIGNMENTS,
             PROCESS_COMMAND_CONSIDERATIONS,
             rank_grade_xwalk,
             grade_mismatch_xwalk,
