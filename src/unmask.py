@@ -16,9 +16,19 @@ def unmask_and_export(
         on = "SSN_MASK"        
     )
     del all_faces_to_matched_spaces['SSN_MASK']
-    all_faces_to_matched_spaces.to_excel(
+    all_faces_to_matched_spaces[['DRRSA_ASGMT', 'STRUC_CMD_CD', 'GFC', 'GFC 1 Name', 'RCC',
+       'PARENT_UIC_CD', 'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME',
+       'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR', 'PARENT_TITLE',
+       'PARNO_aos', 'LN_aos', 'RMK_LIST', 'RMK1', 'RMK2', 'RMK3', 'RMK4',
+       'FMID', 'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
+       'GRADE_aos', 'POSCO', 'stage_matched', 'MATCH_DESCRIPTION',
+       'DUTY_ASG_DT', 'S_DATE', 'T_DATE', 'ASSIGNMENT_AGE', 'POSITION_AGE',
+       'ASG_OLDER_THAN_POS', 'ADD_UIC_TO_AOS', 'CREATE_TEMPLET',
+       'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE', 'DRRSA_ADCON',
+       'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
+       'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY']].to_csv(
         "C:/Users/LuomaKR/Documents/f2s_unmasked/" + 
         cmd_labels 
         + "all_faces_matched_spaces_"
-        + timestamp + ".xlsx"
+        + timestamp + ".csv"
     )

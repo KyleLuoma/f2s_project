@@ -107,7 +107,7 @@ def export_unmatched(unmatched_faces):
     )
     
 def update_connections(all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics):
-    all_faces_to_matched_spaces.to_csv(
+    all_faces_to_matched_spaces.drop_duplicates(subset = "SSN_MASK").to_csv(
         "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
     )
     cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
