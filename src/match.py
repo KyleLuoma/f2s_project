@@ -35,7 +35,10 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
         spaces_index_labels.append("LDUIC")
         
     if(criteria.HSDUIC.loc[stage]):
-        faces_index_labels.append("HSDUIC")
+        if(criteria.TEMP_ASSIGNMENT.loc[stage]):
+            faces_index_labels.append("HSDUIC_TEMP")
+        else:
+            faces_index_labels.append("HSDUIC")
         spaces_index_labels.append("UIC")
         
     if(criteria.PARNO.loc[stage]):
@@ -216,11 +219,15 @@ def full_run(
         faces_with_matches = pd.Series()
         faces_to_match = pd.DataFrame()
         
+        #Check if this is a permanent vs temporary assignment run
+        #If temporary, we only care if TEMP_STAGE_MATCHED is not 0, otherwise
+        #we only care if stage_matched is 0.
+        print(" - Modifying faces_to_match DF based on assignment vs attachment matching phase")
         if(criteria.TEMP_ASSIGNMENT.loc[i]):
             faces_with_matches = face_space_match.where(
                 face_space_match.TEMP_STAGE_MATCHED != 0
             ).dropna(how = "all").SSN_MASK
-            faces_to_match = faces.dropna(subset = ["ATTACH_UIC"]).dropna(how = "all")
+            faces_to_match = faces.dropna(subset = ["ATTACH_UIC"])
         else:
             faces_with_matches = face_space_match.where(
                 face_space_match.stage_matched != 0
@@ -251,7 +258,11 @@ def full_run(
             str(face_space_match.where(
                 face_space_match.stage_matched == i
             ).dropna(how = "all").shape[0]), 
-            " matches."
+            " assignment matches and",
+            str(face_space_match.where(
+                face_space_match.TEMP_STAGE_MATCHED == i
+            ).dropna(how = "all").shape[0]),
+            " attachment matches."
         )
         #Runs after phase 1 to enable perfect match on all positions regardless of RMK code
         if(not rmks_excluded and len(exclude_rmks) > 0):

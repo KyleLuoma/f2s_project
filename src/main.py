@@ -95,8 +95,11 @@ def main():
         
     if(LOAD_EMILPO_TEMP_ASSIGNMENTS):
         emilpo_temp = load_data.load_emilpo_temp_assignments()
+        emilpo_temp = process_data.add_expected_hsduic(
+            emilpo_temp.rename(columns = {"ATTACH_UIC" : "UIC"}), uic_hd_map, NA_value = "NA"
+        ).rename(columns = {"HSDUIC" : "HSDUIC_TEMP"})
         faces = faces.reset_index().set_index("SSN_MASK").join(
-            emilpo_temp.set_index("SSN_MASK"),
+            emilpo_temp[["SSN_MASK", "HSDUIC_TEMP"]].set_index("SSN_MASK"),
             lsuffix = "_faces",
             rsuffix = "_temp"
         ).reset_index()
