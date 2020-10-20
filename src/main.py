@@ -19,17 +19,17 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS_MAPS = False
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_ADDRESS_DATA = False
 LOAD_EMILPO_FACES = False
-LOAD_EMILPO_TEMP_ASSIGNMENTS = True
+LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = False
+RUN_MATCH = True
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
@@ -81,10 +81,9 @@ def main():
         address_data = load_data.load_and_process_address_data(country_code_xwalk)
     
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
-        faces, faces_tmp = load_data.load_and_process_faces(
+        faces = load_data.load_and_process_faces(
             LOAD_EMILPO_FACES,
             LOAD_RCMS_FACES,
-            LOAD_EMILPO_TEMP_ASSIGNMENTS,
             PROCESS_COMMAND_CONSIDERATIONS,
             rank_grade_xwalk,
             grade_mismatch_xwalk,
@@ -93,16 +92,29 @@ def main():
             uic_hd_map,
             af_uic_list
         )
+        
+    if(LOAD_EMILPO_TEMP_ASSIGNMENTS):
+        emilpo_temp = load_data.load_emilpo_temp_assignments()
+        faces = faces.reset_index().set_index("SSN_MASK").join(
+            emilpo_temp.set_index("SSN_MASK"),
+            lsuffix = "_faces",
+            rsuffix = "_temp"
+        ).reset_index()
+        if "index_faces" in faces.columns:
+            del faces["index_faces"]
+        if "index_temp" in faces.columns:
+            del faces["index_temp"]
     
     if(RUN_MATCH):
         # Initiate the matching process by calling this function:
         unmatched_faces, remaining_spaces, face_space_match = match.split_population_full_runs(
             faces,
+            faces_tmp,
             spaces,
             match_phases,
             rmk_codes,
-        )       
-    
+        )
+           
         all_faces_to_matched_spaces = diagnostics.run_face_match_diagnostics(
             faces,
             face_space_match,

@@ -1,3 +1,4 @@
+import pandas as pd
 # =============================================================================
 # Core matching function that iterates through available spaces and aligns
 # faces based on matching criteria passed in the criteria list
@@ -18,8 +19,12 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
     #Analyze match criteria and set multi index array for spaces and faces files
     #Order is critical here. Face and Space indices need to be symetrical for matching to work
     if(criteria.UIC.loc[stage]):
-        faces_index_labels.append("UIC")
+        if(criteria.TEMP_ASSIGNMENT.loc[stage]):
+            faces_index_labels.append("ATTACH_UIC")
+        else:
+            faces_index_labels.append("UIC")
         spaces_index_labels.append("UIC")
+
         
     if(criteria.PARENT_UIC.loc[stage]):
         faces_index_labels.append("PARENT_UIC_CD")
@@ -108,19 +113,22 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
     
     print(" - Matching stage ", str(stage))
     #Force type conversion before sorting and matching:
-    faces["UIC_PAR_LN"] = faces["UIC_PAR_LN"].astype("str")
-    faces["PARNO"] = faces["PARNO"].astype("str")
-    faces["LN"] = faces["LN"].astype("str")
-    faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
-    faces["TMP_LN"] = faces["TMP_LN"].astype("str")
-    faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
-    faces["SSN_MASK"] = faces["SSN_MASK"].astype("str")
-    faces["ASSIGNMENT_AGE"] = faces["ASSIGNMENT_AGE"].astype("int64")
-    faces["GRADE"] = faces["GRADE"].astype("str")
-    spaces["LDUIC"] = spaces["LDUIC"].astype("str")
-    spaces["PARNO"] = spaces["PARNO"].astype("str")
-    spaces["PARNO_3_CHAR"] = spaces["PARNO_3_CHAR"].astype("str")
-    spaces["LN"] = spaces["LN"].astype("str")
+    try:
+        faces["UIC_PAR_LN"] = faces["UIC_PAR_LN"].astype("str")
+        faces["PARNO"] = faces["PARNO"].astype("str")
+        faces["LN"] = faces["LN"].astype("str")
+        faces["TMP_PARNO"] = faces["TMP_PARNO"].astype("str")
+        faces["TMP_LN"] = faces["TMP_LN"].astype("str")
+        faces["PARENT_UIC_CD"] = faces["PARENT_UIC_CD"].astype("str")
+        faces["SSN_MASK"] = faces["SSN_MASK"].astype("str")
+        faces["ASSIGNMENT_AGE"] = faces["ASSIGNMENT_AGE"].astype("int64")
+        faces["GRADE"] = faces["GRADE"].astype("str")
+        spaces["LDUIC"] = spaces["LDUIC"].astype("str")
+        spaces["PARNO"] = spaces["PARNO"].astype("str")
+        spaces["PARNO_3_CHAR"] = spaces["PARNO_3_CHAR"].astype("str")
+        spaces["LN"] = spaces["LN"].astype("str")
+    except KeyError:
+        pass
 
     face_list = sorted(faces[faces_index_labels].values.tolist())
     space_list = sorted(spaces[spaces_index_labels].values.tolist())
@@ -147,7 +155,10 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
         if(face_list[f_ix][0:compare_ix] == space_list[s_ix][0:compare_ix]):
             if(int(face_list[f_ix][age_ix]) <= int(space_list[s_ix][age_ix]) or ~criteria.AGE_MATTERS.loc[stage]):
                 face_space_match.at[space_list[s_ix][fmid_ix], "SSN_MASK"] = face_list[f_ix][mask_ix]
-                face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
+                if(not criteria.TEMP_ASSIGNMENT.loc[stage]):
+                    face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
+                else:
+                    face_space_match.at[space_list[s_ix][fmid_ix], "TEMP_STAGE_MATCHED"] = stage
                 f_ix -= 1
                 s_ix -= 1
                 stage_matched += 1
@@ -185,6 +196,7 @@ def full_run(
     print("Executing full matching run")
     face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
+    face_space_match["TEMP_STAGE_MATCHED"] = 0
     rmks_excluded = False
     
     if(len(include_only_cmds) > 0):
@@ -201,18 +213,36 @@ def full_run(
     
     for i in range(1, criteria.shape[0] + 1):
         print(" *** Calling match() for stage ", str(i), "***")
+        faces_with_matches = pd.Series()
+        faces_to_match = pd.DataFrame()
+        
+        if(criteria.TEMP_ASSIGNMENT.loc[i]):
+            faces_with_matches = face_space_match.where(
+                face_space_match.TEMP_STAGE_MATCHED != 0
+            ).dropna(how = "all").SSN_MASK
+            faces_to_match = faces.dropna(subset = ["ATTACH_UIC"]).dropna(how = "all")
+        else:
+            faces_with_matches = face_space_match.where(
+                face_space_match.stage_matched != 0
+            ).dropna(how = "all").SSN_MASK
+            faces_to_match = faces
+            
+        faces_to_match = faces_to_match.where( 
+            ~faces_to_match.SSN_MASK.isin(faces_with_matches)
+        ).dropna(how = "all")
+        
+        spaces_to_match = spaces.where(
+            spaces.FMID.isin(
+                face_space_match.where(
+                    face_space_match.stage_matched == 0
+                ).dropna(how = "all").FMID
+            )
+        ).dropna(how = "all")
+        
         faces, spaces, face_space_match = match(
             criteria,  
-            faces.where(
-                ~faces.SSN_MASK.isin(face_space_match.SSN_MASK)
-            ).dropna(how = "all"),
-            spaces.where(
-                spaces.FMID.isin(
-                    face_space_match.where(
-                        face_space_match.stage_matched == 0
-                    ).dropna(how = "all").FMID
-                )
-            ).dropna(how = "all"), 
+            faces_to_match,
+            spaces_to_match, 
             i,
             face_space_match,
             verbose
@@ -248,6 +278,7 @@ def full_run(
 # =============================================================================
 def split_population_full_runs(
         faces,
+        faces_tmp,
         spaces,
         match_phases,
         rmk_codes,
@@ -308,5 +339,8 @@ def split_population_full_runs(
     face_space_match = ac_agr_face_space_match.where(
         ~ac_agr_face_space_match.FMID.isin(ar_face_space_match.FMID)
     ).dropna(how = "all").append(ar_face_space_match)
+  
+    
+    
 
     return unmatched_faces, remaining_spaces, face_space_match 
