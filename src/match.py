@@ -162,6 +162,7 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
                     face_space_match.at[space_list[s_ix][fmid_ix], "stage_matched"] = stage
                 else:
                     face_space_match.at[space_list[s_ix][fmid_ix], "TEMP_STAGE_MATCHED"] = stage
+                face_space_match.at[space_list[s_ix][fmid_ix], "ENCUMBERED"] = True
                 f_ix -= 1
                 s_ix -= 1
                 stage_matched += 1
@@ -200,6 +201,7 @@ def full_run(
     face_space_match = spaces.copy()[["FMID", "SSN_MASK", "stage_matched"]]
     face_space_match.SSN_MASK = face_space_match.SSN_MASK.astype("str")
     face_space_match["TEMP_STAGE_MATCHED"] = 0
+    face_space_match["ENCUMBERED"] = False
     rmks_excluded = False
     
     if(len(include_only_cmds) > 0):
@@ -241,7 +243,7 @@ def full_run(
         spaces_to_match = spaces.where(
             spaces.FMID.isin(
                 face_space_match.where(
-                    face_space_match.stage_matched == 0
+                    ~face_space_match.ENCUMBERED
                 ).dropna(how = "all").FMID
             )
         ).dropna(how = "all")
