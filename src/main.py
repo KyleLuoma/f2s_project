@@ -32,10 +32,10 @@ RUN_MATCH = False
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = True
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
 
 def main():
     global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
