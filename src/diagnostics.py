@@ -7,7 +7,8 @@ def run_face_match_diagnostics(
     spaces,
     last_templet_stage,
     match_phases,
-    all_uics
+    all_uics,
+    add_vacant_position_rows = True
 ):
     all_faces_to_matched_spaces = face_space_match_analysis(
         faces, face_space_match, spaces
@@ -20,13 +21,14 @@ def run_face_match_diagnostics(
         all_uics, 
         last_templet_stage
     )
-    all_faces_to_matched_spaces = add_vacant_positions(
-        all_faces_to_matched_spaces,
-        spaces        
-    )    
-    all_faces_to_matched_spaces = reorder_all_faces_to_matched_spaces_columns(
-        all_faces_to_matched_spaces        
-    )
+    if(add_vacant_position_rows):
+        all_faces_to_matched_spaces = add_vacant_positions(
+            all_faces_to_matched_spaces,
+            spaces        
+        )    
+        all_faces_to_matched_spaces = reorder_all_faces_to_matched_spaces_columns(
+            all_faces_to_matched_spaces        
+        )
     return all_faces_to_matched_spaces
 
 
@@ -46,7 +48,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
             drop = True
         ).set_index(
             "SSN_MASK"
-        )[["stage_matched", "FMID"]],
+        )[["stage_matched", "ENCUMBERED", "FMID"]],
         lsuffix = "_facesfile",
         rsuffix = "_f2s"
     )

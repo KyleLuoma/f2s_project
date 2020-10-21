@@ -45,7 +45,7 @@ def main():
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
-    global ac_ar_metrics, address_data, acronym_list
+    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     
     utility.create_project_directories()
         
@@ -97,9 +97,11 @@ def main():
         emilpo_temp = load_data.load_emilpo_temp_assignments()
         emilpo_temp = process_data.add_expected_hsduic(
             emilpo_temp.rename(columns = {"ATTACH_UIC" : "UIC"}), uic_hd_map, NA_value = "NA"
-        ).rename(columns = {"HSDUIC" : "HSDUIC_TEMP"})
+        ).rename(columns = {"HSDUIC" : "HSDUIC_TEMP", "UIC" : "ATTACH_UIC"})
+        if "level_0" in faces.columns:
+            del faces["level_0"]
         faces = faces.reset_index().set_index("SSN_MASK").join(
-            emilpo_temp[["SSN_MASK", "HSDUIC_TEMP"]].set_index("SSN_MASK"),
+            emilpo_temp.set_index("SSN_MASK"),
             lsuffix = "_faces",
             rsuffix = "_temp"
         ).reset_index()
@@ -110,9 +112,9 @@ def main():
     
     if(RUN_MATCH):
         # Initiate the matching process by calling this function:
-        unmatched_faces, remaining_spaces, face_space_match = match.split_population_full_runs(
+        unmatched_faces, remaining_spaces, face_space_match, attach_face_space_match = \
+        match.split_population_full_runs(
             faces,
-            faces_tmp,
             spaces,
             match_phases,
             rmk_codes,
@@ -124,7 +126,20 @@ def main():
             spaces,
             last_templet_stage,
             match_phases,
-            all_uics
+            all_uics,
+            add_vacant_position_rows = True
+        )
+        
+        attached_faces_to_matched_spaces = diagnostics.run_face_match_diagnostics(
+            faces.rename(columns = {
+                "UIC" : "ASSIGN_UIC", "ATTACH_UIC" : "UIC"        
+            }).dropna(subset = ["UIC"], how = "all"),
+            attach_face_space_match,
+            spaces,
+            last_templet_stage,
+            match_phases,
+            all_uics,
+            add_vacant_position_rows = False
         )
     
         all_spaces_to_matched_faces = diagnostics.space_available_analysis(

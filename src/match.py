@@ -291,7 +291,6 @@ def full_run(
 # =============================================================================
 def split_population_full_runs(
         faces,
-        faces_tmp,
         spaces,
         match_phases,
         rmk_codes,
@@ -338,7 +337,7 @@ def split_population_full_runs(
         spaces.where(
             ~spaces.FMID.isin(
                 ac_agr_face_space_match.where(
-                    ac_agr_face_space_match.stage_matched > 0        
+                    ac_agr_face_space_match.ENCUMBERED == 1      
                 ).dropna(how = "all").FMID,
             )             
         ).dropna(how = "all"),
@@ -351,9 +350,13 @@ def split_population_full_runs(
     #Merge AR matches into AC and AGR matches
     face_space_match = ac_agr_face_space_match.where(
         ~ac_agr_face_space_match.FMID.isin(ar_face_space_match.FMID)
-    ).dropna(how = "all").append(ar_face_space_match)
-  
+    ).dropna(how = "all").append(ar_face_space_match) 
     
+    attach_face_space_match = face_space_match.where(
+        face_space_match.TEMP_STAGE_MATCHED > 0
+    ).dropna(how = "all")[["FMID", "SSN_MASK", "TEMP_STAGE_MATCHED", "ENCUMBERED"]]
+    attach_face_space_match = attach_face_space_match.rename(columns = {
+        "TEMP_STAGE_MATCHED" : "stage_matched"        
+    })
     
-
-    return unmatched_faces, remaining_spaces, face_space_match 
+    return unmatched_faces, remaining_spaces, face_space_match, attach_face_space_match 
