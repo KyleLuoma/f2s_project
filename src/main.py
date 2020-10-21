@@ -19,8 +19,8 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS_MAPS = True
+LOAD_MATCH_PHASES = False
+LOAD_AND_PROCESS_MAPS = False
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
@@ -29,13 +29,13 @@ LOAD_EMILPO_FACES = False
 LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = True
-EXPORT_F2S = False
-GENERATE_CMD_METRICS = False
+RUN_MATCH = False
+EXPORT_F2S = True
+GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
+EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 def main():
