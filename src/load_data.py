@@ -14,8 +14,8 @@ import utility
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
 
-RCMS_FILE = "USAR_SELRES_F2S_14Sep.xlsx"
-APART_FILE = "USAR_AGR_F2S_14Sep.xlsx"
+RCMS_FILE = "USAR_SELRES_F2S_22Oct.xlsx"
+APART_FILE = "USAR_AGR_F2S_22Oct.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "10-6-2021"
 UIC_TREE_DATE = "10-6-2021"
@@ -60,7 +60,9 @@ def load_and_process_faces(
         aos_ouid_uic_xwalk,
         drrsa,
         uic_hd_map,
-        af_uic_list
+        af_uic_list,
+        emilpo_faces,
+        rcms_faces
     ):
     
     if(LOAD_EMILPO_FACES):
