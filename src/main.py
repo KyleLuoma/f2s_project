@@ -26,25 +26,27 @@ PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_ADDRESS_DATA = False
 LOAD_EMILPO_FACES = False
-LOAD_RCMS_FACES = True
+LOAD_EMILPO_TEMP_ASSIGNMENTS = False
+LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = True
+RUN_MATCH = False
 EXPORT_F2S = True
 GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = True
+UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+
 
 def main():
-    global drrsa, spaces, faces, match_phases, rank_grade_xwalk, test_faces 
+    global drrsa, spaces, faces, faces_tmp, match_phases, rank_grade_xwalk, test_faces 
     global test_spaces, face_space_match, unmatched_faces, unmatched_analysis
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
-    global ac_ar_metrics, address_data, acronym_list
+    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     
     utility.create_project_directories()
         
@@ -99,23 +101,54 @@ def main():
             emilpo_faces,
             rcms_faces
         )
+        
+    if(LOAD_EMILPO_TEMP_ASSIGNMENTS):
+        emilpo_temp = load_data.load_emilpo_temp_assignments()
+        emilpo_temp = process_data.add_expected_hsduic(
+            emilpo_temp.rename(columns = {"ATTACH_UIC" : "UIC"}), uic_hd_map, NA_value = "NA"
+        ).rename(columns = {"HSDUIC" : "HSDUIC_TEMP", "UIC" : "ATTACH_UIC"})
+        if "level_0" in faces.columns:
+            del faces["level_0"]
+        faces = faces.reset_index().set_index("SSN_MASK").join(
+            emilpo_temp.set_index("SSN_MASK"),
+            lsuffix = "_faces",
+            rsuffix = "_temp"
+        ).reset_index()
+        if "index_faces" in faces.columns:
+            del faces["index_faces"]
+        if "index_temp" in faces.columns:
+            del faces["index_temp"]
     
     if(RUN_MATCH):
         # Initiate the matching process by calling this function:
-        unmatched_faces, remaining_spaces, face_space_match = match.split_population_full_runs(
+        unmatched_faces, remaining_spaces, face_space_match, attach_face_space_match = \
+        match.split_population_full_runs(
             faces,
             spaces,
             match_phases,
             rmk_codes,
-        )       
-    
+        )
+           
         all_faces_to_matched_spaces = diagnostics.run_face_match_diagnostics(
             faces,
             face_space_match,
             spaces,
             last_templet_stage,
             match_phases,
-            all_uics
+            all_uics,
+            add_vacant_position_rows = True
+        )
+        
+        attached_faces_to_matched_spaces = diagnostics.run_face_match_diagnostics(
+            faces.rename(columns = {
+                "UIC" : "ASSIGN_UIC", "ATTACH_UIC" : "UIC"        
+            }).dropna(subset = ["UIC"], how = "all"),
+            attach_face_space_match,
+            spaces,
+            last_templet_stage,
+            match_phases,
+            all_uics,
+            add_vacant_position_rows = False
         )
     
         all_spaces_to_matched_faces = diagnostics.space_available_analysis(

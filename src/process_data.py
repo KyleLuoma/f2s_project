@@ -447,6 +447,7 @@ def process_emilpo_assignments(
         lambda row: "0" + row.LN if len(row.LN) == 1 else row.LN, 
         axis = 1        
     )
+    emilpo_assignments["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
     return emilpo_assignments
 
 def update_para_ln(target, source, verbose = False):

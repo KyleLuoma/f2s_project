@@ -20,6 +20,7 @@ RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "10-6-2021"
 UIC_TREE_DATE = "10-6-2021"
 EMILPO_FILE_DATE = "10-9-20"
+EMILPO_TEMP_FILE_DATE = "8-31-2020"
 DRRSA_FILE_DATE = "8-24-2020"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 
@@ -417,6 +418,39 @@ def load_emilpo():
             ).rename(columns = {"SSN_MASK_HASH" : "SSN_MASK"})
     emilpo_file["EMILPO_FILE_DATE"] = EMILPO_FILE_DATE
     return emilpo_file
+
+def load_emilpo_temp_assignments():
+    print(" - Loading and processing emilpo temporary assignments file")
+    emilpo_temp_assignments = pd.read_csv(
+        DATA_PATH + "/emilpo/temp_assignments/EMILPO_TEMP_ASSIGNMENTS_" + 
+        EMILPO_TEMP_FILE_DATE + ".csv",
+        dtype = {
+            "SSN_MASK_HASH" : str,
+            "UIC_CD" : str,	
+            "RC_ATTACH_CAT_CD" : str,
+            "ATTACH_START_DT" : str,
+            "ATTACH_EXP_DT" : str,
+            "ATTACH_RSN_CD" : str, 
+            "ATTACH_TYP_CD" : str,
+            "TAPDB_REC_STAT_CD" : str
+        }
+    )
+    emilpo_temp_assignments["ATTACH_START_DT"] = pd.to_datetime(
+        emilpo_temp_assignments.ATTACH_START_DT, infer_datetime_format = True, errors = "ignore"
+    )
+    emilpo_temp_assignments = process_data.calculate_age(
+        emilpo_temp_assignments, utility.get_local_time_as_datetime(), 
+        "ATTACH_START_DT", "ATTACHMENT"
+    )
+    return emilpo_temp_assignments[[
+        "SSN_MASK_HASH", "UIC_CD", "RC_ATTACH_CAT_CD", "ATTACH_START_DT",
+        "ATTACH_EXP_DT", "ATTACH_RSN_CD", "ATTACH_TYP_CD", "TAPDB_REC_STAT_CD"
+    ]].rename(
+        columns = {
+            "SSN_MASK_HASH" : "SSN_MASK",
+            "UIC_CD" : "ATTACH_UIC"
+        }
+    )
 
 """ Retreive match phases file """
 def load_match_phases():
