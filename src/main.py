@@ -19,8 +19,8 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS_MAPS = False
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
@@ -37,6 +37,7 @@ EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folde
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+
 
 def main():
     global drrsa, spaces, faces, faces_tmp, match_phases, rank_grade_xwalk, test_faces 
@@ -79,6 +80,12 @@ def main():
         
     if(LOAD_AND_PROCESS_ADDRESS_DATA):
         address_data = load_data.load_and_process_address_data(country_code_xwalk)
+        
+    if(LOAD_EMILPO_FACES):
+        emilpo_faces = pd.DataFrame()
+        
+    if(LOAD_RCMS_FACES):
+        rcms_faces = pd.DataFrame()
     
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
         faces = load_data.load_and_process_faces(
@@ -90,7 +97,9 @@ def main():
             aos_ouid_uic_xwalk,
             drrsa,
             uic_hd_map,
-            af_uic_list
+            af_uic_list,
+            emilpo_faces,
+            rcms_faces
         )
         
     if(LOAD_EMILPO_TEMP_ASSIGNMENTS):
