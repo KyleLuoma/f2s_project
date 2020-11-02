@@ -21,10 +21,10 @@ import analytics.templet_analysis
 
 LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
-LOAD_COMMAND_CONSIDERATIONS = False
-PROCESS_COMMAND_CONSIDERATIONS = False
-LOAD_AND_PROCESS_SPACES = True
-LOAD_AND_PROCESS_ADDRESS_DATA = True
+LOAD_COMMAND_CONSIDERATIONS = True
+PROCESS_COMMAND_CONSIDERATIONS = True
+LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_ADDRESS_DATA = False
 LOAD_EMILPO_FACES = True
 LOAD_EMILPO_TEMP_ASSIGNMENTS = True
 LOAD_RCMS_FACES = True
@@ -47,6 +47,12 @@ def main():
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
     global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
+    
+    if(LOAD_AND_PROCESS_SPACES): assert(load_data.check_spaces_files_exist())
+    if(LOAD_AND_PROCESS_ADDRESS_DATA): assert(load_data.check_address_files_exist())
+    if(LOAD_EMILPO_FACES): assert(load_data.check_emilpo_files_exist())
+    if(LOAD_EMILPO_TEMP_ASSIGNMENTS): assert(load_data.check_emilpo_temp_files_exist())
+    if(LOAD_RCMS_FACES): assert(load_data.check_rcms_files_exist())
     
     utility.create_project_directories()
         

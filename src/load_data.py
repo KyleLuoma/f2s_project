@@ -54,13 +54,47 @@ def check_spaces_files_exist():
     else:
         print("     - Missing AOS files:", missing_files)
     return all_exist
-    
+
+def check_address_files_exist():
+    print("  - Verifying that the UIC address file is available")
+    exists = True
+    if not path.exists(DATA_PATH + "/uic_location/" + UIC_ADDRESS_FILE):
+        exists = False
+        print("     - Missing UIC address file", UIC_ADDRESS_FILE)
+    return exists
+
+def check_emilpo_files_exist():
+    print("  - Verifying that the EMILPO faces file is available")
+    exists = True
+    if not path.exists(DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv"):
+        exists = False
+        print("     - Missing EMILPO file", "EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv")
+    return exists
+
+def check_emilpo_temp_files_exist():
+    print("  - Verifying that the EMILPO attachment file is available")
+    exists = True
+    if not path.exists(DATA_PATH + "/emilpo/temp_assignments/EMILPO_TEMP_ASSIGNMENTS_" + 
+        EMILPO_TEMP_FILE_DATE + ".csv"):
+        exists = False
+        print("     - Missing EMILPO attachment file", "EMILPO_TEMP_ASSIGNMENTS_" + EMILPO_TEMP_FILE_DATE + ".csv")
+    return exists
+
+def check_rcms_files_exist():
+    print("  - Verifying that the RCMS and APART faces files are available")
+    exists = True
+    if not path.exists(DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE):
+        exists = False
+        print("     - Missing RCMS file", RCMS_FILE)
+    if not path.exists(DATA_PATH + "/rcmsr/assignments/" + APART_FILE):
+        exists = False
+        print("     - Missing APART file", APART_FILE)
+    return exists
 
 """ Drives the spaces file generation process; calls functions in this load_data
 module as well as in process_data.py"""
 def load_and_process_spaces(uic_hd_map, country_code_xwalk):        
     print(" - Loading and processing spaces files")
-    assert(check_spaces_files_exist())
     print("  - Loading DRRS-A file dated", DRRSA_FILE_DATE)
     drrsa = load_drrsa_file()
     spaces = load_army_command_aos_billets()
@@ -95,9 +129,9 @@ def load_and_process_faces(
         aos_ouid_uic_xwalk,
         drrsa,
         uic_hd_map,
-        af_uic_list,
         emilpo_faces,
-        rcms_faces
+        rcms_faces,
+        af_uic_list = []
     ):
     
     if(LOAD_EMILPO_FACES):
