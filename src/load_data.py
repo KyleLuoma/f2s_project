@@ -17,10 +17,10 @@ DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
 RCMS_FILE = "USAR_SELRES_F2S_22Oct.xlsx"
 APART_FILE = "USAR_AGR_F2S_22Oct.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
-AOS_FILE_DATE = "10-6-2021"
-UIC_TREE_DATE = "10-6-2021"
-EMILPO_FILE_DATE = "10-9-20"
-EMILPO_TEMP_FILE_DATE = "8-31-2020"
+AOS_FILE_DATE = "10-30-2020"
+UIC_TREE_DATE = "10-13-2020"
+EMILPO_FILE_DATE = "10-13-20"
+EMILPO_TEMP_FILE_DATE = "10-13-2020"
 DRRSA_FILE_DATE = "8-24-2020"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 
@@ -28,6 +28,7 @@ UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 module as well as in process_data.py"""
 def load_and_process_spaces(uic_hd_map, country_code_xwalk):        
     print(" - Loading and processing spaces files")
+    print("  - Loading DRRS-A file dated", DRRSA_FILE_DATE)
     drrsa = load_drrsa_file()
     spaces = load_army_command_aos_billets()
     spaces = process_data.process_aos_billet_export(spaces)
@@ -210,7 +211,11 @@ def load_and_append_warcff_billet_export(num_partitions):
 
 """ Retrieve AOS Billet Export for USAR and AC """
 def load_army_command_aos_billets():
-    aos_file =  load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT).append(
+    print("  - Loading AOS billets, this may take a while...")
+    print("   - Loading and combining WARCFX billet exports")
+    aos_file =  load_and_append_warcff_billet_export(WARCFF_PARTITION_COUNT)
+    print("   - Loading W00EFF billet export")
+    aos_file = aos_file.append(
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
@@ -236,7 +241,9 @@ def load_army_command_aos_billets():
                         },
                     skipfooter = 1
                 )
-            ).append(
+            )
+    print("   - Loading WSTAFF billet export")
+    aos_file = aos_file.append(
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
@@ -262,7 +269,9 @@ def load_army_command_aos_billets():
                         },
                     skipfooter = 1
                 )
-            ).append(
+            )
+    print("   - Loading WUSAFF billet export")
+    aos_file = aos_file.append(
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/WUSAFF/WUSAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
