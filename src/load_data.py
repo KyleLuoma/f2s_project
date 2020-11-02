@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 import process_data
 import utility
+import os.path
+from os import path
 
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
@@ -24,10 +26,41 @@ EMILPO_TEMP_FILE_DATE = "10-13-2020"
 DRRSA_FILE_DATE = "8-24-2020"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 
+def check_spaces_files_exist():
+    print("  - Verifying that all AOS files are available")
+    all_exist = True
+    missing_files = []
+    if not path.exists(DATA_PATH + "/drrsa/drrsa " + DRRSA_FILE_DATE + ".xlsx"):
+        missing_files.append("drrsa " + DRRSA_FILE_DATE + ".xlsx")
+        all_exist = False
+    if not path.exists(DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"):
+        missing_files.append(
+            "W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"
+        )
+        all_exist = False
+    if not path.exists(DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"):
+        missing_files.append("WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx")
+        all_exist = False
+    if not path.exists(DATA_PATH + "/aos/billet_tree/WUSAFF/WUSAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"):
+        missing_files.append("WUSAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx")
+        all_exist = False
+    file_name_end = " C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx"
+    for i in range(1, WARCFF_PARTITION_COUNT + 1):
+        if not path.exists(DATA_PATH + "/aos/billet_tree/WARCFF/WARCF" + str(i) + file_name_end):
+            missing_files.append("WARCF" + str(i) + file_name_end)
+            all_exist = False
+    if(all_exist):
+        print("     - All AOS files available")
+    else:
+        print("     - Missing AOS files:", missing_files)
+    return all_exist
+    
+
 """ Drives the spaces file generation process; calls functions in this load_data
 module as well as in process_data.py"""
 def load_and_process_spaces(uic_hd_map, country_code_xwalk):        
     print(" - Loading and processing spaces files")
+    assert(check_spaces_files_exist())
     print("  - Loading DRRS-A file dated", DRRSA_FILE_DATE)
     drrsa = load_drrsa_file()
     spaces = load_army_command_aos_billets()
