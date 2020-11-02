@@ -19,22 +19,22 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS_MAPS = True
-LOAD_COMMAND_CONSIDERATIONS = True
-PROCESS_COMMAND_CONSIDERATIONS = True
+LOAD_MATCH_PHASES = False
+LOAD_AND_PROCESS_MAPS = False
+LOAD_COMMAND_CONSIDERATIONS = False
+PROCESS_COMMAND_CONSIDERATIONS = False
 LOAD_AND_PROCESS_SPACES = False
 LOAD_AND_PROCESS_ADDRESS_DATA = False
-LOAD_EMILPO_FACES = True
-LOAD_EMILPO_TEMP_ASSIGNMENTS = True
-LOAD_RCMS_FACES = True
+LOAD_EMILPO_FACES = False
+LOAD_EMILPO_TEMP_ASSIGNMENTS = False
+LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = True
+RUN_MATCH = False
 EXPORT_F2S = True
-GENERATE_CMD_METRICS = True
+GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
+UPDATE_CONNECTIONS = True
 EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
@@ -103,9 +103,9 @@ def main():
             aos_ouid_uic_xwalk,
             drrsa,
             uic_hd_map,
-            af_uic_list,
             emilpo_faces,
-            rcms_faces
+            rcms_faces,
+            af_uic_list
         )
         
     if(LOAD_EMILPO_TEMP_ASSIGNMENTS):
@@ -161,11 +161,6 @@ def main():
             faces, face_space_match, spaces        
         )
     
-# =============================================================================
-#     uic_templets = analytics.templet_analysis.templet_usage_by_uic(
-#         all_spaces_to_matched_faces
-#     )
-# =============================================================================
     if(GENERATE_CMD_METRICS):
         cmd_metrics, ar_cmd_metrics, ac_ar_metrics = analytics.analytics_driver.run_analytics(
             all_faces_to_matched_spaces,        
@@ -184,7 +179,6 @@ def main():
         ar_cmd_metrics,
         ac_ar_metrics,
         unmatched_faces,
-        uic_templets,
         drrsa,
         address_data,
         acronym_list

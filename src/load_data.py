@@ -131,7 +131,7 @@ def load_and_process_faces(
         uic_hd_map,
         emilpo_faces,
         rcms_faces,
-        af_uic_list = []
+        af_uic_list
     ):
     
     if(LOAD_EMILPO_FACES):

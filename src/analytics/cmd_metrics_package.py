@@ -5,7 +5,6 @@ import analytics.lname_generator
 
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
-    uic_templets,
     drrsa,
     address_data,
     acronym_list,
@@ -168,14 +167,7 @@ def create_cmd_metrics_packages(
             ar_columns.insert(0, "GFC 1 Name")
             ar_columns.insert(0, "GFC")
             cmd_templets_needed = cmd_templets_needed[ar_columns]
-# =============================================================================
-#         cmd_templets_needed = cmd_templets_needed.set_index(
-#             "UICs requiring templets"
-#         ).join(
-#             uic_templets.set_index("UIC")        
-#         ).reset_index()
-# =============================================================================
-        
+      
         # create a DF with a list of positions with assignment age > position age
         cmd_asg_age = cmd_df.where(
             cmd_df.ASG_OLDER_THAN_POS == 1.0

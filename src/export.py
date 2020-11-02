@@ -15,7 +15,6 @@ def run_export_jobs(
     ar_cmd_metrics,
     ac_ar_metrics,
     unmatched_faces,
-    uic_templets,
     drrsa,
     address_data,
     acronym_list
@@ -48,7 +47,6 @@ def run_export_jobs(
         import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
             all_faces_to_matched_spaces,
-            uic_templets,
             drrsa,
             address_data,
             acronym_list,
