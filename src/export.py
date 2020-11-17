@@ -39,7 +39,7 @@ def run_export_jobs(
         print("  - Exporting unmasked files to local directory")
         unmask.unmask_and_export(
             all_faces_to_matched_spaces, utility.get_file_timestamp(),
-            emilpo_key_date = "10-9-2020"
+            emilpo_key_date = "11-9-2020"
         )
     
     if(EXPORT_CMD_SPECS):
@@ -65,7 +65,7 @@ def run_export_jobs(
             ).dropna(how = "all"),
             utility.get_file_timestamp(),
             cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
-            emilpo_key_date = "7-24-2020"
+            emilpo_key_date = "11-9-2020"
         )
 
 def export_matches(face_space_match, all_faces_to_matched_spaces):

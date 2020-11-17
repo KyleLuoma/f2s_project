@@ -14,7 +14,7 @@ import os.path
 from os import path
 
 WARCFF_PARTITION_COUNT = 5
-DATA_PATH = "\\\\ba-anvl-fs05/FMDShare/AOS/master_files"
+DATA_PATH = "F:/aos/master_files"
 
 RCMS_FILE = "USAR_SELRES_F2S_09Nov.xlsx"
 APART_FILE = "USAR_AGR_F2S_09Nov.XLSX"
@@ -30,6 +30,26 @@ def check_spaces_files_exist():
     print("  - Verifying that all AOS files are available")
     all_exist = True
     missing_files = []
+    if not path.exists(
+        DATA_PATH + "/aos/uic_tree/WARCFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx"
+    ):
+        missing_files.append("WARCFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx")
+        all_exist = False
+    if not path.exists(
+        DATA_PATH + "/aos/uic_tree/W00EFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx"
+    ):
+        missing_files.append("W00EFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx")
+        all_exist = False
+    if not path.exists(
+        DATA_PATH + "/aos/uic_tree/WUSAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx"
+    ):
+        missing_files.append("WUSAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx")
+        all_exist = False
+    if not path.exists(
+        DATA_PATH + "/aos/uic_tree/WSTAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx"
+    ):
+        missing_files.append("WSTAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx")
+        all_exist = False
     if not path.exists(DATA_PATH + "/drrsa/drrsa " + DRRSA_FILE_DATE + ".xlsx"):
         missing_files.append("drrsa " + DRRSA_FILE_DATE + ".xlsx")
         all_exist = False

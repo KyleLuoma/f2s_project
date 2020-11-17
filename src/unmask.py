@@ -8,7 +8,7 @@ def unmask_and_export(
         cmd_labels = ""
 ):
     key_file = pd.read_csv(
-        "C:/Users/LuomaKR/Documents/emilpo_maps/emilpo map " + emilpo_key_date + ".csv",
+        "F:/aos/master_files/emilpo/emilpo_maps/emilpo assignments map " + emilpo_key_date + ".csv",
         dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
@@ -31,7 +31,7 @@ def unmask_and_export(
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
        'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY'
     ]].drop_duplicates(subset = "SSN").to_csv(
-        "C:/Users/LuomaKR/Documents/f2s_unmasked/" + 
+        "F:/aos/f2s_project/export/f2s_unmasked/" + 
         cmd_labels 
         + "all_faces_matched_spaces_"
         + timestamp + ".csv",
