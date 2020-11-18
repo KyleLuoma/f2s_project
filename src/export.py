@@ -14,6 +14,7 @@ def run_export_jobs(
     cmd_metrics,
     ar_cmd_metrics,
     ac_ar_metrics,
+    curorg_metrics,
     unmatched_faces,
     drrsa,
     address_data,
@@ -23,7 +24,7 @@ def run_export_jobs(
     if(EXPORT_F2S):
         print("  - Exporting all_faces_to_matched_spaces and command metrics")
         export_matches(face_space_match, all_faces_to_matched_spaces)
-        export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics)
+        export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics)
         
     if(EXPORT_UNMATCHED):
         print("  - Exporting unmatched faces")
@@ -80,7 +81,7 @@ def export_matches(face_space_match, all_faces_to_matched_spaces):
         + ".csv"
     )
     
-def export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics):
+def export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics):
     cmd_metrics.to_csv(
         "../export/command_metrics"
         + utility.get_file_timestamp()
@@ -95,6 +96,11 @@ def export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics):
         "../export/ac_ar_command_metrics"
         + utility.get_file_timestamp()
         + ".csv"
+    )
+    curorg_metrics.to_csv(
+        "../export/ar_curorg_rcc_metrics"
+        + utility.get_file_timestamp()
+        + ".csv"   
     )
     
 def export_unmatched(unmatched_faces):
