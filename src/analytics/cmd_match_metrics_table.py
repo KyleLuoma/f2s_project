@@ -113,7 +113,7 @@ def merge_AC_RC_cmd_metrics(cmd_metrics, ar_cmd_metrics):
     ar_cmd_metrics["COMPONENT"] = "AR"
     ar_cmd_metrics = ar_cmd_metrics.rename(
         columns = {
-            'GFC' : 'STRUC_CMD_CD'        
+            'GFC1' : 'STRUC_CMD_CD'        
         }        
     )
     ACRC_metrics = cmd_metrics.append(ar_cmd_metrics)

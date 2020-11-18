@@ -17,7 +17,7 @@ from os import path
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "F:/aos/master_files"
 
-RCMS_FILE = "USAR_SELRES_F2S_09Nov.xlsx"
+RCMS_FILE = "USAR_BDE_SELRES_F2S_09Nov.xlsx"
 APART_FILE = "USAR_AGR_F2S_09Nov.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
 AOS_FILE_DATE = "11-13-2020"
@@ -393,8 +393,10 @@ def load_rcms():
     rcms = pd.read_excel(
         DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
         dtype = {
-            "GFC" : str,
+            "GFC1" : str,
             "GFC 1 Name" : str,
+            "GFC2" : str,
+            "GFC 2 Name" : str,
             "Mask" : str,
             "Paragraph" : str,
             "Line Number" : str,
