@@ -8,6 +8,7 @@ import pandas as pd
 from pandas.api.types import CategoricalDtype
 import numpy as np
 import load_data
+import aos_unzipper
 import process_data
 import export
 import utility
@@ -19,19 +20,17 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-from multiprocessing import Pool, Process, Queue
-
 LOAD_MATCH_PHASES = True
-LOAD_AND_PROCESS_MAPS = False
-LOAD_COMMAND_CONSIDERATIONS = False
-PROCESS_COMMAND_CONSIDERATIONS = False
-LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_ADDRESS_DATA = False
-LOAD_EMILPO_FACES = False
-LOAD_EMILPO_TEMP_ASSIGNMENTS = False
-LOAD_RCMS_FACES = False
-VERBOSE = False
-RUN_MATCH = False
+LOAD_AND_PROCESS_MAPS = True
+LOAD_COMMAND_CONSIDERATIONS = True
+PROCESS_COMMAND_CONSIDERATIONS = True
+LOAD_AND_PROCESS_SPACES = True
+LOAD_AND_PROCESS_ADDRESS_DATA = True
+LOAD_EMILPO_FACES = True
+LOAD_EMILPO_TEMP_ASSIGNMENTS = True
+LOAD_RCMS_FACES = True
+VERBOSE = True
+RUN_MATCH = True
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
@@ -39,6 +38,8 @@ EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folde
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+
+DATA_PATH = "F:/aos/master_files"
 
 
 def main():
@@ -50,7 +51,9 @@ def main():
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
     global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     
-    if(LOAD_AND_PROCESS_SPACES): assert(load_data.check_spaces_files_exist())
+    if(LOAD_AND_PROCESS_SPACES): 
+        aos_unzipper.unzip_aos_files(file_path = FILE_PATH)
+        assert(load_data.check_spaces_files_exist())
     if(LOAD_AND_PROCESS_ADDRESS_DATA): assert(load_data.check_address_files_exist())
     if(LOAD_EMILPO_FACES): assert(load_data.check_emilpo_files_exist())
     if(LOAD_EMILPO_TEMP_ASSIGNMENTS): assert(load_data.check_emilpo_temp_files_exist())
@@ -59,20 +62,12 @@ def main():
     utility.create_project_directories()
         
     if(LOAD_MATCH_PHASES):
-        queue_match_phases = Queue()
-        process_match_phases = Process(
-            target = load_data.load_match_phases(), args = (queue_match_phases,)
-        )
-        process_match_phases.start()
-        print(" - Loading match phases")
-        process_match_phases.join()
-        match_phases = queue_match_phases.get()
-
+        match_phases = load_data.load_match_phases()
         
     # Find last stage that uses templets:
-    #last_templet_stage = match_phases.where(
-    #    match_phases.TEMPLET
-    #).dropna(how = "all").tail(1).index[0]
+    last_templet_stage = match_phases.where(
+        match_phases.TEMPLET
+    ).dropna(how = "all").tail(1).index[0]
         
     if(LOAD_AND_PROCESS_MAPS):
         print(" - Loading and processing mapping files")
