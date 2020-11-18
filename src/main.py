@@ -49,7 +49,8 @@ def main():
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
-    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
+    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match,
+    global curorg_metrics
     
     if(LOAD_AND_PROCESS_SPACES): 
         aos_unzipper.unzip_aos_files(file_path = FILE_PATH)
@@ -166,9 +167,11 @@ def main():
         )
     
     if(GENERATE_CMD_METRICS):
-        cmd_metrics, ar_cmd_metrics, ac_ar_metrics = analytics.analytics_driver.run_analytics(
-            all_faces_to_matched_spaces,        
-        )
+        cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics \
+            = analytics.analytics_driver.run_analytics(
+                all_faces_to_matched_spaces,        
+            )
+        
     
     export.run_export_jobs(
         EXPORT_F2S,
@@ -182,6 +185,7 @@ def main():
         cmd_metrics,
         ar_cmd_metrics,
         ac_ar_metrics,
+        curorg_metrics,
         unmatched_faces,
         drrsa,
         address_data,
