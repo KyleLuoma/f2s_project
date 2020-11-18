@@ -456,8 +456,10 @@ def update_para_ln(target, source, verbose = False):
     source = source.reset_index().set_index("SSN_MASK")
     print("  - Generating a UIC data association dataframe to update UIC based attributes")
     uic_updates = pd.DataFrame(
-        target[["UIC", "UNITNAME", "GFC", "GFC 1 Name"]].groupby(
-            ["UIC", "UNITNAME", "GFC", "GFC 1 Name"]
+        target[[
+            "UIC", "UNITNAME", "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name"
+        ]].groupby(
+            ["UIC", "UNITNAME", "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name"]
         ).size()
     ).reset_index().set_index("UIC")
     
@@ -473,12 +475,16 @@ def update_para_ln(target, source, verbose = False):
             target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
             if(row.UIC in uic_updates.index.to_list()):
                 target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
-                target.at[row.Index, "GFC"] = uic_updates.loc[row.UIC].GFC
+                target.at[row.Index, "GFC1"] = uic_updates.loc[row.UIC].GFC1
                 target.at[row.Index, "GFC 1 Name"] = uic_updates.loc[row.UIC]["GFC 1 Name"]
+                target.at[row.Index, "GFC2"] = uic_updates.loc[row.UIC].GFC2
+                target.at[row.Index, "GFC 2 Name"] = uic_updates.loc[row.UIC]["GFC 2 Name"]
             else:
                 target.at[row.Index, "UNITNAME"] = "Not in RCMS file"
-                target.at[row.Index, "GFC"] = "Not in RCMS file"
+                target.at[row.Index, "GFC1"] = "Not in RCMS file"
                 target.at[row.Index, "GFC 1 Name"] = "Not in RCMS file"
+                target.at[row.Index, "GFC2"] = "Not in RCMS file"
+                target.at[row.Index, "GFC 2 Name"] = "Not in RCMS file"
                 
         else:
             rcms_apart_mismatch_count += 1

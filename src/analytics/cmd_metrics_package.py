@@ -49,11 +49,11 @@ def create_cmd_metrics_packages(
         )
         
         uic_gfcs = ar_faces_spaces.groupby(
-            ["GFC", "UIC_facesfile"], observed = True, as_index = False
-        ).count()[["UIC_facesfile", "GFC"]]
+            ["GFC1", "UIC_facesfile"], observed = True, as_index = False
+        ).count()[["UIC_facesfile", "GFC1"]]
         
         uic_gfcs = uic_gfcs.set_index("UIC_facesfile").join(
-            ar_faces_spaces[["UIC_facesfile", "GFC 1 Name", "GFC"]].groupby(
+            ar_faces_spaces[["UIC_facesfile", "GFC 1 Name", "GFC1"]].groupby(
                 ["GFC 1 Name", "UIC_facesfile"], observed = True, as_index = False
             ).count()[["UIC_facesfile", "GFC 1 Name"]].set_index("UIC_facesfile")
         ).reset_index()
@@ -126,10 +126,10 @@ def create_cmd_metrics_packages(
             ).reset_index()
             #Reorder the AR columns
             ar_columns = cmd_uics_needed.columns.to_list()
-            ar_columns.remove("GFC")
+            ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
             ar_columns.insert(0, "GFC 1 Name")
-            ar_columns.insert(0, "GFC")
+            ar_columns.insert(0, "GFC1")
             cmd_uics_needed = cmd_uics_needed[ar_columns]
         
         # create a DF with a list of UICs that require templets
@@ -162,10 +162,10 @@ def create_cmd_metrics_packages(
                 rsuffix = "_uic_gfcs"
             ).reset_index()
             ar_columns = cmd_templets_needed.columns.to_list()
-            ar_columns.remove("GFC")
+            ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
             ar_columns.insert(0, "GFC 1 Name")
-            ar_columns.insert(0, "GFC")
+            ar_columns.insert(0, "GFC1")
             cmd_templets_needed = cmd_templets_needed[ar_columns]
       
         # create a DF with a list of positions with assignment age > position age

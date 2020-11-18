@@ -17,7 +17,7 @@ def run_analytics(
             all_faces_to_matched_spaces.STRUC_CMD_CD == "AR"
         ).dropna(how = "all"),
         utility.get_date_string(),
-        group_by = "GFC",
+        group_by = "GFC1",
         include_columns = ["GFC 1 Name"]
     )
     
