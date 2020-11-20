@@ -24,20 +24,20 @@ LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = True
 LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
-LOAD_AND_PROCESS_SPACES = False
+LOAD_AND_PROCESS_SPACES = True
 LOAD_AND_PROCESS_ADDRESS_DATA = True
-LOAD_EMILPO_FACES = True
-LOAD_EMILPO_TEMP_ASSIGNMENTS = True
-LOAD_RCMS_FACES = True
+LOAD_EMILPO_FACES = False
+LOAD_EMILPO_TEMP_ASSIGNMENTS = False
+LOAD_RCMS_FACES = False
 VERBOSE = True
 RUN_MATCH = True
 EXPORT_F2S = False
-GENERATE_CMD_METRICS = False
+GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["SP"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 
@@ -49,11 +49,11 @@ def main():
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
-    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match,
+    global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     global curorg_metrics
     
     if(LOAD_AND_PROCESS_SPACES): 
-        aos_unzipper.unzip_aos_files(file_path = FILE_PATH)
+        aos_unzipper.unzip_aos_files(file_path = DATA_PATH)
         assert(load_data.check_spaces_files_exist())
     if(LOAD_AND_PROCESS_ADDRESS_DATA): assert(load_data.check_address_files_exist())
     if(LOAD_EMILPO_FACES): assert(load_data.check_emilpo_files_exist())
