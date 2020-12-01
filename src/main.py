@@ -37,7 +37,7 @@ EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["SP"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["P1"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 
