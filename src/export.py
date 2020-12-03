@@ -52,6 +52,8 @@ def run_export_jobs(
             drrsa,
             address_data,
             acronym_list,
+            curorg_metrics,
+            ar_cmd_metrics,
             unmask = EXPORT_UNMASKED,
             date_time_string = utility.get_file_timestamp(),
             commands = COMMAND_EXPORT_LIST

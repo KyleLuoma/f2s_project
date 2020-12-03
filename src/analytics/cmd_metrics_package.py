@@ -8,6 +8,8 @@ def create_cmd_metrics_packages(
     drrsa,
     address_data,
     acronym_list,
+    curorg_metrics = pd.DataFrame(),
+    ar_cmd_metrics = pd.DataFrame(),
     unmask = False,
     date_time_string = "",
     commands = []
@@ -215,5 +217,12 @@ def create_cmd_metrics_packages(
             cmd_asg_age.to_excel(
                 writer, sheet_name = "Old-Assignments", freeze_panes = (1,0)        
             )
+            if cmd == "AR":
+                curorg_metrics.to_excel(
+                    writer, sheet_name = "CURORG Metrics"            
+                )
+                ar_cmd_metrics.to_excel(
+                    writer, sheet_name = "AR CMD Metrics"        
+                )
     
     
