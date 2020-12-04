@@ -115,6 +115,13 @@ def add_match_phase_description(target, match_phases):
             )
     return target
 
+def add_uic_path(target, all_uics, on_column = "UIC"):
+    print("Joining UIC path to target dataframe")
+    print(target.columns)
+    all_uics = all_uics.reset_index().set_index("UIC")
+    target = target.join(all_uics, on = on_column)
+    return target
+
 def add_command_title(target, cmd_description_xwalk, cmd_col_name = "STRUC_CMD_CD"):
     print("Mapping command titles to target data frame")
     target = target.join(

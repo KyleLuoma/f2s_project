@@ -137,9 +137,9 @@ def create_cmd_metrics_packages(
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.query(
             'CREATE_TEMPLET == 1.0 and STRUC_CMD_CD == "' + cmd + '"' 
-        )[["UIC_facesfile", "SSN_MASK"]]
+        )[["UIC_facesfile", "UIC_PATH", "SSN_MASK"]]
         cmd_templets_needed = cmd_templets_needed.groupby(
-            ["UIC_facesfile"],
+            ["UIC_facesfile", "UIC_PATH"],
             observed = True,
             as_index = False
         ).count().rename(
@@ -174,7 +174,8 @@ def create_cmd_metrics_packages(
         cmd_asg_age = cmd_df.where(
             cmd_df.ASG_OLDER_THAN_POS == 1.0
         ).dropna(how = "all")[[
-            "UIC_facesfile", 
+            "UIC_facesfile",
+            "UIC_PATH",
             "PARNO_facesfile",
             "LN_facesfile",
             "FMID",

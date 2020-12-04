@@ -15,10 +15,10 @@ def run_face_match_diagnostics(
     )
     all_faces_to_matched_spaces = process_data.add_match_phase_description(
         all_faces_to_matched_spaces, match_phases
-    )
+    )    
     all_faces_to_matched_spaces = diagnose_mismatch_in_target(
         all_faces_to_matched_spaces, 
-        all_uics, 
+        all_uics.UIC, 
         last_templet_stage
     )
     if(add_vacant_position_rows):
@@ -28,6 +28,13 @@ def run_face_match_diagnostics(
         )    
         all_faces_to_matched_spaces = reorder_all_faces_to_matched_spaces_columns(
             all_faces_to_matched_spaces        
+        )
+        all_faces_to_matched_spaces = process_data.add_uic_path(
+            all_faces_to_matched_spaces, all_uics, on_column = "UIC"      
+        )
+    else:
+        all_faces_to_matched_spaces = process_data.add_uic_path(
+            all_faces_to_matched_spaces, all_uics, on_column = "UIC_facesfile"        
         )
     return all_faces_to_matched_spaces
 
