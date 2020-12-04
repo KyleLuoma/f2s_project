@@ -127,9 +127,7 @@ def load_and_process_spaces(uic_hd_map, country_code_xwalk):
         spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
     )
     spaces = process_data.add_is_templet_column(spaces)
-    all_uics = spaces.UIC.drop_duplicates().append(
-        load_uics_from_uic_trees()
-    )
+    all_uics = load_uics_from_uic_trees()
     return spaces, drrsa, all_uics
 
 def load_and_process_address_data(country_code_xwalk):
@@ -232,7 +230,7 @@ def load_uics_from_uic_trees():
             skipfooter = 1    
         )
     )
-    uics = uics.drop_duplicates("UIC")["UIC"]
+    uics = uics.drop_duplicates("UIC")[["UIC", "UIC_PATH"]]
     return uics
 
 """ Retrieve partitioned command tree and return a single DF of all Army Commands"""

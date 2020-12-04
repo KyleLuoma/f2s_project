@@ -31,13 +31,14 @@ LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = True
 RUN_MATCH = False
+RUN_MATCH_DIAGNOSTICS = True
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+COMMAND_EXPORT_LIST = ["MC"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 
@@ -140,6 +141,7 @@ def main():
             rmk_codes,
         )
            
+    if(RUN_MATCH_DIAGNOSTICS):
         all_faces_to_matched_spaces = diagnostics.run_face_match_diagnostics(
             faces,
             face_space_match,
