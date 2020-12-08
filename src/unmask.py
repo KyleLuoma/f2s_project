@@ -8,7 +8,7 @@ def unmask_and_export(
         cmd_labels = ""
 ):
     key_file = pd.read_csv(
-        "F:/aos/master_files/emilpo/emilpo_maps/emilpo assignments map " + emilpo_key_date + ".csv",
+        "C:/Users/KYLE/Documents/f2s_unmask/emilpo assignments map " + emilpo_key_date + ".csv",
         dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
@@ -18,7 +18,7 @@ def unmask_and_export(
     del all_faces_to_matched_spaces['SSN_MASK']
     all_faces_to_matched_spaces.dropna(
         subset = ["SSN"]     
-    )[[
+    ).rename(columns = {"GFC1" : "GFC"})[[
        'SSN', 'FMID', 'DRRSA_ASGMT', 'STRUC_CMD_CD', 'GFC', 'GFC 1 Name', 'RCC',
        'PARENT_UIC_CD', 'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME',
        'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR', 'PARENT_TITLE',
@@ -31,7 +31,7 @@ def unmask_and_export(
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
        'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY'
     ]].drop_duplicates(subset = "SSN").to_csv(
-        "F:/aos/f2s_project/export/f2s_unmasked/" + 
+        "C:/Users/KYLE/Documents/f2s_unmask/f2s_file_export/" + 
         cmd_labels 
         + "all_faces_matched_spaces_"
         + timestamp + ".csv",
