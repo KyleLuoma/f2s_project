@@ -29,7 +29,7 @@ LOAD_AND_PROCESS_ADDRESS_DATA = False
 LOAD_EMILPO_FACES = False
 LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
-VERBOSE = True
+VERBOSE = False
 RUN_MATCH = False
 RUN_MATCH_DIAGNOSTICS = False
 EXPORT_F2S = False
@@ -51,7 +51,7 @@ def main():
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
     global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
     global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
-    global curorg_metrics
+    global curorg_metrics, attached_faces_to_matched_spaces
     
     if(LOAD_AND_PROCESS_SPACES): 
         aos_unzipper.unzip_aos_files(file_path = DATA_PATH)
@@ -184,6 +184,7 @@ def main():
         COMMAND_EXPORT_LIST,
         face_space_match,
         all_faces_to_matched_spaces,
+        attached_faces_to_matched_spaces,
         cmd_metrics,
         ar_cmd_metrics,
         ac_ar_metrics,
