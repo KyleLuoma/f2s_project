@@ -3,10 +3,20 @@ import pandas as pd
 
 def unmask_and_export(
         all_faces_to_matched_spaces, 
+        attached_faces_to_matched_spaces,
         timestamp, 
         emilpo_key_date,
         cmd_labels = ""
 ):
+    all_faces_to_matched_spaces["ASGN_TYPE"] = "PERM"
+    attached_faces_to_matched_spaces = attached_faces_to_matched_spaces.reset_index()
+    attached_faces_to_matched_spaces["ASGN_TYPE"] = "TEMP"
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.drop_duplicates(
+        subset = "SSN_MASK"
+    )
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.append(
+        attached_faces_to_matched_spaces
+    )
     key_file = pd.read_csv(
         "C:/Users/KYLE/Documents/f2s_unmask/emilpo assignments map " + emilpo_key_date + ".csv",
         dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
@@ -29,8 +39,8 @@ def unmask_and_export(
        'ASG_OLDER_THAN_POS', 'ADD_UIC_TO_AOS', 'CREATE_TEMPLET',
        'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE', 'DRRSA_ADCON',
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
-       'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY'
-    ]].drop_duplicates(subset = "SSN").to_csv(
+       'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY', 'ASGN_TYPE'
+    ]].to_csv(
         "C:/Users/KYLE/Documents/f2s_unmask/f2s_file_export/" + 
         cmd_labels 
         + "all_faces_matched_spaces_"

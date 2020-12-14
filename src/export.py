@@ -12,6 +12,7 @@ def run_export_jobs(
     COMMAND_EXPORT_LIST,
     face_space_match,
     all_faces_to_matched_spaces,
+    attached_faces_to_matched_spaces,
     cmd_metrics,
     ar_cmd_metrics,
     ac_ar_metrics,
@@ -40,7 +41,9 @@ def run_export_jobs(
     if(EXPORT_UNMASKED):
         print("  - Exporting unmasked files to local directory")
         unmask.unmask_and_export(
-            all_faces_to_matched_spaces, utility.get_file_timestamp(),
+            all_faces_to_matched_spaces,
+            attached_faces_to_matched_spaces,
+            utility.get_file_timestamp(),
             emilpo_key_date = "11-9-2020"
         )
     
@@ -67,6 +70,11 @@ def run_export_jobs(
                     COMMAND_EXPORT_LIST
                 )
             ).dropna(how = "all"),
+            attached_faces_to_matched_spaces.where(
+                attached_faces_to_matched_spaces.STRUC_CMD_CD.isin(
+                    COMMAND_EXPORT_LIST        
+                )        
+            ),
             utility.get_file_timestamp(),
             cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
             emilpo_key_date = "11-9-2020"
