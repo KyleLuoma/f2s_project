@@ -230,6 +230,13 @@ def load_uics_from_uic_trees():
             skipfooter = 1    
         )
     )
+    uics = uics.append(
+        pd.read_excel(
+            DATA_PATH + "/aos/uic_tree/WSTAFF C2 UIC TREE " + UIC_TREE_DATE + ".xlsx",
+            header = 2,
+            skipfooter = 1
+        )        
+    )
     uics = uics.drop_duplicates("UIC")[["UIC", "UIC_PATH"]]
     return uics
 
