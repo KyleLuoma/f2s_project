@@ -20,25 +20,25 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
-LOAD_MATCH_PHASES = False
-LOAD_AND_PROCESS_MAPS = False
-LOAD_COMMAND_CONSIDERATIONS = False
-PROCESS_COMMAND_CONSIDERATIONS = False
-LOAD_AND_PROCESS_SPACES = False
-LOAD_AND_PROCESS_ADDRESS_DATA = False
+LOAD_MATCH_PHASES = True
+LOAD_AND_PROCESS_MAPS = True
+LOAD_COMMAND_CONSIDERATIONS = True
+PROCESS_COMMAND_CONSIDERATIONS = True
+LOAD_AND_PROCESS_SPACES = True
+LOAD_AND_PROCESS_ADDRESS_DATA = True
 LOAD_EMILPO_FACES = False
 LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
 RUN_MATCH = True
-RUN_MATCH_DIAGNOSTICS = False
+RUN_MATCH_DIAGNOSTICS = True
 EXPORT_F2S = True
-GENERATE_CMD_METRICS = False
+GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = True
+EXPORT_CMD_SPECS = True
+COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 
