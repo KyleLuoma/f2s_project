@@ -302,11 +302,41 @@ def split_population_full_runs(
         agr_spaces = agr_spaces.append(
             spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
         )
+    agr_spaces = agr_spaces.append(spaces.where(spaces.is_templet)) #<--- added this, haven't tested yet
     unmatched_agr_faces, remaining_agr_spaces, agr_face_space_match = full_run(
         match_phases,
         agr_faces,
         agr_spaces,
         include_only_cmds = [],
+        exclude_cmds = [],
+        exclude_rmks = []
+    )
+    
+# =============================================================================
+#     TODO: THIS IS UNTESTED JUST STREAM OF CONCIOUSNESS CODE PLEASE FIX WHEN YOU CAN
+#     
+# =============================================================================
+    ima_faces = faces.where(faces.RCC == "IMA").dropna(how = "all")
+    ima_spaces = spaces.where(spaces.RMK1 == "MD").dropna(how = "all")
+    ima_spaces = ima_spaces.append(spaces.where(spaces.RMK1 == "DM").dropna(how = "all"))
+    ima_spaces = ima_spaces.append(spaces.where(spaces.RMK1 == "MQ").dropna(how = "all"))
+    for i in range(2, 5):
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "MD").dropna(how = "all")        
+        )
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "DM").dropna(how = "all")        
+        )
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "MQ").dropna(how = "all")        
+        )
+    ima_spaces = ima_spaces.append(spaces.where(spaces.is_templet))
+        
+    unmatched_ima_faces, remaining_ima_spaces, ima_face_space_match = full_run(
+        match_phases,
+        ima_faces,
+        ima_spaces,
+        include_only_cmds = ["AR"],
         exclude_cmds = [],
         exclude_rmks = []
     )
