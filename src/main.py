@@ -26,18 +26,18 @@ LOAD_COMMAND_CONSIDERATIONS = True
 PROCESS_COMMAND_CONSIDERATIONS = True
 LOAD_AND_PROCESS_SPACES = True
 LOAD_AND_PROCESS_ADDRESS_DATA = True
-LOAD_EMILPO_FACES = False
-LOAD_EMILPO_TEMP_ASSIGNMENTS = False
-LOAD_RCMS_FACES = False
+LOAD_EMILPO_FACES = True
+LOAD_EMILPO_TEMP_ASSIGNMENTS = True
+LOAD_RCMS_FACES = True
 VERBOSE = False
 RUN_MATCH = True
 RUN_MATCH_DIAGNOSTICS = True
-EXPORT_F2S = True
+EXPORT_F2S = False
 GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = True
-EXPORT_CMD_SPECS = True
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = False
+EXPORT_CMD_SPECS = False
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
@@ -53,13 +53,18 @@ def main():
     global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     global curorg_metrics, attached_faces_to_matched_spaces
     
+# =============================================================================
+#     Check the presence and content of the input files here prior to fully loading
+# =============================================================================
     if(LOAD_AND_PROCESS_SPACES): 
         aos_unzipper.unzip_aos_files(file_path = DATA_PATH)
         assert(load_data.check_spaces_files_exist())
     if(LOAD_AND_PROCESS_ADDRESS_DATA): assert(load_data.check_address_files_exist())
     if(LOAD_EMILPO_FACES): assert(load_data.check_emilpo_files_exist())
     if(LOAD_EMILPO_TEMP_ASSIGNMENTS): assert(load_data.check_emilpo_temp_files_exist())
-    if(LOAD_RCMS_FACES): assert(load_data.check_rcms_files_exist())
+    if(LOAD_RCMS_FACES): 
+        assert(load_data.check_rcms_files_exist())
+        load_data.check_rcms_columns()
     
     utility.create_project_directories()
         

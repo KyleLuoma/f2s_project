@@ -25,6 +25,10 @@ def unmask_and_export(
         key_file,
         on = "SSN_MASK"        
     )
+    all_faces_to_matched_spaces.SSN = all_faces_to_matched_spaces.apply(
+        lambda row: str(row.SSN).zfill(9),
+        axis = 1
+    )
     del all_faces_to_matched_spaces['SSN_MASK']
     all_faces_to_matched_spaces.dropna(
         subset = ["SSN"]     

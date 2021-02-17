@@ -16,15 +16,14 @@ from os import path
 
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "F:/aos/master_files"
-
-RCMS_FILE = "USAR_BDE_SELRES_F2S_14JAN.xlsx"
-APART_FILE = "USAR_AGR_F2S_14JAN.XLSX"
+RCMS_FILE = "USAR_BDE_SELRES_F2S_10FEB_FINAL.xlsx"
+APART_FILE = "USAR_AGR_F2S_10FEB_FINAL.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
-AOS_FILE_DATE = "3-1-2021"
-UIC_TREE_DATE = "3-1-2021"
-EMILPO_FILE_DATE = "1-11-2021"
-EMILPO_TEMP_FILE_DATE = "1-11-2021"
-DRRSA_FILE_DATE = "1-14-2021"
+AOS_FILE_DATE = "3-2-2021"
+UIC_TREE_DATE = "3-2-2021"
+EMILPO_FILE_DATE = "2-9-2021"
+EMILPO_TEMP_FILE_DATE = "2-9-2021"
+DRRSA_FILE_DATE = "2-11-2021"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 
 def check_spaces_files_exist():
@@ -111,6 +110,48 @@ def check_rcms_files_exist():
         exists = False
         print("     - Missing APART file", APART_FILE)
     return exists
+
+def check_rcms_columns():
+    print("  - Verifying column names in the RCMS faces file")
+    rcms = pd.read_excel(
+        DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
+        dtype = {
+            "GFC1" : str,
+            "GFC 1 Name" : str,
+            "GFC2" : str,
+            "GFC 2 Name" : str,
+            "Mask" : str,
+            "Paragraph" : str,
+            "Line Number" : str,
+            "Rank" : str,
+            "PMOS" : str,
+            "SMOS" : str,
+            "AMOS" : str,
+            "Primary ASI" : str,
+            "Secondary ASI" : str,
+            "Additional ASI" : str
+        }
+    )
+    rcms_required_columns = [
+        "STRUC_CMD_CD", "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name", "UPC", "UIC",
+        "Unit Name", "RCC", "Mask", "Grade", "MPC", "Rank", "Position Assigned Date",
+        "Position Number", "Paragraph", "Line Number", "PMOS", "SMOS", "AMOS",
+        "Primary ASI", "Secondary ASI", "Additional ASI"
+    ]
+    print(rcms[rcms_required_columns].head())
+    print("   ...all required RCMS columns present.")
+    print("  - Verifying column names in the APART faces file")
+    apart = pd.read_excel(DATA_PATH + "/rcmsr/assignments/" + APART_FILE
+    )
+    apart_required_columns = [
+        "GFC", "GFC 1 Name", "UPC", "UIC", "Unit Name", "RCC", "Mask", "Grade",
+        "MPC", "Rank", "Position Assigned Date", "Position Number", "Paragraph", 
+        "Line Number", "APART_POSN_KEY", "PMOS", "SMOS", "AMOS",
+        "Primary ASI", "Secondary ASI", "Additional ASI"
+    ]
+    print(apart[apart_required_columns].head())
+    print("   ...all required APART columns present.")
+    
 
 """ Drives the spaces file generation process; calls functions in this load_data
 module as well as in process_data.py"""
