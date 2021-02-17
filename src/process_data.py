@@ -347,6 +347,13 @@ def process_emilpo_assignments(
                         "UIC_CD" : "UIC"
             })
         
+    print("  - Isolating null duty assignment UICs and replacing with assignment UICs")
+    emilpo_assignments["ASSIGN_UIC_CD"] = emilpo_assignments["UIC_CD"]
+    emilpo_assignments["UIC_CD"] = emilpo_assignments.apply(
+        lambda row: row.SLOT_UIC_CD if not pd.isna(row.SLOT_UIC_CD) else row.UIC_CD,
+        axis = 1        
+    )
+    
     print("  - Creating 3 Char PARNO Column")    
     emilpo_assignments.PARNO = emilpo_assignments.PARNO.astype("str")
     emilpo_assignments["PARNO_3_CHAR"] = emilpo_assignments.apply(
