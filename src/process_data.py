@@ -23,7 +23,10 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
 TEMPLET_PARNOS = ["999", "9GO", "9AD", "9RF","9ER", 
-                  "9TM", "9AI", "9PF", "9SA", "9ST"]
+                  "9TM", "9AI", "9PF", "9SA", "9ST",
+                  "9AB", "9CH", "9CT", "9DE", "9OC",
+                  "9SM"]
+                  
 
 def process_address_data(address_data, country_code_xwalk):
     print(" - Creating address update file to join to UIC file")
@@ -334,60 +337,63 @@ def process_aos_billet_export(aos_billet_export):
 " ASI10,ASI11,ASI12,ASI13,ASI14
 "
 """
-def process_emilpo_assignments(
-    emilpo_assignments, 
+def process_emilpo_or_rcms_assignments(
+    assignments_file, 
     rank_grade_xwalk, 
     grade_mismatch_xwalk, 
-    consolidate = True
+    consolidate = True,
+    source = 'eMILPO' #emilpo or rcms
    ):
-    print("Processing EMILPO assignments file")
-    emilpo_assignments["stage_matched"] = 0    
+    print("Processing", source,"assignments file")
+    assignments_file["stage_matched"] = 0    
+    
+    if(str.lower(source) == 'emilpo'):    
+        print("  - Isolating null duty assignment UICs and replacing with assignment UICs")
+        assignments_file["ASSIGN_UIC_CD"] = assignments_file["UIC_CD"]
+        assignments_file["UIC_CD"] = assignments_file.apply(
+            lambda row: row.SLOT_UIC_CD if not pd.isna(row.SLOT_UIC_CD) else row.UIC_CD,
+            axis = 1        
+        )
+    
     print("  - Renaming columns")
-    emilpo_assignments = emilpo_assignments.rename(columns = {
-                        "UIC_CD" : "UIC"
-            })
-        
-    print("  - Isolating null duty assignment UICs and replacing with assignment UICs")
-    emilpo_assignments["ASSIGN_UIC_CD"] = emilpo_assignments["UIC_CD"]
-    emilpo_assignments["UIC_CD"] = emilpo_assignments.apply(
-        lambda row: row.SLOT_UIC_CD if not pd.isna(row.SLOT_UIC_CD) else row.UIC_CD,
-        axis = 1        
-    )
+    assignments_file = assignments_file.rename(columns = {
+        "UIC_CD" : "UIC"
+    })
     
     print("  - Creating 3 Char PARNO Column")    
-    emilpo_assignments.PARNO = emilpo_assignments.PARNO.astype("str")
-    emilpo_assignments["PARNO_3_CHAR"] = emilpo_assignments.apply(
+    assignments_file.PARNO = assignments_file.PARNO.astype("str")
+    assignments_file["PARNO_3_CHAR"] = assignments_file.apply(
         lambda row: row.PARNO[0:3],
         axis = 1
     )
     
-    print("  - Mapping grade to rank in the eMILPO assignments file")
-    emilpo_assignments["GRADE"] = emilpo_assignments.apply(
+    print("  - Mapping grade to rank in the", source, "assignments file")
+    assignments_file["GRADE"] = assignments_file.apply(
         lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, 
         axis = 1
     )
     
-    print("  - Mapping grade to one-up grade in the eMILPO assignments file")
-    emilpo_assignments["ONE_UP"] = emilpo_assignments.apply(
+    print("  - Mapping grade to one-up grade in the", source, "assignments file")
+    assignments_file["ONE_UP"] = assignments_file.apply(
             lambda row: grade_mismatch_xwalk.loc[row.GRADE].ONE_UP, 
             axis = 1
             )
     
-    print("  - Mapping grade to two-up grade in the eMILPO assignments file")
-    emilpo_assignments["TWO_UP"] = emilpo_assignments.apply(
+    print("  - Mapping grade to two-up grade in the", source, "assignments file")
+    assignments_file["TWO_UP"] = assignments_file.apply(
             lambda row: grade_mismatch_xwalk.loc[row.GRADE].TWO_UP, 
             axis = 1
             )
     
-    print("  - Mapping grade to one-down grade in the eMILPO assignments file")
-    emilpo_assignments["ONE_DN"] = emilpo_assignments.apply(
+    print("  - Mapping grade to one-down grade in the", source, "assignments file")
+    assignments_file["ONE_DN"] = assignments_file.apply(
             lambda row: grade_mismatch_xwalk.loc[row.GRADE].ONE_DN, 
             axis = 1
             )    
     
     if(consolidate):
-        print("  - Consolidating ASIs into ASI_LIST column in the eMILPO assignments file")
-        emilpo_assignments["ASI_LIST"] = emilpo_assignments.apply(
+        print("  - Consolidating ASIs into ASI_LIST column in the", source, "assignments file")
+        assignments_file["ASI_LIST"] = assignments_file.apply(
                 lambda row: pd.Series(data = [
                         row.ASI1,
                         row.ASI2,
@@ -407,8 +413,8 @@ def process_emilpo_assignments(
                         axis = 1
                 )
         
-        print("  - Consolidating SQIs into SQI_LIST column in the eMILPO assignments file")
-        emilpo_assignments["SQI_LIST"] = emilpo_assignments.apply(
+        print("  - Consolidating SQIs into SQI_LIST column in the", source, "assignments file")
+        assignments_file["SQI_LIST"] = assignments_file.apply(
                 lambda row: pd.Series(data = [
                         row.SQI1,
                         row.SQI2,
@@ -430,8 +436,8 @@ def process_emilpo_assignments(
                         axis = 1
                 )
         
-        print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the eMILPO assignments file")
-        emilpo_assignments["MOS_AOC_LIST"] = emilpo_assignments.apply(
+        print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the", source, "assignments file")
+        assignments_file["MOS_AOC_LIST"] = assignments_file.apply(
                 lambda row: pd.Series(data = [
                         row.MOS_AOC1,
                         row.MOS_AOC2,
@@ -451,18 +457,18 @@ def process_emilpo_assignments(
                 )
     
     print("  - Converting duty assignment date to date_time format")
-    emilpo_assignments["DUTY_ASG_DT"] = pd.to_datetime(
-        emilpo_assignments.DUTY_ASG_DT, infer_datetime_format = True, errors = "ignore"
+    assignments_file["DUTY_ASG_DT"] = pd.to_datetime(
+        assignments_file.DUTY_ASG_DT, infer_datetime_format = True, errors = "ignore"
     )
     
     print("  - Adding leading 0 to LN for single digit LNs")
-    emilpo_assignments.LN = emilpo_assignments.LN.astype("str")
-    emilpo_assignments.LN = emilpo_assignments.apply(
+    assignments_file.LN = assignments_file.LN.astype("str")
+    assignments_file.LN = assignments_file.apply(
         lambda row: "0" + row.LN if len(row.LN) == 1 else row.LN, 
         axis = 1        
     )
-    emilpo_assignments["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
-    return emilpo_assignments
+    assignments_file["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
+    return assignments_file
 
 def update_para_ln(target, source, verbose = False):
     print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")

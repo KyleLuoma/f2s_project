@@ -19,12 +19,13 @@ DATA_PATH = "F:/aos/master_files"
 RCMS_FILE = "USAR_BDE_SELRES_F2S_10FEB_FINAL.xlsx"
 APART_FILE = "USAR_AGR_F2S_10FEB_FINAL.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
-AOS_FILE_DATE = "3-2-2021"
-UIC_TREE_DATE = "3-2-2021"
+AOS_FILE_DATE = "3-3-2021"
+UIC_TREE_DATE = "3-3-2021"
 EMILPO_FILE_DATE = "2-9-2021"
 EMILPO_TEMP_FILE_DATE = "2-9-2021"
 DRRSA_FILE_DATE = "2-11-2021"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
+PHASES_FILE = "match_phases mos mismatch last.csv"
 
 def check_spaces_files_exist():
     print("  - Verifying that all AOS files are available")
@@ -198,11 +199,12 @@ def load_and_process_faces(
     
     if(LOAD_EMILPO_FACES):
         print(" - Loading and processing emilpo file")
-        emilpo_faces = process_data.process_emilpo_assignments(
+        emilpo_faces = process_data.process_emilpo_or_rcms_assignments(
             load_emilpo(), 
             rank_grade_xwalk,
             grade_mismatch_xwalk,
-            consolidate = True
+            consolidate = True,
+            source = "eMILPO"
         )
         
     if(LOAD_RCMS_FACES):
@@ -210,11 +212,12 @@ def load_and_process_faces(
         rcms_faces = load_rcms()
         apart_data = load_apart()
         rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
-        rcms_faces = process_data.process_emilpo_assignments(
+        rcms_faces = process_data.process_emilpo_or_rcms_assignments(
             rcms_faces,
             rank_grade_xwalk,
             grade_mismatch_xwalk, 
-            consolidate = False
+            consolidate = False,
+            source = "RCMS"
         )
         
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
@@ -601,7 +604,7 @@ def load_emilpo_temp_assignments():
 
 """ Retreive match phases file """
 def load_match_phases():
-    return pd.read_csv(DATA_PATH + "/phases/match_phases.csv").set_index("STAGE")
+    return pd.read_csv(DATA_PATH + "/phases/" + PHASES_FILE).set_index("STAGE")
 
 """ Retrieve rank grade crosswalk file """
 def load_rank_grade_xwalk():

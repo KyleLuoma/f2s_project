@@ -105,7 +105,7 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
     spaces_index_labels.append("FMID") #This will be the last column in the list
     faces_index_labels.append("SSN_MASK") #This will be the last column in the list
     
-    if(stage == 1): #Overwrite the index labels for perfect matching stage 1
+    if(stage == -1): #Overwrite the index labels for perfect matching stage 1
         
         face_list = faces_index_labels = [
             "UIC_PAR_LN", "ASSIGNMENT_AGE", "SSN_MASK"
@@ -344,7 +344,7 @@ def split_population_full_runs(
         include_only_cmds = ["AR"],
         exclude_cmds = [],
         exclude_rmks = ["89"],
-        verbose = True
+        verbose = False
     )
     
     #Merge AR matches into AC and AGR matches

@@ -32,12 +32,12 @@ LOAD_RCMS_FACES = True
 VERBOSE = False
 RUN_MATCH = True
 RUN_MATCH_DIAGNOSTICS = True
-EXPORT_F2S = False
+EXPORT_F2S = True
 GENERATE_CMD_METRICS = True
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
+EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = True
+EXPORT_CMD_SPECS = True
 COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
