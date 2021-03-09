@@ -348,10 +348,10 @@ def process_emilpo_or_rcms_assignments(
     assignments_file["stage_matched"] = 0    
     
     if(str.lower(source) == 'emilpo'):    
-        print("  - Isolating null duty assignment UICs and replacing with assignment UICs")
+        print("  - Isolating null assignment UICs and replacing with duty assignment UICs")
         assignments_file["ASSIGN_UIC_CD"] = assignments_file["UIC_CD"]
         assignments_file["UIC_CD"] = assignments_file.apply(
-            lambda row: row.SLOT_UIC_CD if not pd.isna(row.SLOT_UIC_CD) else row.UIC_CD,
+            lambda row: row.UIC_CD if not pd.isna(row.UIC_CD) else row.SLOT_UIC_CD,
             axis = 1        
         )
     
