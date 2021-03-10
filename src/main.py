@@ -5,7 +5,6 @@ Created on Mon Feb 10 13:45:26 2020
 @author: LuomaKR
 """
 import pandas as pd
-from pandas.api.types import CategoricalDtype
 import numpy as np
 import load_data
 import aos_unzipper
@@ -35,10 +34,10 @@ RUN_MATCH_DIAGNOSTICS = False
 EXPORT_F2S = False
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
-EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = [] #Leave empty to export all commands
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = True
+EXPORT_CMD_SPECS = True
+COMMAND_EXPORT_LIST = ["MC"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 
@@ -49,7 +48,7 @@ def main():
     global grade_mismatch_xwalk, all_faces_to_matched_spaces, aos_ouid_uic_xwalk 
     global rmk_codes, uic_hd_map, cmd_description_xwalk, cmd_match_metrics_table
     global cmd_metrics, af_uic_list, remaining_spaces, all_uics, ar_cmd_metrics
-    global all_spaces_to_matched_faces, uic_templets, emilpo_faces, rcms_faces
+    global uic_templets, emilpo_faces, rcms_faces
     global ac_ar_metrics, address_data, acronym_list, attach_face_space_match
     global curorg_metrics, attached_faces_to_matched_spaces
     
@@ -167,10 +166,6 @@ def main():
             match_phases,
             all_uics,
             add_vacant_position_rows = False
-        )
-    
-        all_spaces_to_matched_faces = diagnostics.space_available_analysis(
-            faces, face_space_match, spaces        
         )
     
     if(GENERATE_CMD_METRICS):
