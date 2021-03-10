@@ -164,7 +164,6 @@ def load_and_process_spaces(uic_hd_map, country_code_xwalk):
     spaces = process_data.process_aos_billet_export(spaces)
     spaces = process_data.add_expected_hsduic(spaces, uic_hd_map, "NA")
     spaces = process_data.add_drrsa_data(spaces, drrsa)
-    spaces = process_data.categorical_spaces(spaces)
     spaces = process_data.calculate_age(
         spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
     )
@@ -229,7 +228,6 @@ def load_and_process_faces(
         )
         faces = process_data.add_templet_columns(faces, parno = "999")
         faces = process_data.add_expected_hsduic(faces, uic_hd_map, "None")
-        faces = process_data.categorical_faces(faces)
         faces = process_data.calculate_age(
             faces, utility.get_local_time_as_datetime(), 
             "DUTY_ASG_DT", "ASSIGNMENT"

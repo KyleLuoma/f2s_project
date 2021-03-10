@@ -126,10 +126,13 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
         faces["SSN_MASK"] = faces["SSN_MASK"].astype("str")
         faces["ASSIGNMENT_AGE"] = faces["ASSIGNMENT_AGE"].astype("int64")
         faces["GRADE"] = faces["GRADE"].astype("str")
+        faces["MOS_AOC1"] = faces["MOS_AOC1"].astype("str")
         spaces["LDUIC"] = spaces["LDUIC"].astype("str")
         spaces["PARNO"] = spaces["PARNO"].astype("str")
         spaces["PARNO_3_CHAR"] = spaces["PARNO_3_CHAR"].astype("str")
         spaces["LN"] = spaces["LN"].astype("str")
+        spaces["GRADE"] = spaces["GRADE"].astype("str")
+        spaces["POSCO"] = spaces["POSCO"].astype("str")
     except KeyError:
         pass
 
