@@ -21,6 +21,12 @@ def unmask_and_export(
         "C:/Users/KYLE/Documents/f2s_unmask/emilpo assignments map " + emilpo_key_date + ".csv",
         dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
+    key_file = key_file.append(
+        pd.read_csv(
+            "C:/Users/KYLE/Documents/f2s_unmask/rcms assignments map " + emilpo_key_date + ".csv",
+            dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+        ).set_index("SSN_MASK_HASH")
+    )   
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         key_file,
         on = "SSN_MASK"        

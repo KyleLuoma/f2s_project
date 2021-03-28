@@ -3,6 +3,8 @@ import utility
 import unmask
 import openpyxl
 
+EMILPO_KEY_DATE = "2-5-2021"
+
 def run_export_jobs(
     EXPORT_F2S,
     EXPORT_UNMATCHED,
@@ -44,7 +46,7 @@ def run_export_jobs(
             all_faces_to_matched_spaces,
             attached_faces_to_matched_spaces,
             utility.get_file_timestamp(),
-            emilpo_key_date = "2-9-2021"
+            emilpo_key_date = EMILPO_KEY_DATE
         )
     
     if(EXPORT_CMD_SPECS):
@@ -77,7 +79,7 @@ def run_export_jobs(
             ),
             utility.get_file_timestamp(),
             cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
-            emilpo_key_date = "11-9-2020"
+            emilpo_key_date = EMILPO_KEY_DATE
         )
 
 def export_matches(face_space_match, all_faces_to_matched_spaces):
