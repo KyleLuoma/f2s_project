@@ -2,6 +2,10 @@
 
 import pandas as pd
 import analytics.lname_generator
+import unmask
+
+MASKED_EXPORT_PATH = "F:/aos/f2s_project/export/cmd_metrics/"
+UNMASKED_EXPORT_PATH = "C:/Users/KYLE/Documents/f2s_unmask/f2s_file_export/unmasked_cmd_metrics/"
 
 def create_cmd_metrics_packages(
     all_faces_to_matched_spaces,
@@ -10,9 +14,11 @@ def create_cmd_metrics_packages(
     acronym_list,
     curorg_metrics = pd.DataFrame(),
     ar_cmd_metrics = pd.DataFrame(),
-    unmask = False,
+    unmask_ssn = False,
     date_time_string = "",
-    commands = []
+    commands = [],
+    emilpo_key = pd.DataFrame(),
+    tapdbr_key = pd.DataFrame()
 ):
     uic_templets_needed = all_faces_to_matched_spaces.where(
         all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
@@ -193,14 +199,18 @@ def create_cmd_metrics_packages(
             "DUTY_ASG_DT" : "Assignment Start Date"
         })
         
+        export_path = MASKED_EXPORT_PATH    
+        
         # include an option to export unmasked metrics
-        if(unmask):
-            print(" *** still need to build unmask functionality ***")
+        if(unmask_ssn):
+            print(" - Unmasking command metrics package detail worksheet")
+            cmd_df = unmask.unmask_and_return(cmd_df, emilpo_key, tapdbr_key)
+            export_path = UNMASKED_EXPORT_PATH
         
         # export to a file
-        print(" - Saving " + cmd + " metrics as file")
+        print(" - Saving " + cmd + " metrics as file to " + export_path)
         with pd.ExcelWriter(
-            "F:/aos/f2s_project/export/cmd_metrics/" + 
+            export_path + 
             cmd + 
             "_f2s_metrics" + 
             date_time_string + 

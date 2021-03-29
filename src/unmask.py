@@ -1,11 +1,41 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
+def unmask_and_return(
+        all_faces_to_matched_spaces,
+        emilpo_key,
+        tapdbr_key,
+        cmd_labels = ""
+):
+    print(" - Unmasking and returning unmasked data to calling function.")
+    key_file = pd.read_csv(
+        emilpo_key,
+        dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
+    ).set_index("SSN_MASK_HASH")
+    key_file = key_file.append(
+        pd.read_csv(
+            tapdbr_key,
+            dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+        ).set_index("SSN_MASK_HASH")
+    )
+    all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
+        key_file,
+        on = "SSN_MASK"        
+    )
+    all_faces_to_matched_spaces.SSN = all_faces_to_matched_spaces.apply(
+        lambda row: str(row.SSN).zfill(9),
+        axis = 1
+    )
+    del all_faces_to_matched_spaces['SSN_MASK']
+    return all_faces_to_matched_spaces
+        
+
 def unmask_and_export(
         all_faces_to_matched_spaces, 
         attached_faces_to_matched_spaces,
         timestamp, 
-        emilpo_key_date,
+        emilpo_key,
+        tapdbr_key,
         cmd_labels = ""
 ):
     all_faces_to_matched_spaces["ASGN_TYPE"] = "PERM"
@@ -18,12 +48,12 @@ def unmask_and_export(
         attached_faces_to_matched_spaces
     )
     key_file = pd.read_csv(
-        "C:/Users/KYLE/Documents/f2s_unmask/emilpo assignments map " + emilpo_key_date + ".csv",
+        emilpo_key,
         dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
-            "C:/Users/KYLE/Documents/f2s_unmask/rcms assignments map " + emilpo_key_date + ".csv",
+            tapdbr_key,
             dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
         ).set_index("SSN_MASK_HASH")
     )   

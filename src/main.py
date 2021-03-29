@@ -29,17 +29,24 @@ LOAD_EMILPO_FACES = False
 LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = True
-RUN_MATCH_DIAGNOSTICS = True
+RUN_MATCH = False
+RUN_MATCH_DIAGNOSTICS = False
 EXPORT_F2S = False
-GENERATE_CMD_METRICS = True
+GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
 UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
-COMMAND_EXPORT_LIST = ["AR"] #Leave empty to export all commands
+EXPORT_UNMASKED_CMD_SPECS = True
+COMMAND_EXPORT_LIST = ["5A"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
+
+#Update this to reflect the current key files for unmasking
+AC_KEY_DATE = "2-5-2021"
+AR_KEY_DATE = "2-5-2021"
+AC_KEY_FILE = "C:/Users/KYLE/Documents/f2s_unmask/emilpo assignments map " + AC_KEY_DATE + ".csv"
+RC_KEY_FILE = "C:/Users/KYLE/Documents/f2s_unmask/rcms assignments map " + AR_KEY_DATE + ".csv"
 
 
 def main():
@@ -181,6 +188,7 @@ def main():
         UPDATE_CONNECTIONS,
         EXPORT_UNMASKED,
         EXPORT_CMD_SPECS,
+        EXPORT_UNMASKED_CMD_SPECS,
         COMMAND_EXPORT_LIST,
         face_space_match,
         all_faces_to_matched_spaces,
@@ -192,7 +200,9 @@ def main():
         unmatched_faces,
         drrsa,
         address_data,
-        acronym_list
+        acronym_list,
+        AC_KEY_FILE,
+        RC_KEY_FILE
     )
 
 if (__name__ == "__main__"): main()

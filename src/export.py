@@ -11,6 +11,7 @@ def run_export_jobs(
     UPDATE_CONNECTIONS,
     EXPORT_UNMASKED,
     EXPORT_CMD_SPECS,
+    EXPORT_UNMASKED_CMD_SPECS,
     COMMAND_EXPORT_LIST,
     face_space_match,
     all_faces_to_matched_spaces,
@@ -22,7 +23,9 @@ def run_export_jobs(
     unmatched_faces,
     drrsa,
     address_data,
-    acronym_list
+    acronym_list,
+    AC_KEY_FILE,
+    RC_KEY_FILE
 ):
     print(" - Running export jobs")
     if(EXPORT_F2S):
@@ -46,10 +49,11 @@ def run_export_jobs(
             all_faces_to_matched_spaces,
             attached_faces_to_matched_spaces,
             utility.get_file_timestamp(),
-            emilpo_key_date = EMILPO_KEY_DATE
+            AC_KEY_FILE,
+            RC_KEY_FILE
         )
     
-    if(EXPORT_CMD_SPECS):
+    if(EXPORT_CMD_SPECS or EXPORT_UNMASKED_CMD_SPECS):
         print("  - Exporting command metrics workbooks")
         import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
@@ -59,27 +63,11 @@ def run_export_jobs(
             acronym_list,
             curorg_metrics,
             ar_cmd_metrics,
-            unmask = EXPORT_UNMASKED,
+            unmask_ssn = EXPORT_UNMASKED_CMD_SPECS,
             date_time_string = utility.get_file_timestamp(),
-            commands = COMMAND_EXPORT_LIST
-        )
-        
-    if(EXPORT_UNMASKED and EXPORT_CMD_SPECS):
-        print("  - Exporting unmasked command metrics workbooks to local directory")
-        unmask.unmask_and_export(
-            all_faces_to_matched_spaces.where(
-                all_faces_to_matched_spaces.STRUC_CMD_CD.isin(
-                    COMMAND_EXPORT_LIST
-                )
-            ).dropna(how = "all"),
-            attached_faces_to_matched_spaces.where(
-                attached_faces_to_matched_spaces.STRUC_CMD_CD.isin(
-                    COMMAND_EXPORT_LIST        
-                )        
-            ),
-            utility.get_file_timestamp(),
-            cmd_labels = utility.make_commands_label(COMMAND_EXPORT_LIST),
-            emilpo_key_date = EMILPO_KEY_DATE
+            commands = COMMAND_EXPORT_LIST,
+            emilpo_key = AC_KEY_FILE,
+            tapdbr_key = RC_KEY_FILE
         )
 
 def export_matches(face_space_match, all_faces_to_matched_spaces):
