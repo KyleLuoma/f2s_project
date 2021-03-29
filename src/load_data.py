@@ -168,6 +168,7 @@ def load_and_process_spaces(uic_hd_map, country_code_xwalk):
         spaces, utility.get_local_time_as_datetime(), "S_DATE", "POSITION"
     )
     spaces = process_data.add_is_templet_column(spaces)
+    spaces = process_data.position_level_compo_adjust(spaces) #must run after DRRSA 
     all_uics = load_uics_from_uic_trees().append(
         spaces[["UIC"]].groupby(["UIC"]).count().reset_index()
     ).drop_duplicates(subset = ["UIC"])

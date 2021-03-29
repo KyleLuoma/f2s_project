@@ -298,13 +298,24 @@ def split_population_full_runs(
         match_phases,
         rmk_codes,
     ):
-    # Full run for AR AGR faces and spaces
+    # Full run for AR AGR ABL faces and spaces
+    print("### Performing split population full runs ###")
+    print("#-- AGR Above the line                    --#")
     agr_faces = faces.where(faces.RCC == "AGR").dropna(how = "all")
     agr_spaces = spaces.where(spaces.RMK1 == "92").dropna(how = "all")
     for i in range(2, 5):
         agr_spaces = agr_spaces.append(
             spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
         )
+    agr_spaces = agr_spaces.append(
+        spaces.where(spaces.IS_TEMPLET).dropna(how = "all")        
+    )
+    
+    agr_match_phases = match_phases
+    
+    print("ALERT: BYPASSING AGE MATTERS RESTRICTION FOR AGR MATCHING!!!")
+    agr_match_phases.AGE_MATTERS = False #For FY22 runs only
+    
     unmatched_agr_faces, remaining_agr_spaces, agr_face_space_match = full_run(
         match_phases,
         agr_faces,
@@ -313,12 +324,68 @@ def split_population_full_runs(
         exclude_cmds = [],
         exclude_rmks = []
     )
-        
+    
+    #Full run for AR IMA ABL faces and spaces
+    print("#-- IMA Above the line                    --#")
+    ima_faces = faces.where(faces.RCC == "IMA").dropna(how = "all")
+
+    ima_spaces = spaces.where(spaces.IS_TEMPLET).dropna(how = "all")
+    ima_spaces = ima_spaces.where(
+        ~ima_spaces.FMID.isin(
+            agr_face_space_match.where(
+                agr_face_space_match.ENCUMBERED == 1
+            ).dropna(how = "all").FMID
+        )        
+    ).dropna(how = "all")
+    #347596
+    ima_spaces = ima_spaces.append(spaces.where(spaces.RMK1 == "MD").dropna(how = "all"))
+    ima_spaces = ima_spaces.append(spaces.where(spaces.RMK1 == "DM").dropna(how = "all"))
+    ima_spaces = ima_spaces.append(spaces.where(spaces.RMK1 == "MQ").dropna(how = "all"))
+    for i in range(2, 5):
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "MD").dropna(how = "all")        
+        )
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "DM").dropna(how = "all")        
+        )
+        ima_spaces = ima_spaces.append(
+            spaces.where(spaces["RMK" + str(i)] == "MQ").dropna(how = "all")        
+        )
+    #349296
+    ima_match_phases = match_phases
+    
+    print("ALERT: BYPASSING AGE MATTERS RESTRICTION FOR IMA MATCHING!!!")
+    ima_match_phases.AGE_MATTERS = False #For FY22 runs only
+    unmatched_ima_faces, remaining_ima_spaces, ima_face_space_match = full_run(
+        ima_match_phases,
+        ima_faces,
+        ima_spaces,
+        include_only_cmds = [],
+        exclude_cmds = [],
+        exclude_rmks = []
+    )
+    
+    #Merge IMA matches into AGR matches
+    agr_ima_face_space_match = ima_face_space_match.where(
+        ima_face_space_match.ENCUMBERED
+    ).dropna(how = "all").append(
+        agr_face_space_match.where(
+            agr_face_space_match.ENCUMBERED        
+        ).dropna(how = "all")
+    )
+    
+    print("#-- All Active Component                    --#")
     # Full run for AC faces and spaces:
+    
+    #Drop spaces encumbered by IMA and AGR:
+    ac_run_spaces = spaces.where(
+        ~spaces.FMID.isin(agr_ima_face_space_match.FMID)
+    ).dropna(how = "all")
+    
     unmatched_faces, remaining_spaces, ac_face_space_match = full_run(
         match_phases, 
         faces, 
-        spaces,
+        ac_run_spaces,
         include_only_cmds = [],
         exclude_cmds = ["AR"],
         exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
@@ -326,24 +393,26 @@ def split_population_full_runs(
             .index.to_list()
     )
                 
-    #Merge AGR matches into ac matches
-    ac_agr_face_space_match = ac_face_space_match.where(
-        ~ac_face_space_match.FMID.isin(agr_face_space_match.FMID)
-    ).dropna(how = "all").append(agr_face_space_match)  
-                
+    #Merge AGR and IMA matches into ac matches
+    ac_agr_ima_face_space_match = ac_face_space_match.append(
+        agr_ima_face_space_match        
+    )
+    
+    usar_spaces = spaces.where(spaces.COMPO == 3).dropna(how = "all") 
+    usar_spaces = usar_spaces.where(
+        ~usar_spaces.FMID.isin(ac_agr_ima_face_space_match.where(
+                ac_agr_ima_face_space_match.ENCUMBERED == 1
+            ).dropna(how = "all").FMID
+        )
+    ).dropna(how = "all") 
     # Full run for AR faces and spaces:
+    print("#-- All Remaining Reserve Component        --#")
     unmatched_faces, remaining_spaces, ar_face_space_match = full_run(
         match_phases, 
         faces.where(
-            ~faces.SSN_MASK.isin(agr_face_space_match.SSN_MASK)        
+            ~faces.SSN_MASK.isin(ac_agr_ima_face_space_match.SSN_MASK)        
         ).dropna(how = "all"), 
-        spaces.where(
-            ~spaces.FMID.isin(
-                ac_agr_face_space_match.where(
-                    ac_agr_face_space_match.ENCUMBERED == 1      
-                ).dropna(how = "all").FMID,
-            )             
-        ).dropna(how = "all"),
+        usar_spaces,
         include_only_cmds = ["AR"],
         exclude_cmds = [],
         exclude_rmks = ["89"],
@@ -351,8 +420,8 @@ def split_population_full_runs(
     )
     
     #Merge AR matches into AC and AGR matches
-    face_space_match = ac_agr_face_space_match.where(
-        ~ac_agr_face_space_match.FMID.isin(ar_face_space_match.FMID)
+    face_space_match = ac_agr_ima_face_space_match.where(
+        ~ac_agr_ima_face_space_match.FMID.isin(ar_face_space_match.FMID)
     ).dropna(how = "all").append(ar_face_space_match) 
     
     attach_face_space_match = face_space_match.where(

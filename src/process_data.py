@@ -21,11 +21,12 @@ CIV_GRADES = ["00", "01", "02", "03", "04", "05", "06", "07", "08",
 
 NON_ADD_RMKS = ['49','83','85','87','88','90','91','89','92']
 
+USAR_ABL_RMKS = ['92', '87', 'MD', 'DM', 'MQ']
+
 TEMPLET_PARNOS = ["999", "9GO", "9AD", "9RF","9ER", 
                   "9TM", "9AI", "9PF", "9SA", "9ST",
                   "9AB", "9CH", "9CT", "9DE", "9OC",
-                  "9SM"]
-                  
+                  "9SM"]                  
 
 def process_address_data(address_data, country_code_xwalk):
     print(" - Creating address update file to join to UIC file")
@@ -137,13 +138,16 @@ def add_drrsa_data(target, drrsa):
     print("Mapping DRRSA data to target data frame")    
     column_check_list = [
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
-        "DRRSA_ASGMT", "DRRSA_UNPRSNTLOCZIP", "DRRSA_PPA"
+        "DRRSA_ASGMT", "DRRSA_UNPRSNTLOCZIP", "DRRSA_PPA", "COMPO"
     ]
     for column in column_check_list:
         if column in target.columns:
             target = target.drop(column, axis = 1)
     target = target.join(
-        drrsa[["ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", "PPA", "UNPRSNTLOCZIP"]],
+        drrsa[[
+            "ADCON", "HOGEO", "ARLOC", "GEOLOCATIONNAME", "ASGMT", 
+            "PPA", "UNPRSNTLOCZIP", "COMPO"
+        ]],
         on = "UIC",
         lsuffix = "_AOS",
         rsuffix = "_DRRSA"
@@ -154,7 +158,8 @@ def add_drrsa_data(target, drrsa):
         "GEOLOCATIONNAME" : "DRRSA_GEOLOCATIONNAME",
         "ASGMT" : "DRRSA_ASGMT",
         "UNPRSNTLOCZIP" : "DRRSA_UNPRSNTLOCZIP",
-        "PPA_DRRSA" : "DRRSA_PPA"
+        "PPA_DRRSA" : "DRRSA_PPA",
+        "COMPO" : "POSITION_COMPO"
         }
     )
     target.DRRSA_UNPRSNTLOCZIP = target.apply(
@@ -170,7 +175,7 @@ def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
     return target
 
 def add_expected_hsduic(target, UIC_HD_map, NA_value = "NA"):
-    print("Adding expected HSDUIC to target file")
+    print("  - Adding expected HSDUIC to target file")
     UIC_primary_code_list = UIC_HD_map.UIC.to_list()
     UIC_HD_map = UIC_HD_map.set_index("UIC")
     target["HSDUIC"] = target.apply(
@@ -182,10 +187,23 @@ def add_expected_hsduic(target, UIC_HD_map, NA_value = "NA"):
     return target
 
 def add_templet_columns(target, parno = "999E", ln = "99"):
-    print("Adding templet PARA and LN to target data frame")
+    print("  - Adding templet PARA and LN to target data frame")
     target["TMP_PARNO"] = parno
     target["TMP_LN"] = ln
     return target
+
+def position_level_compo_adjust(spaces):
+    print("  - Modifying compo value at position level for ABL AGR and IMA positions")
+    spaces["POSITION_COMPO"] = spaces.apply(
+        lambda row: 3 if (
+            (row.RMK1 in USAR_ABL_RMKS or
+            row.RMK2 in USAR_ABL_RMKS) or
+            (row.RMK3 in USAR_ABL_RMKS or
+            row.RMK4 in USAR_ABL_RMKS)
+            ) else row.POSITION_COMPO,
+        axis = 1
+    )
+    return spaces
 
 def add_is_templet_column(spaces):
     spaces["IS_TEMPLET"] = spaces.apply(
