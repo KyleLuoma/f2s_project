@@ -398,7 +398,7 @@ def split_population_full_runs(
         agr_ima_face_space_match        
     )
     
-    usar_spaces = spaces.where(spaces.COMPO == 3).dropna(how = "all") 
+    usar_spaces = spaces.where(spaces.POSITION_COMPO == 3).dropna(how = "all") 
     usar_spaces = usar_spaces.where(
         ~usar_spaces.FMID.isin(ac_agr_ima_face_space_match.where(
                 ac_agr_ima_face_space_match.ENCUMBERED == 1
