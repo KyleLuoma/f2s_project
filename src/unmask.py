@@ -10,12 +10,12 @@ def unmask_and_return(
     print(" - Unmasking and returning unmasked data to calling function.")
     key_file = pd.read_csv(
         emilpo_key,
-        dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
+        converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
             tapdbr_key,
-            dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+            converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
         ).set_index("SSN_MASK_HASH")
     )
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
@@ -49,12 +49,12 @@ def unmask_and_export(
     )
     key_file = pd.read_csv(
         emilpo_key,
-        dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
+        converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
             tapdbr_key,
-            dtype = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+            converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
         ).set_index("SSN_MASK_HASH")
     )   
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(

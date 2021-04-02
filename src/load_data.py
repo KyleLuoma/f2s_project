@@ -116,7 +116,7 @@ def check_rcms_columns():
     print("  - Verifying column names in the RCMS faces file")
     rcms = pd.read_excel(
         DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
-        dtype = {
+        converters = {
             "GFC1" : str,
             "GFC 1 Name" : str,
             "GFC2" : str,
@@ -294,7 +294,7 @@ def load_and_append_warcff_billet_export(num_partitions):
     cmd_billet_export = pd.read_excel(
             file_path + cmd_uic + str(1) + file_name_end,
             header = 2,
-            dtype = {
+            converters = {
                 'PARENT_PARNO': str,    
                 'FMID': str,
                 'PERLN': str,
@@ -322,7 +322,7 @@ def load_and_append_warcff_billet_export(num_partitions):
                 pd.read_excel(
                         file_path + cmd_uic + str(i) + file_name_end,
                         header = 2,
-                        dtype = {
+                        converters = {
                             'PARENT_PARNO': str,    
                             'FMID': str,
                             'PERLN': str,
@@ -357,7 +357,7 @@ def load_army_command_aos_billets():
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/W00EFF/W00EFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
-                    dtype = {
+                    converters = {
                         'PARENT_PARNO': str,    
                         'FMID': str,
                         'PERLN': str,
@@ -385,7 +385,7 @@ def load_army_command_aos_billets():
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/WSTAFF/WSTAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
-                    dtype = {
+                    converters = {
                         'PARENT_PARNO': str,    
                         'FMID': str,
                         'PERLN': str,
@@ -413,7 +413,7 @@ def load_army_command_aos_billets():
                 pd.read_excel(
                     DATA_PATH + "/aos/billet_tree/WUSAFF/WUSAFF C2 BILLET EXPORT " + AOS_FILE_DATE + ".xlsx",
                     header = 2,
-                    dtype = {
+                    converters = {
                         'PARENT_PARNO': str,    
                         'FMID': str,
                         'PERLN': str,
@@ -442,7 +442,7 @@ def load_army_command_aos_billets():
 def load_rcms():
     rcms = pd.read_excel(
         DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
-        dtype = {
+        converters = {
             "GFC1" : str,
             "GFC 1 Name" : str,
             "GFC2" : str,
@@ -494,7 +494,7 @@ def load_rcms():
 """ Retrieve SSN_MASK, UIC, PARNO, LN POSN KEY from Apart AGR file"""
 def load_apart():
     apart = pd.read_excel(DATA_PATH + "/rcmsr/assignments/" + APART_FILE,
-        dtype = {
+        converters = {
             "Mask" : str,
             "UIC" : str,
             "Paragraph" : str,
@@ -515,7 +515,7 @@ def load_apart():
 def load_emilpo():
     emilpo_file = pd.read_csv(
             DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv",
-            dtype = {
+            converters = {
                     "PARNO": str,
                     "LN": str,
                     "SSN_MASK_HASH": str,
@@ -573,7 +573,7 @@ def load_emilpo_temp_assignments():
     emilpo_temp_assignments = pd.read_csv(
         DATA_PATH + "/emilpo/temp_assignments/EMILPO_TEMP_ASSIGNMENTS_" + 
         EMILPO_TEMP_FILE_DATE + ".csv",
-        dtype = {
+        converters = {
             "SSN_MASK_HASH" : str,
             "UIC_CD" : str,	
             "RC_ATTACH_CAT_CD" : str,

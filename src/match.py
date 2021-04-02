@@ -390,7 +390,7 @@ def split_population_full_runs(
         exclude_cmds = ["AR"],
         exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
             .dropna(how = "all")
-            .index.to_list()
+            .index.tolist()
     )
                 
     #Merge AGR and IMA matches into ac matches

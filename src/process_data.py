@@ -7,6 +7,14 @@ Module to process data files loaded for F2S matching
 
 import pandas as pd
 
+#Check if pandas.isna is available in version, if not then map isnull as alias
+try:
+    pd.isna
+    print(" - pd.isna detected as part of pandas library")
+except AttributeError:
+    print(" - Mapping alias pd.isna to pd.isnull")
+    pd.isna = pd.isnull
+
 """Match phase headers
 " STAGE,UIC,PARNO,LN,GRADE,PRI_MOS,ALT_MOS,SQI,ASI,
 " GRADE_VAR_UP,GRADE_VAR_DN,TEMPLET
@@ -176,7 +184,7 @@ def check_uic_in_aos(target, uic_ouid_xwalk, uic_index_title):
 
 def add_expected_hsduic(target, UIC_HD_map, NA_value = "NA"):
     print("  - Adding expected HSDUIC to target file")
-    UIC_primary_code_list = UIC_HD_map.UIC.to_list()
+    UIC_primary_code_list = UIC_HD_map.UIC.tolist()
     UIC_HD_map = UIC_HD_map.set_index("UIC")
     target["HSDUIC"] = target.apply(
             lambda row: ((row.UIC[0:4] + UIC_HD_map.HDUIC.loc[row.UIC[4:6]]) 
@@ -258,7 +266,7 @@ def process_aos_billet_export(aos_billet_export):
     aos_billet_export["ASI_LIST"] = aos_billet_export.apply(
         lambda row: pd.Series(
             data = [row.ASI1, row.ASI2, row.ASI3, row.ASI4]
-        ).dropna().to_list(),
+        ).dropna().tolist(),
         axis = 1
     )
     
@@ -266,7 +274,7 @@ def process_aos_billet_export(aos_billet_export):
     aos_billet_export["RMK_LIST"] = aos_billet_export.apply(
         lambda row: pd.Series(
             data = [row.RMK1, row.RMK2, row.RMK3, row.RMK4]
-        ).dropna().to_list(),
+        ).dropna().tolist(),
         axis = 1
     )
             
@@ -373,7 +381,7 @@ def process_emilpo_or_rcms_assignments(
                         row.ASI12,
                         row.ASI13,
                         row.ASI14
-                        ]).dropna().to_list(),
+                        ]).dropna().tolist(),
                         axis = 1
                 )
         
@@ -396,7 +404,7 @@ def process_emilpo_or_rcms_assignments(
                         row.SQI14,
                         row.SQI15,
                         row.SQI16
-                        ]).dropna().to_list(),
+                        ]).dropna().tolist(),
                         axis = 1
                 )
         
@@ -416,7 +424,7 @@ def process_emilpo_or_rcms_assignments(
                         row.MOS_AOC11,
                         row.MOS_AOC12,
                         row.MOS_AOC13
-                        ]).dropna().to_list(),
+                        ]).dropna().tolist(),
                         axis = 1
                 )
     
@@ -451,13 +459,13 @@ def update_para_ln(target, source, verbose = False):
     target["APART_POSN_KEY"] = ""
     print("  - Iterating throuth APART file and updating RCMS Faces dataframe")
     for row in source.itertuples():
-        if(row.Index in target.index.to_list()):
+        if(row.Index in target.index.tolist()):
             target.at[row.Index, "UIC"] = row.UIC
             target.at[row.Index, "PARNO"] = row.PARNO
             target.at[row.Index, "LN"] = row.LN
             target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
             target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
-            if(row.UIC in uic_updates.index.to_list()):
+            if(row.UIC in uic_updates.index.tolist()):
                 target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
                 target.at[row.Index, "GFC1"] = uic_updates.loc[row.UIC].GFC1
                 target.at[row.Index, "GFC 1 Name"] = uic_updates.loc[row.UIC]["GFC 1 Name"]

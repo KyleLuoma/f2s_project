@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time as tm
-import pyodbc as db
+#import pyodbc as db #Commented out because JSP version of python does not have this library
 import urllib
 import sqlalchemy
 import pandas as pd
