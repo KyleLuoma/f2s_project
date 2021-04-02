@@ -29,16 +29,16 @@ LOAD_EMILPO_FACES = False
 LOAD_EMILPO_TEMP_ASSIGNMENTS = False
 LOAD_RCMS_FACES = False
 VERBOSE = False
-RUN_MATCH = True
-RUN_MATCH_DIAGNOSTICS = True
+RUN_MATCH = False
+RUN_MATCH_DIAGNOSTICS = False
 EXPORT_F2S = False
-GENERATE_CMD_METRICS = True
+GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
-EXPORT_UNMASKED = True #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = False
+EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
+UPDATE_CONNECTIONS = True
 EXPORT_CMD_SPECS = False
-EXPORT_UNMASKED_CMD_SPECS = True
-COMMAND_EXPORT_LIST = ["P1", "FC"] #Leave empty to export all commands
+EXPORT_UNMASKED_CMD_SPECS = False
+COMMAND_EXPORT_LIST = ["TC", "TA"] #Leave empty to export all commands
 
 DATA_PATH = "F:/aos/master_files"
 

@@ -199,19 +199,22 @@ def create_cmd_metrics_packages(
             "DUTY_ASG_DT" : "Assignment Start Date"
         })
         
-        export_path = MASKED_EXPORT_PATH    
+        export_path = MASKED_EXPORT_PATH
+        unmask_file_name_modifier = ""
         
         # include an option to export unmasked metrics
         if(unmask_ssn):
             print(" - Unmasking command metrics package detail worksheet")
             cmd_df = unmask.unmask_and_return(cmd_df, emilpo_key, tapdbr_key)
             export_path = UNMASKED_EXPORT_PATH
+            unmask_file_name_modifier = "_unmasked"
         
         # export to a file
         print(" - Saving " + cmd + " metrics as file to " + export_path)
         with pd.ExcelWriter(
             export_path + 
             cmd + 
+            unmask_file_name_modifier +
             "_f2s_metrics" + 
             date_time_string + 
             ".xlsx"
