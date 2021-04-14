@@ -20,7 +20,7 @@ import match
 import analytics.templet_analysis
 
 
-LOAD_MATCH_PHASES = False
+LOAD_MATCH_PHASES = True
 LOAD_AND_PROCESS_MAPS = False
 LOAD_COMMAND_CONSIDERATIONS = False
 PROCESS_COMMAND_CONSIDERATIONS = False
