@@ -19,6 +19,7 @@ import diagnostics
 import match
 import analytics.templet_analysis
 
+
 LOAD_MATCH_PHASES = False
 LOAD_AND_PROCESS_MAPS = False
 LOAD_COMMAND_CONSIDERATIONS = False
@@ -31,11 +32,11 @@ LOAD_RCMS_FACES = False
 VERBOSE = False
 RUN_MATCH = False
 RUN_MATCH_DIAGNOSTICS = False
-EXPORT_F2S = False
+EXPORT_F2S = True
 GENERATE_CMD_METRICS = False
 EXPORT_UNMATCHED = False
 EXPORT_UNMASKED = False #Export ONLY to your local drive, not to a network folder
-UPDATE_CONNECTIONS = True
+UPDATE_CONNECTIONS = False
 EXPORT_CMD_SPECS = False
 EXPORT_UNMASKED_CMD_SPECS = False
 COMMAND_EXPORT_LIST = ["TC", "TA"] #Leave empty to export all commands

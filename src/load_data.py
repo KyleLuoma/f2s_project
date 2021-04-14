@@ -14,11 +14,27 @@ import utility
 import os.path
 from os import path
 
+#Check if pandas.isna is available in version, if not then map isnull as alias
+try:
+    pd.isna
+    print(" - pd.isna detected as part of pandas library")
+except AttributeError:
+    print(" - Mapping alias pd.isna to pd.isnull")
+    pd.isna = pd.isnull
+    
+try:
+    pd.Series.isna
+    print(" - pd.Series.isna detected as part of pandas library")
+except AttributeError:
+    print(" - Mapping alias pd.Series.isna to pd.Series.isnull")
+    pd.Series.isna = pd.Series.isnull
+
 WARCFF_PARTITION_COUNT = 5
 DATA_PATH = "F:/aos/master_files"
 RCMS_FILE = "USAR_BDE_SELRES_F2S_15MAR_FINAL.xlsx"
 APART_FILE = "USAR_AGR_F2S_15MAR_FINAL.XLSX"
 RCMS_IMA_FILE = "IMA_hoy96_all_20200505_Hash.xlsx"
+TAPDBR_FILE_DATE = "3-26-2021"
 AOS_FILE_DATE = "3-10-2021"
 UIC_TREE_DATE = "3-10-2021"
 EMILPO_FILE_DATE = "3-21-2021"
@@ -26,6 +42,7 @@ EMILPO_TEMP_FILE_DATE = "3-21-2021"
 DRRSA_FILE_DATE = "3-12-2021"
 UIC_ADDRESS_FILE = "textfile_tab_1269578455_UIC_LOCNM_53057.txt"
 PHASES_FILE = "match_phases mos mismatch last.csv"
+USAR_DATA_SOURCE = "tapdbr" #select "tapdbr" or "rcms"
 
 def check_spaces_files_exist():
     print("  - Verifying that all AOS files are available")
@@ -208,21 +225,34 @@ def load_and_process_faces(
         )
         
     if(LOAD_RCMS_FACES):
-        print(" - Loading and processing rcms file")
-        rcms_faces = load_rcms()
+        try:
+            assert USAR_DATA_SOURCE in ["tapdbr", "rcms"]
+        except AssertionError:
+            print(
+                "Invalid value for constant USAR_DATA_SOURCE in load_data.py:", 
+                USAR_DATA_SOURCE
+            )
+            
+        usar_faces = pd.DataFrame
+        print(" - Loading and processing", USAR_DATA_SOURCE ,"file")
+        if(USAR_DATA_SOURCE == "rcmsr"):
+            usar_faces = load_rcms()
+        elif(USAR_DATA_SOURCE == "tapdbr"):
+            print(" - Loading and processing tapdbr file")
+            usar_faces = load_tapdbr()
         apart_data = load_apart()
-        rcms_faces = process_data.update_para_ln(target = rcms_faces, source = apart_data)
-        rcms_faces = process_data.process_emilpo_or_rcms_assignments(
-            rcms_faces,
+        usar_faces = process_data.update_para_ln(target = usar_faces, source = apart_data)
+        usar_faces = process_data.process_emilpo_or_rcms_assignments(
+            usar_faces,
             rank_grade_xwalk,
             grade_mismatch_xwalk, 
             consolidate = False,
-            source = "RCMS"
+            source = USAR_DATA_SOURCE
         )
         
     if(LOAD_EMILPO_FACES or LOAD_RCMS_FACES):
         print(" - Merging emilpo and rcms files and calculating additional fields")
-        faces = emilpo_faces.append(rcms_faces, ignore_index = True)
+        faces = emilpo_faces.append(usar_faces, ignore_index = True)
         faces = process_data.add_drrsa_data(faces, drrsa)
         faces = process_data.check_uic_in_aos(
             faces, aos_ouid_uic_xwalk, "DRRSA_ADCON"
@@ -438,6 +468,50 @@ def load_army_command_aos_billets():
             ).drop_duplicates("FMID")
     aos_file["AOS_FILE_DATE"] = AOS_FILE_DATE
     return aos_file
+
+def load_tapdbr(asgn_date_impute = "20210114"):
+    tapdbr = pd.read_csv(
+        DATA_PATH + "/tapdbr/assignments/TAPDBR_ASSIGNMENTS_" + TAPDBR_FILE_DATE + ".csv",
+        converters = {
+            "GFC1" : str,
+            "GFC 1 Name" : str,
+            "GFC2" : str,
+            "GFC 2 Name" : str,
+            "SSN_MASK_HASH" : str,
+            "PARAGRAPH" : str,
+            "Line Number" : str,
+            "RANK" : str,
+            "PMOS" : str,
+            "SMOS" : str,
+            "AMOS" : str,
+            "Primary ASI" : str,
+            "Secondary ASI" : str,
+            "Additional ASI" : str
+        }
+    ).rename(
+        columns = {
+            "SSN_MASK_HASH" : "SSN_MASK",
+            "PARAGRAPH" : "PARNO",
+            "Line Number" : "LN",
+            "Position Assigned Date" : "DUTY_ASG_DT",
+            "RANK" : "RANK_AB",
+            "PMOS" : "MOS_AOC1",
+            "SMOS" : "MOS_AOC2",
+            "AMOS" : "MOS_AOC3",
+            "Primary ASI" : "ASI1",
+            "Secondary ASI" : "ASI2",
+            "Additional ASI" : "ASI3",
+            "Unit Name" : "UNITNAME"
+        }
+    )
+    tapdbr["UIC_PAR_LN"] = tapdbr.fillna("").apply(
+        lambda row: row.UIC + row.PARNO + row.LN,
+        axis = 1
+    )
+    tapdbr.DUTY_ASG_DT.fillna(asgn_date_impute, inplace = True)
+    tapdbr["RCMS_FILE"] = TAPDBR_FILE_DATE
+    tapdbr = tapdbr.where(~tapdbr.DUTY_ASG_DT.isna()).dropna(how = "all")
+    return tapdbr.where(~tapdbr.RANK_AB.isna()).dropna(how = "all")
                 
 def load_rcms():
     rcms = pd.read_excel(
