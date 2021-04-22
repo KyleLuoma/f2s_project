@@ -339,6 +339,22 @@ def process_emilpo_or_rcms_assignments(
         axis = 1
     )
     
+    print("  - Adding leading 0 to LN for single digit LNs")
+    assignments_file.LN = assignments_file.LN.astype("str")
+    assignments_file.LN = assignments_file.apply(
+        lambda row: row.LN.zfill(2), 
+        axis = 1        
+    )
+    
+    print("  - Adding leading 0s to PARNO for less than 3 digit PARNOs")
+    assignments_file.PARNO = assignments_file.PARNO.astype("str")
+    assignments_file.PARNO = assignments_file.apply(
+        lambda row:
+            row.PARNO.zfill(3) if (len(row.PARNO) > 0 and len(row.PARNO) < 4) else
+            row.PARNO,
+        axis = 1
+    )
+    
     print("  - Mapping grade to rank in the", source, "assignments file")
     assignments_file["GRADE"] = assignments_file.apply(
         lambda row: rank_grade_xwalk.loc[row.RANK_AB].GRADE, 
@@ -433,12 +449,8 @@ def process_emilpo_or_rcms_assignments(
         assignments_file.DUTY_ASG_DT, infer_datetime_format = True, errors = "ignore"
     )
     
-    print("  - Adding leading 0 to LN for single digit LNs")
-    assignments_file.LN = assignments_file.LN.astype("str")
-    assignments_file.LN = assignments_file.apply(
-        lambda row: "0" + row.LN if len(row.LN) == 1 else row.LN, 
-        axis = 1        
-    )
+    
+    
     assignments_file["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
     return assignments_file
 
