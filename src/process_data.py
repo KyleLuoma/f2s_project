@@ -454,7 +454,7 @@ def process_emilpo_or_rcms_assignments(
     assignments_file["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
     return assignments_file
 
-def update_para_ln(target, source, verbose = False):
+def update_para_ln(target, source, verbose = False, update_unit_data = False):
     print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")
     target = target.reset_index().set_index("SSN_MASK")
     source = source.reset_index().set_index("SSN_MASK")
@@ -477,18 +477,19 @@ def update_para_ln(target, source, verbose = False):
             target.at[row.Index, "LN"] = row.LN
             target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
             target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
-            if(row.UIC in uic_updates.index.tolist()):
-                target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
-                target.at[row.Index, "GFC1"] = uic_updates.loc[row.UIC].GFC1
-                target.at[row.Index, "GFC 1 Name"] = uic_updates.loc[row.UIC]["GFC 1 Name"]
-                target.at[row.Index, "GFC2"] = uic_updates.loc[row.UIC].GFC2
-                target.at[row.Index, "GFC 2 Name"] = uic_updates.loc[row.UIC]["GFC 2 Name"]
-            else:
-                target.at[row.Index, "UNITNAME"] = "Not in RCMS file"
-                target.at[row.Index, "GFC1"] = "Not in RCMS file"
-                target.at[row.Index, "GFC 1 Name"] = "Not in RCMS file"
-                target.at[row.Index, "GFC2"] = "Not in RCMS file"
-                target.at[row.Index, "GFC 2 Name"] = "Not in RCMS file"
+            if(update_unit_data):
+                if(row.UIC in uic_updates.index.tolist()):
+                    target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
+                    target.at[row.Index, "GFC1"] = uic_updates.loc[row.UIC].GFC1
+                    target.at[row.Index, "GFC 1 Name"] = uic_updates.loc[row.UIC]["GFC 1 Name"]
+                    target.at[row.Index, "GFC2"] = uic_updates.loc[row.UIC].GFC2
+                    target.at[row.Index, "GFC 2 Name"] = uic_updates.loc[row.UIC]["GFC 2 Name"]
+                else:
+                    target.at[row.Index, "UNITNAME"] = "Not in RCMS file"
+                    target.at[row.Index, "GFC1"] = "Not in RCMS file"
+                    target.at[row.Index, "GFC 1 Name"] = "Not in RCMS file"
+                    target.at[row.Index, "GFC2"] = "Not in RCMS file"
+                    target.at[row.Index, "GFC 2 Name"] = "Not in RCMS file"
                 
         else:
             rcms_apart_mismatch_count += 1

@@ -4,21 +4,16 @@ import pandas as pd
 import analytics.lname_generator
 import unmask
 
-MASKED_EXPORT_PATH = "F:/aos/f2s_project/export/cmd_metrics/"
-UNMASKED_EXPORT_PATH = "C:/Users/KYLE/Documents/f2s_unmask/f2s_file_export/unmasked_cmd_metrics/"
-
 def create_cmd_metrics_packages(
+    run_config,
+    file_config,
     all_faces_to_matched_spaces,
     drrsa,
     address_data,
     acronym_list,
     curorg_metrics = pd.DataFrame(),
     ar_cmd_metrics = pd.DataFrame(),
-    unmask_ssn = False,
     date_time_string = "",
-    commands = [],
-    emilpo_key = pd.DataFrame(),
-    tapdbr_key = pd.DataFrame()
 ):
     uic_templets_needed = all_faces_to_matched_spaces.where(
         all_faces_to_matched_spaces.CREATE_TEMPLET == 1.0
@@ -34,7 +29,7 @@ def create_cmd_metrics_packages(
             "SSN_MASK" : "All Command Templet Requirement"
         }        
     )
-    
+    commands = run_config['COMMAND_EXPORT_LIST']    
     if(len(commands) > 0):
         print(type(commands))
         assert type(commands) == list
@@ -199,14 +194,14 @@ def create_cmd_metrics_packages(
             "DUTY_ASG_DT" : "Assignment Start Date"
         })
         
-        export_path = MASKED_EXPORT_PATH
+        export_path = file_config['MASKED_CMD_METRICS_EXPORT_PATH']
         unmask_file_name_modifier = ""
         
         # include an option to export unmasked metrics
-        if(unmask_ssn):
+        if(run_config['EXPORT_UNMASKED_CMD_SPECS']):
             print(" - Unmasking command metrics package detail worksheet")
-            cmd_df = unmask.unmask_and_return(cmd_df, emilpo_key, tapdbr_key)
-            export_path = UNMASKED_EXPORT_PATH
+            cmd_df = unmask.unmask_and_return(file_config, cmd_df)
+            export_path = file_config['UNMASKED_CMD_METRICS_EXPORT_PATH']
             unmask_file_name_modifier = "_unmasked"
         
         # export to a file

@@ -3,16 +3,11 @@ import utility
 import unmask
 import openpyxl
 
-EMILPO_KEY_DATE = "2-5-2021"
+#EMILPO_KEY_DATE = "2-5-2021"
 
 def run_export_jobs(
-    EXPORT_F2S,
-    EXPORT_UNMATCHED,
-    UPDATE_CONNECTIONS,
-    EXPORT_UNMASKED,
-    EXPORT_CMD_SPECS,
-    EXPORT_UNMASKED_CMD_SPECS,
-    COMMAND_EXPORT_LIST,
+    run_config,
+    file_config,
     face_space_match,
     all_faces_to_matched_spaces,
     attached_faces_to_matched_spaces,
@@ -23,51 +18,46 @@ def run_export_jobs(
     unmatched_faces,
     drrsa,
     address_data,
-    acronym_list,
-    AC_KEY_FILE,
-    RC_KEY_FILE
+    acronym_list
 ):
     print(" - Running export jobs")
-    if(EXPORT_F2S):
+    if(run_config['EXPORT_F2S']):
         print("  - Exporting all_faces_to_matched_spaces and command metrics")
         export_matches(face_space_match, all_faces_to_matched_spaces)
         export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics)
         
-    if(EXPORT_UNMATCHED):
+    if(run_config['EXPORT_UNMATCHED']):
         print("  - Exporting unmatched faces")
         export_unmatched(unmatched_faces)
         
-    if(UPDATE_CONNECTIONS):
+    if(run_config['UPDATE_CONNECTIONS']):
         print("  - Updating Access DB connection files")
         update_connections(
             all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics, curorg_metrics
         )
         
-    if(EXPORT_UNMASKED):
+    if(run_config['EXPORT_UNMASKED']):
         print("  - Exporting unmasked files to local directory")
         unmask.unmask_and_export(
             all_faces_to_matched_spaces,
             attached_faces_to_matched_spaces,
             utility.get_file_timestamp(),
-            AC_KEY_FILE,
-            RC_KEY_FILE
+            file_config
         )
     
-    if(EXPORT_CMD_SPECS or EXPORT_UNMASKED_CMD_SPECS):
+    if(run_config['EXPORT_CMD_SPECS'] or run_config['EXPORT_UNMASKED_CMD_SPECS']):
         print("  - Exporting command metrics workbooks")
         import analytics.cmd_metrics_package #Uncomment for debugging
         analytics.cmd_metrics_package.create_cmd_metrics_packages(
+            run_config,
+            file_config,
             all_faces_to_matched_spaces,
             drrsa,
             address_data,
             acronym_list,
             curorg_metrics,
             ar_cmd_metrics,
-            unmask_ssn = EXPORT_UNMASKED_CMD_SPECS,
-            date_time_string = utility.get_file_timestamp(),
-            commands = COMMAND_EXPORT_LIST,
-            emilpo_key = AC_KEY_FILE,
-            tapdbr_key = RC_KEY_FILE
+            date_time_string = utility.get_file_timestamp()
         )
 
 def export_matches(face_space_match, all_faces_to_matched_spaces):
@@ -112,15 +102,18 @@ def export_unmatched(unmatched_faces):
     )
     
 def update_connections(all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics, curorg_metrics):
-    all_faces_to_matched_spaces.drop_duplicates(subset = "SSN_MASK").to_csv(
-        "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
-    )
+# =============================================================================
+#     all_faces_to_matched_spaces.drop_duplicates(subset = "SSN_MASK").to_csv(
+#         "..\export\\for_connections\\all_faces_to_matched_space_latest.csv"
+#     )
+# =============================================================================
     cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
     ar_cmd_metrics.to_csv("..\export\\for_connections\\ar_cmd_metrics.csv")
+    curorg_metrics.co_csv("..\export\\for_connections\\ar_curorg_metrics.csv")
     
     print("  - Generating new excel dashboards in exports folder")
     ac_cmd_metric_dashboard = openpyxl.load_workbook(
-        filename = "F:/aos/f2s_project/export/ac_cmd_metric_dashboard_template.xlsx",
+        filename = "../export/ac_cmd_metric_dashboard_template.xlsx",
         data_only = False
     )
     del ac_cmd_metric_dashboard["CMD_Metrics"]
@@ -134,13 +127,13 @@ def update_connections(all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics,
         ac_cmd_metric_dashboard["CMD_Metrics"].append(row)
         
     ac_cmd_metric_dashboard.save(
-        "F:/aos/f2s_project/export/ac_cmd_metric_dashboard" 
+        "../export/ac_cmd_metric_dashboard" 
         + utility.get_file_timestamp()
         + ".xlsx"
     )
     
     ar_cmd_metric_dashboard = openpyxl.load_workbook(
-        filename = "F:/aos/f2s_project/export/ar_cmd_metric_dashboard_template.xlsx",
+        filename = "../export/ar_cmd_metric_dashboard_template.xlsx",
         data_only = False
     )
     del ar_cmd_metric_dashboard["CMD_Metrics"]
@@ -162,7 +155,7 @@ def update_connections(all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics,
         ar_cmd_metric_dashboard["AC_CMD_Metrics"].append(row)
     
     ar_cmd_metric_dashboard.save(
-        "F:/aos/f2s_project/export/ar_cmd_metric_dashboard" 
+        "../export/ar_cmd_metric_dashboard" 
         + utility.get_file_timestamp()
         + ".xlsx"
     )

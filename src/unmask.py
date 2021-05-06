@@ -2,20 +2,21 @@
 import pandas as pd
 
 def unmask_and_return(
+        file_config,
         all_faces_to_matched_spaces,
-        emilpo_key,
-        tapdbr_key,
         cmd_labels = ""
 ):
+    emilpo_key = file_config['AC_KEY_FILE']
+    tapdbr_key = file_config['AR_KEY_FILE']
     print(" - Unmasking and returning unmasked data to calling function.")
     key_file = pd.read_csv(
         emilpo_key,
-        converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
+        converters = {"SSN_MASK_HASH" : str, "SSN" : str}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
             tapdbr_key,
-            converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+            converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
@@ -34,8 +35,7 @@ def unmask_and_export(
         all_faces_to_matched_spaces, 
         attached_faces_to_matched_spaces,
         timestamp, 
-        emilpo_key,
-        tapdbr_key,
+        file_config,
         cmd_labels = ""
 ):
     all_faces_to_matched_spaces["ASGN_TYPE"] = "PERM"
@@ -48,13 +48,13 @@ def unmask_and_export(
         attached_faces_to_matched_spaces
     )
     key_file = pd.read_csv(
-        emilpo_key,
-        converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}
+        file_config['AC_KEY_FILE'],
+        converters = {"SSN_MASK_HASH" : str, "SSN" : str}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
-            tapdbr_key,
-            converters = {"SSN_MASK_HASH" : "str", "SSN" : "str"}            
+            file_config['AR_KEY_FILE'],
+            converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )   
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
@@ -81,7 +81,7 @@ def unmask_and_export(
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
        'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY', 'ASGN_TYPE'
     ]].to_csv(
-        "C:/Users/KYLE/Documents/f2s_unmask/f2s_file_export/" + 
+        file_config['KEY_PATH'] + 
         cmd_labels 
         + "all_faces_matched_spaces_"
         + timestamp + ".csv",
