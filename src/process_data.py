@@ -56,6 +56,7 @@ def process_address_data(address_data, country_code_xwalk):
             "ZIP" : "PH_POSTAL_CODE_TXT"
         }        
     )
+    address_update_file.COUNTRY.fillna("NKN, inplace = True)
     country_code_xwalk = country_code_xwalk.reset_index().set_index("name")
     country_key_errors = 0
     for row in address_update_file.itertuples():
