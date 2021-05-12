@@ -21,7 +21,6 @@ def create_cmd_metrics_packages(
     
     uic_templets_needed = uic_templets_needed.groupby(
         ["UIC_facesfile"],
-        observed = True,
         as_index = False
     ).count().rename(
         columns = {
@@ -42,7 +41,7 @@ def create_cmd_metrics_packages(
     # for each command in match file
     cmd_list = only_cmd_faces[["STRUC_CMD_CD"]].groupby(
         "STRUC_CMD_CD"
-    ).count().index.to_list()
+    ).count().index.tolist()
     
     uic_gfcs = pd.DataFrame()
     if "AR" in cmd_list:
@@ -52,12 +51,12 @@ def create_cmd_metrics_packages(
         )
         
         uic_gfcs = ar_faces_spaces.groupby(
-            ["GFC1", "UIC_facesfile"], observed = True, as_index = False
+            ["GFC1", "UIC_facesfile"], as_index = False
         ).count()[["UIC_facesfile", "GFC1"]]
         
         uic_gfcs = uic_gfcs.set_index("UIC_facesfile").join(
             ar_faces_spaces[["UIC_facesfile", "GFC 1 Name", "GFC1"]].groupby(
-                ["GFC 1 Name", "UIC_facesfile"], observed = True, as_index = False
+                ["GFC 1 Name", "UIC_facesfile"], as_index = False
             ).count()[["UIC_facesfile", "GFC 1 Name"]].set_index("UIC_facesfile")
         ).reset_index()
     
@@ -85,7 +84,6 @@ def create_cmd_metrics_packages(
         ).dropna(how = "all")
         cmd_uics_needed = cmd_uics_needed.groupby(
             ["UIC_facesfile"],
-            observed = True,
             as_index = False
         ).count().rename(
             columns = {
@@ -128,7 +126,7 @@ def create_cmd_metrics_packages(
                 rsuffix = "_uic_gfcs"
             ).reset_index()
             #Reorder the AR columns
-            ar_columns = cmd_uics_needed.columns.to_list()
+            ar_columns = cmd_uics_needed.columns.tolist()
             ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
             ar_columns.insert(0, "GFC 1 Name")
@@ -141,7 +139,6 @@ def create_cmd_metrics_packages(
         )[["UIC_facesfile", "UIC_PATH", "SSN_MASK"]]
         cmd_templets_needed = cmd_templets_needed.groupby(
             ["UIC_facesfile", "UIC_PATH"],
-            observed = True,
             as_index = False
         ).count().rename(
             columns = {
@@ -164,7 +161,7 @@ def create_cmd_metrics_packages(
                 lsuffix = "_cmd_uics_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
-            ar_columns = cmd_templets_needed.columns.to_list()
+            ar_columns = cmd_templets_needed.columns.tolist()
             ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
             ar_columns.insert(0, "GFC 1 Name")
@@ -215,16 +212,16 @@ def create_cmd_metrics_packages(
             ".xlsx"
         ) as writer:
             cmd_df.to_excel(
-                writer, sheet_name = "face-space-detail", freeze_panes = (1,0)
+                writer, sheet_name = "face-space-detail"
             )
             cmd_uics_needed.to_excel(
-                writer, sheet_name = "UICs-not-in-AOS", freeze_panes = (1,0)
+                writer, sheet_name = "UICs-not-in-AOS"
             )
             cmd_templets_needed.to_excel(
-                writer, sheet_name = "Templets-to-build", freeze_panes = (1,0)
+                writer, sheet_name = "Templets-to-build"
             )
             cmd_asg_age.to_excel(
-                writer, sheet_name = "Old-Assignments", freeze_panes = (1,0)        
+                writer, sheet_name = "Old-Assignments"        
             )
             if cmd == "AR":
                 curorg_metrics.to_excel(

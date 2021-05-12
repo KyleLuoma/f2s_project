@@ -69,7 +69,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         ).set_index(
             "FMID"
         )[[
-            "UIC", "PARNO", "LN", "IS_TEMPLET", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4",
+            "UIC", "PARNO", "LN", "IS_TEMPLET", "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", "AGR",
             "PARENT_TITLE", "TITLE", "GRADE", "POSCO", 
             "S_DATE", "T_DATE", "POSITION_AGE", "AOS_FILE_DATE"
         ]],
@@ -98,7 +98,7 @@ def add_vacant_positions(
             "GRADE" : "GRADE_aos"
         })[[
             "FMID", "UIC_aos", "PARNO_aos", "LN_aos", "IS_TEMPLET", 
-            "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4",
+            "RMK_LIST", "RMK1", "RMK2", "RMK3", "RMK4", "AGR",
             "PARENT_TITLE", "TITLE",
             "GRADE_aos", "POSCO", "S_DATE", "T_DATE", "POSITION_AGE", 
             "AOS_FILE_DATE", "DRRSA_ADCON", "DRRSA_ARLOC", "DRRSA_ASGMT",
@@ -165,7 +165,7 @@ def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
         'PARNO_facesfile', 'LN_facesfile', 'MIL_POSN_RPT_NR',  
         'PARENT_TITLE', 'TITLE', 'PARNO_aos', 'LN_aos', 'IS_TEMPLET',
-        'RMK_LIST', "RMK1", "RMK2", "RMK3", "RMK4", 'FMID',
+        'RMK_LIST', "RMK1", "RMK2", "RMK3", "RMK4", "AGR", 'FMID',
         'RANK_AB', 'GRADE_facesfile', 'MOS_AOC1', 'MOS_AOC2',
         'GRADE_aos', 'POSCO', 'SSN_MASK', 
         'stage_matched', 'MATCH_DESCRIPTION', 
