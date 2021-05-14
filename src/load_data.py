@@ -542,6 +542,12 @@ def load_tapdbr(file_config, asgn_date_impute = "20210114"):
     tapdbr.DUTY_ASG_DT.fillna(asgn_date_impute, inplace = True)
     tapdbr["RCMS_FILE"] = TAPDBR_FILE_DATE
     tapdbr = tapdbr.where(~tapdbr.DUTY_ASG_DT.isna()).dropna(how = "all")
+    tapdbr.dropna(subset = ["UIC"], inplace = True)
+    for column in tapdbr.columns:
+        try:
+            tapdbr[column] = tapdbr[column].str.strip()
+        except AttributeError:
+            pass
     return tapdbr.where(~tapdbr.RANK_AB.isna()).dropna(how = "all")
                 
 def load_rcms(file_config):
@@ -596,6 +602,7 @@ def load_rcms(file_config):
     
     rcms["RCMS_FILE"] = RCMS_FILE
     rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
+    rcms = rcms.dropna(subset = ["UIC"])
     return rcms.where(~rcms.RANK_AB.isna()).dropna(how = "all")
 
 """ Retrieve SSN_MASK, UIC, PARNO, LN POSN KEY from Apart AGR file"""
@@ -677,6 +684,13 @@ def load_emilpo(file_config):
                     }
             ).rename(columns = {"SSN_MASK_HASH" : "SSN_MASK"})
     emilpo_file["EMILPO_FILE_DATE"] = EMILPO_FILE_DATE
+    emilpo_file.dropna(subset = ["UIC_CD"], inplace = True)
+    print(" - Stripping white space from eMilpo columns")
+    for column in emilpo_file.columns:
+        try:
+            emilpo_file[column] = emilpo_file[column].str.strip()
+        except AttributeError:
+            pass
     return emilpo_file
 
 def load_emilpo_temp_assignments(file_config):
@@ -704,6 +718,12 @@ def load_emilpo_temp_assignments(file_config):
         emilpo_temp_assignments, utility.get_local_time_as_datetime(), 
         "ATTACH_START_DT", "ATTACHMENT"
     )
+    emilpo_temp_assignments.dropna(subset = ["UIC_CD"]), inplace = True)
+    for column in emilpo_temp_assignments.columns:
+        try:
+            emilpo_temp_assignments[column] = emilpo_temp_assignments[column].str.strip()
+        except AttributeError:
+            pass
     return emilpo_temp_assignments[[
         "SSN_MASK_HASH", "UIC_CD", "RC_ATTACH_CAT_CD", "ATTACH_START_DT",
         "ATTACH_EXP_DT", "ATTACH_RSN_CD", "ATTACH_TYP_CD", "TAPDB_REC_STAT_CD"

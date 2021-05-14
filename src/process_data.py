@@ -457,7 +457,7 @@ def process_emilpo_or_rcms_assignments(
 
 def update_para_ln(target, source, verbose = False, update_unit_data = False):
     print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")
-    target = target.reset_index().set_index("SSN_MASK")
+    target = target.reset_index().set_index("RCMS_SSN_MASK")
     source = source.reset_index().set_index("SSN_MASK")
     print("  - Generating a UIC data association dataframe to update UIC based attributes")
     uic_updates = pd.DataFrame(

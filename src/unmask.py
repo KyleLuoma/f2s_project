@@ -19,6 +19,12 @@ def unmask_and_return(
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )
+    key_file.dropna(subset = ["SSN"], inplace = True)
+    for column in key_file.columns:
+        try:
+            key_file[column] = key_file[column].str.strip()
+        except AttributeError:
+            pass
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         key_file,
         on = "SSN_MASK"        
@@ -56,7 +62,13 @@ def unmask_and_export(
             file_config['AR_KEY_FILE'],
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
-    )   
+    )
+    key_file.dropna(subset = ["SSN"], inplace = True)
+    for column in key_file.columns:
+        try:
+            key_file[column] = key_file[column].str.strip()
+        except AttributeError:
+            pass
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         key_file,
         on = "SSN_MASK"        
