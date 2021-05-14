@@ -509,6 +509,7 @@ def load_tapdbr(file_config, asgn_date_impute = "20210114"):
             "GFC2" : str,
             "GFC 2 Name" : str,
             "SSN_MASK_HASH" : str,
+            "RCMS_SSN_MASK" : str,
             "PARAGRAPH" : str,
             "Line Number" : str,
             "RANK" : str,
