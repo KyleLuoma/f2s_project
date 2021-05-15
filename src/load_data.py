@@ -503,6 +503,7 @@ def load_tapdbr(file_config, asgn_date_impute = "20210114"):
     TAPDBR_FILE_DATE = file_config['TAPDBR_FILE_DATE']
     tapdbr = pd.read_csv(
         DATA_PATH + "/tapdbr/assignments/TAPDBR_ASSIGNMENTS_" + TAPDBR_FILE_DATE + ".csv",
+        sep = '|',
         converters = {
             "GFC1" : str,
             "GFC 1 Name" : str,
@@ -634,6 +635,7 @@ def load_emilpo(file_config):
     EMILPO_FILE_DATE = file_config['EMILPO_FILE_DATE']
     emilpo_file = pd.read_csv(
             DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv",
+            sep = '|',
             converters = {
                     "PARNO": str,
                     "LN": str,
@@ -701,6 +703,7 @@ def load_emilpo_temp_assignments(file_config):
     emilpo_temp_assignments = pd.read_csv(
         DATA_PATH + "/emilpo/temp_assignments/EMILPO_TEMP_ASSIGNMENTS_" + 
         EMILPO_TEMP_FILE_DATE + ".csv",
+        sep = '|',
         converters = {
             "SSN_MASK_HASH" : str,
             "UIC_CD" : str,	
@@ -719,7 +722,7 @@ def load_emilpo_temp_assignments(file_config):
         emilpo_temp_assignments, utility.get_local_time_as_datetime(), 
         "ATTACH_START_DT", "ATTACHMENT"
     )
-    emilpo_temp_assignments.dropna(subset = ["UIC_CD"]), inplace = True)
+    emilpo_temp_assignments.dropna(subset = ["UIC_CD"], inplace = True)
     for column in emilpo_temp_assignments.columns:
         try:
             emilpo_temp_assignments[column] = emilpo_temp_assignments[column].str.strip()

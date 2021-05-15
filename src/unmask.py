@@ -11,11 +11,13 @@ def unmask_and_return(
     print(" - Unmasking and returning unmasked data to calling function.")
     key_file = pd.read_csv(
         emilpo_key,
+        sep = '|',
         converters = {"SSN_MASK_HASH" : str, "SSN" : str}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
             tapdbr_key,
+            sep = '|',
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )
@@ -55,11 +57,13 @@ def unmask_and_export(
     )
     key_file = pd.read_csv(
         file_config['AC_KEY_FILE'],
+        sep = '|',
         converters = {"SSN_MASK_HASH" : str, "SSN" : str}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
         pd.read_csv(
             file_config['AR_KEY_FILE'],
+            sep = '|',
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )
