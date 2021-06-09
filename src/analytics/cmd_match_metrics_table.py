@@ -49,6 +49,7 @@ def make_cmd_f2s_metric_df(
     # Because fillna() isn't working here, replace nan with 0s where commands
     # get 100 percent matches
     cmd_metrics.UNMATCHED.fillna(0, inplace = True)
+               
         
     cmd_metrics["MATCHED"] = cmd_metrics.ASSIGNED - cmd_metrics.UNMATCHED
     cmd_metrics["PERCENT_MATCHED"] = cmd_metrics.MATCHED / cmd_metrics.ASSIGNED
@@ -103,8 +104,39 @@ def make_cmd_f2s_metric_df(
             group_by
         ),
         on = group_by
-    )
+    )       
+        
     cmd_metrics.MATCHED_ASG_OLDER_THAN_POS.fillna(0, inplace = True)
+    
+        
+    if(group_by == "STRUC_CMD_CD"):
+        cmd_metrics = cmd_metrics.join(
+            non_matches.where(
+                non_matches.RCC == "IMA"
+            ).dropna(how = "all")[["TAPDBR_CMD_CD", "SSN_MASK"]].dropna(
+                how = "all"
+            ).groupby(
+                "TAPDBR_CMD_CD"        
+            ).count().rename(
+                columns = {"SSN_MASK" : "UNMATCHED_IMA"}        
+            ),
+            on = group_by
+        )
+        cmd_metrics.UNMATCHED_IMA.fillna(0, inplace = True)
+            
+        cmd_metrics = cmd_metrics.join(
+            non_matches.where(
+                non_matches.RCC == "AGR"
+            ).dropna(how = "all")[["TAPDBR_CMD_CD", "SSN_MASK"]].dropna(
+                how = "all"
+            ).groupby(
+                "TAPDBR_CMD_CD"        
+            ).count().rename(
+                columns = {"SSN_MASK" : "UNMATCHED_AGR"}        
+            ),
+            on = group_by
+        )
+        cmd_metrics.UNMATCHED_AGR.fillna(0, inplace = True)
         
     return cmd_metrics
 

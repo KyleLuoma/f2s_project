@@ -2,12 +2,12 @@
 
 def get_run_config():
     run_config = {
-        'LOAD_MATCH_PHASES'              : True,
-        'LOAD_AND_PROCESS_MAPS'          : True,
-        'LOAD_COMMAND_CONSIDERATIONS'    : True,
-        'PROCESS_COMMAND_CONSIDERATIONS' : True,
-        'LOAD_AND_PROCESS_SPACES'        : True,
-        'LOAD_AND_PROCESS_ADDRESS_DATA'  : True,
+        'LOAD_MATCH_PHASES'              : False,
+        'LOAD_AND_PROCESS_MAPS'          : False,
+        'LOAD_COMMAND_CONSIDERATIONS'    : False,
+        'PROCESS_COMMAND_CONSIDERATIONS' : False,
+        'LOAD_AND_PROCESS_SPACES'        : False,
+        'LOAD_AND_PROCESS_ADDRESS_DATA'  : False,
         'LOAD_EMILPO_FACES'              : False,
         'LOAD_EMILPO_TEMP_ASSIGNMENTS'   : False,
         'LOAD_RCMS_FACES'                : False,
@@ -15,11 +15,11 @@ def get_run_config():
         'RUN_MATCH'                      : False,
         'RUN_MATCH_DIAGNOSTICS'          : False,
         'EXPORT_F2S'                     : False,
-        'GENERATE_CMD_METRICS'           : False,
+        'GENERATE_CMD_METRICS'           : True,
         'EXPORT_UNMATCHED'               : False,
         #Export ONLY to your local drive, not to a network folder:
         'EXPORT_UNMASKED'                : False, 
-        'UPDATE_CONNECTIONS'             : False,
+        'UPDATE_CONNECTIONS'             : True,
         'EXPORT_CMD_SPECS'               : False,
         'EXPORT_UNMASKED_CMD_SPECS'      : False,
         'COMMAND_EXPORT_LIST' : [] #Leave empty to export all commands
@@ -29,7 +29,7 @@ def get_run_config():
 
 def get_file_config():
     file_config = {
-        'DATA_PATH' : "O:/FMD/SFAB/AOS/f2s_project_master_files",
+        'DATA_PATH' : "Y:/AOS/master_files",
         #Update this to reflect the current key files for unmasking
         'AC_KEY_DATE'           : "5-14-2021",
         'AR_KEY_DATE'           : "5-14-2021",
@@ -52,10 +52,10 @@ def get_file_config():
         'UIC_ADDRESS_FILE'      : "textfile_tab_1269578455_UIC_LOCNM_53057.txt",
         'PHASES_FILE'           : "match_phases mos mismatch last.csv",
         #Update absolute paths for command metric exports
-        'MASKED_CMD_METRICS_EXPORT_PATH'   : "O:/FMD/SFAB/AOS/f2s_project-master/export/cmd_metrics/",
+        'MASKED_CMD_METRICS_EXPORT_PATH'   : "Y:/AOS/f2s_project/export/cmd_metrics/",
         'UNMASKED_CMD_METRICS_EXPORT_PATH' : "C:/f2s_data/unmask/cmd_metrics/",
         #Export File Name note - addes whatever string value you enter here between the file name and date stamp
-        'EXPORT_FILENAME_NOTE'             : "_mock6b_"
+        'EXPORT_FILENAME_NOTE'             : "_FY21Billets_"
     }
     
     file_config['AC_KEY_FILE'] = file_config['KEY_PATH'] \

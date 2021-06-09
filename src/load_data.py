@@ -613,7 +613,7 @@ def load_rcms(file_config):
         lambda row: row.UIC + row.PARNO + row.LN,
         axis = 1
     )
-    
+    rcms["TAPDBR_CMD_CD"] = "AR"
     rcms["RCMS_FILE"] = RCMS_FILE
     rcms = rcms.where(~rcms.DUTY_ASG_DT.isna()).dropna(how = "all")
     rcms = rcms.dropna(subset = ["UIC"])

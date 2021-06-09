@@ -119,6 +119,7 @@ def calculate_age(target, today, time_column, age_column_prefix = ""):
         )
     except AttributeError:
         print("  - Caught an AttributeError exception when attempting to access date data from row")
+    target[target_column] = target[target_column].fillna(0)
     return target
 
 def add_match_phase_description(target, match_phases):

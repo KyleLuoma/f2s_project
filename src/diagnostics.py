@@ -49,7 +49,7 @@ def face_space_match_analysis(faces, face_space_match, spaces):
         "RANK_AB", "GRADE",
         "DRRSA_ADCON", "DRRSA_HOGEO", "DRRSA_ARLOC", "DRRSA_GEOLOCATIONNAME",
         "DRRSA_ASGMT", "PPA", "DRRSA_ADCON_IN_AOS", "ASSIGNMENT_AGE", "RCC",
-        "UNITNAME", "EMILPO_FILE_DATE", "RCMS_FILE"
+        "UNITNAME", "TAPDBR_CMD_CD", "EMILPO_FILE_DATE", "RCMS_FILE"
     ]].set_index("SSN_MASK", drop = True)
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         face_space_match.reset_index(
@@ -159,7 +159,7 @@ def space_available_analysis(faces, face_space_match, spaces):
     
 def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
     return all_faces_to_matched_spaces[[
-        'DRRSA_ASGMT', 'STRUC_CMD_CD', 'DML_CD', 'DMSL_CD',
+        'DRRSA_ASGMT', 'STRUC_CMD_CD', 'TAPDBR_CMD_CD', 'DML_CD', 'DMSL_CD',
         'GFC1', 'GFC 1 Name', "GFC2", "GFC 2 Name",
         'RCC', 'PARENT_UIC_CD', 
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 
