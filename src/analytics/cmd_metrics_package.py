@@ -21,6 +21,7 @@ def create_cmd_metrics_packages(
     
     uic_templets_needed = uic_templets_needed.groupby(
         ["UIC_facesfile"],
+        #observed = True,
         as_index = False
     ).count().rename(
         columns = {
@@ -59,8 +60,22 @@ def create_cmd_metrics_packages(
                 ["GFC 1 Name", "UIC_facesfile"], as_index = False
             ).count()[["UIC_facesfile", "GFC 1 Name"]].set_index("UIC_facesfile")
         ).reset_index()
-    
-    
+            
+    if not (len(cmd_list) == 1 and "AR" in cmd_list): #Make sure we're not doing an AR only run
+        print(" - Commands other than AR selected for export, processing non-AR data frames")
+        non_ar_faces_spaces = all_faces_to_matched_spaces.where(
+            all_faces_to_matched_spaces.STRUC_CMD_CD != "AR"        
+        ).dropna(how = "all")
+        uic_dmls = non_ar_faces_spaces.groupby(
+            ["DML_CD", "UIC_facesfile"], as_index = False        
+        ).count()[["UIC_facesfile", "DML_CD"]]
+        uic_dmsls = non_ar_faces_spaces.groupby(
+            ["DMSL_CD", "UIC_facesfile"], as_index = False        
+        ).count()[["UIC_facesfile", "DMSL_CD"]]
+        uic_dml_dmsl = uic_dmls.set_index("UIC_facesfile").join(
+            uic_dmsls.set_index("UIC_facesfile")        
+        ).reset_index()
+        
     for cmd in cmd_list:
         print(" - Procesing command metrics file for: " + cmd)
         
@@ -132,6 +147,20 @@ def create_cmd_metrics_packages(
             ar_columns.insert(0, "GFC 1 Name")
             ar_columns.insert(0, "GFC1")
             cmd_uics_needed = cmd_uics_needed[ar_columns]
+        else:
+            cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index(
+                "UIC not in AOS"        
+            ).join(
+                uic_dml_dmsl.reset_index(drop = True).set_index("UIC_facesfile"),
+                lsuffix = "_cmd_uics_needed",
+                rsuffix = "_uic_dml_dmsl"
+            ).reset_index()
+            ac_columns = cmd_uics_needed.columns.tolist()
+            ac_columns.remove("DML_CD")
+            ac_columns.remove("DMSL_CD")
+            ac_columns.insert(0, "DML_CD")
+            ac_columns.insert(0, "DMSL_CD")
+            cmd_uics_needed = cmd_uics_needed[ac_columns]
         
         # create a DF with a list of UICs that require templets
         cmd_templets_needed = cmd_df.query(
@@ -158,7 +187,7 @@ def create_cmd_metrics_packages(
                 "UICs requiring templets"
             ).join(
                 uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
-                lsuffix = "_cmd_uics_needed",
+                lsuffix = "_cmd_templets_needed",
                 rsuffix = "_uic_gfcs"
             ).reset_index()
             ar_columns = cmd_templets_needed.columns.tolist()
@@ -167,6 +196,20 @@ def create_cmd_metrics_packages(
             ar_columns.insert(0, "GFC 1 Name")
             ar_columns.insert(0, "GFC1")
             cmd_templets_needed = cmd_templets_needed[ar_columns]
+        else:
+            cmd_templets_needed = cmd_templets_needed.reset_index(drop = True).set_index(
+                "UICs requiring templets"        
+            ).join(
+                uic_dml_dmsl.reset_index(drop = True).set_index("UIC_facesfile"),
+                lsuffix = "_cmd_templets_needed",
+                rsuffix = "_uic_dml_dmsl"
+            ).reset_index()
+            ac_columns = cmd_templets_needed.columns.tolist()
+            ac_columns.remove("DML_CD")
+            ac_columns.remove("DMSL_CD")
+            ac_columns.insert(0, "DML_CD")
+            ac_columns.insert(0, "DMSL_CD")
+            cmd_templets_needed = cmd_templets_needed[ac_columns]
       
         # create a DF with a list of positions with assignment age > position age
         cmd_asg_age = cmd_df.where(
@@ -208,6 +251,7 @@ def create_cmd_metrics_packages(
             cmd + 
             unmask_file_name_modifier +
             "_f2s_metrics" + 
+            file_config["EXPORT_FILENAME_NOTE"] +
             date_time_string + 
             ".xlsx"
         ) as writer:
@@ -220,9 +264,11 @@ def create_cmd_metrics_packages(
             cmd_templets_needed.to_excel(
                 writer, sheet_name = "Templets-to-build"
             )
-            cmd_asg_age.to_excel(
-                writer, sheet_name = "Old-Assignments"        
-            )
+#==============================================================================
+#             cmd_asg_age.to_excel(
+#                 writer, sheet_name = "Old-Assignments"        
+#             )
+#==============================================================================
             if cmd == "AR":
                 curorg_metrics.to_excel(
                     writer, sheet_name = "CURORG Metrics"            

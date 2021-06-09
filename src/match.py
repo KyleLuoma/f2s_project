@@ -378,8 +378,10 @@ def split_population_full_runs(
     # Full run for AC faces and spaces:
     
     #Drop spaces encumbered by IMA and AGR:
-    ac_run_spaces = spaces.where(
-        ~spaces.FMID.isin(agr_ima_face_space_match.FMID)
+    ac_run_spaces = spaces.where(spaces.POSITION_COMPO == 1)
+    
+    ac_run_spaces = ac_run_spaces.where(
+        ~ac_run_spaces.FMID.isin(agr_ima_face_space_match.FMID)
     ).dropna(how = "all")
     
     unmatched_faces, remaining_spaces, ac_face_space_match = full_run(
@@ -388,9 +390,7 @@ def split_population_full_runs(
         ac_run_spaces,
         include_only_cmds = [],
         exclude_cmds = ["AR"],
-        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC)
-            .dropna(how = "all")
-            .index.tolist()
+        exclude_rmks = rmk_codes.where(rmk_codes.NO_AC).dropna(how = "all").index.tolist()
     )
                 
     #Merge AGR and IMA matches into ac matches

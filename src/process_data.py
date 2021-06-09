@@ -56,7 +56,7 @@ def process_address_data(address_data, country_code_xwalk):
             "ZIP" : "PH_POSTAL_CODE_TXT"
         }        
     )
-    address_update_file.COUNTRY.fillna("NKN, inplace = True)
+    address_update_file.COUNTRY.fillna("NKN", inplace = True)
     country_code_xwalk = country_code_xwalk.reset_index().set_index("name")
     country_key_errors = 0
     for row in address_update_file.itertuples():
@@ -112,10 +112,13 @@ def calculate_age(target, today, time_column, age_column_prefix = ""):
     print("Calculating target column age with prefix", age_column_prefix)
     target_column = age_column_prefix + "_AGE"
     target[target_column] = 0
-    target[target_column] = target.apply(
-        lambda row: (today - row[time_column]).days, 
-        axis = 1
-    )
+    try:
+        target[target_column] = target.apply(
+            lambda row: (today - row[time_column]).days, 
+            axis = 1
+        )
+    except AttributeError:
+        print("  - Caught an AttributeError exception when attempting to access date data from row")
     return target
 
 def add_match_phase_description(target, match_phases):
@@ -265,17 +268,15 @@ def process_aos_billet_export(aos_billet_export):
     
     print("  - Consolidating AOS ASIs into ASI_LIST column")
     aos_billet_export["ASI_LIST"] = aos_billet_export.apply(
-        lambda row: pd.Series(
-            data = [row.ASI1, row.ASI2, row.ASI3, row.ASI4]
-        ).dropna().tolist(),
+        lambda row: "[" + str(row.ASI1) + ", " + 
+                      str(row.ASI2) + ", " + str(row.ASI4) + "]",
         axis = 1
     )
     
     print("  - Consolidating AOS RMKs into RMK_LIST column")
     aos_billet_export["RMK_LIST"] = aos_billet_export.apply(
-        lambda row: pd.Series(
-            data = [row.RMK1, row.RMK2, row.RMK3, row.RMK4]
-        ).dropna().tolist(),
+        lambda row: "[" + str(row.RMK1) + ", " + str(row.RMK2) + ", " + 
+                      str(row.RMK3) + ", " + str(row.RMK4) + "]",
         axis = 1
     )
             
@@ -383,65 +384,59 @@ def process_emilpo_or_rcms_assignments(
     if(consolidate):
         print("  - Consolidating ASIs into ASI_LIST column in the", source, "assignments file")
         assignments_file["ASI_LIST"] = assignments_file.apply(
-                lambda row: pd.Series(data = [
-                        row.ASI1,
-                        row.ASI2,
-                        row.ASI3,
-                        row.ASI4,
-                        row.ASI5,
-                        row.ASI6,
-                        row.ASI7,
-                        row.ASI8,
-                        row.ASI9,
-                        row.ASI10,
-                        row.ASI11,
-                        row.ASI12,
-                        row.ASI13,
-                        row.ASI14
-                        ]).dropna().tolist(),
+                lambda row: "[" + str(row.ASI1) + ", " +
+                              str(row.ASI2) + ", " +
+                              str(row.ASI3) + ", " +
+                              str(row.ASI4) + ", " +
+                              str(row.ASI5) + ", " +
+                              str(row.ASI6) + ", " +
+                              str(row.ASI7) + ", " +
+                              str(row.ASI8) + ", " +
+                              str(row.ASI9) + ", " +
+                              str(row.ASI10) + ", " +
+                              str(row.ASI11) + ", " +
+                              str(row.ASI12) + ", " +
+                              str(row.ASI13) + ", " +
+                              str(row.ASI14) + "]",
                         axis = 1
                 )
         
         print("  - Consolidating SQIs into SQI_LIST column in the", source, "assignments file")
         assignments_file["SQI_LIST"] = assignments_file.apply(
-                lambda row: pd.Series(data = [
-                        row.SQI1,
-                        row.SQI2,
-                        row.SQI3,
-                        row.SQI4,
-                        row.SQI5,
-                        row.SQI6,
-                        row.SQI7,
-                        row.SQI8,
-                        row.SQI9,
-                        row.SQI10,
-                        row.SQI11,
-                        row.SQI12,
-                        row.SQI13,
-                        row.SQI14,
-                        row.SQI15,
-                        row.SQI16
-                        ]).dropna().tolist(),
+                lambda row: "[" + str(row.SQI1) + ", " +
+                              str(row.SQI2) + ", " +
+                              str(row.SQI3) + ", " +
+                              str(row.SQI4) + ", " +
+                              str(row.SQI5) + ", " +
+                              str(row.SQI6) + ", " +
+                              str(row.SQI7) + ", " +
+                              str(row.SQI8) + ", " +
+                              str(row.SQI9) + ", " +
+                              str(row.SQI10) + ", " +
+                              str(row.SQI11) + ", " +
+                              str(row.SQI12) + ", " +
+                              str(row.SQI13) + ", " +
+                              str(row.SQI14) + ", " +
+                              str(row.SQI15) + ", " +
+                              str(row.SQI16) + "]",
                         axis = 1
                 )
         
         print("  - Consolidating MOS/AOC into MOS_AOC_LIST column in the", source, "assignments file")
         assignments_file["MOS_AOC_LIST"] = assignments_file.apply(
-                lambda row: pd.Series(data = [
-                        row.MOS_AOC1,
-                        row.MOS_AOC2,
-                        row.MOS_AOC3,
-                        row.MOS_AOC4,
-                        row.MOS_AOC5,
-                        row.MOS_AOC6,
-                        row.MOS_AOC7,
-                        row.MOS_AOC8,
-                        row.MOS_AOC9,
-                        row.MOS_AOC10,
-                        row.MOS_AOC11,
-                        row.MOS_AOC12,
-                        row.MOS_AOC13
-                        ]).dropna().tolist(),
+                lambda row: "[" + str(row.MOS_AOC1) + ", " +
+                              str(row.MOS_AOC2) + ", " +
+                              str(row.MOS_AOC3) + ", " +
+                              str(row.MOS_AOC4) + ", " +
+                              str(row.MOS_AOC5) + ", " +
+                              str(row.MOS_AOC6) + ", " +
+                              str(row.MOS_AOC7) + ", " +
+                              str(row.MOS_AOC8) + ", " +
+                              str(row.MOS_AOC9) + ", " +
+                              str(row.MOS_AOC10) + ", " +
+                              str(row.MOS_AOC11) + ", " +
+                              str(row.MOS_AOC12) + ", " +
+                              str(row.MOS_AOC13) + "]",
                         axis = 1
                 )
     
@@ -455,9 +450,13 @@ def process_emilpo_or_rcms_assignments(
     assignments_file["ASSIGNMENT_TYPE"] = "ASSIGN_PER"    
     return assignments_file
 
-def update_para_ln(target, source, verbose = False, update_unit_data = False):
-    print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")
-    target = target.reset_index().set_index("RCMS_SSN_MASK")
+def update_para_ln(file_config, target, source, verbose = False, update_unit_data = False):
+    if(file_config["USAR_DATA_SOURCE"]== 'tapdbr'):
+        print(" - Updating UIC, PARA and LN in TAPDBR Faces with APART data")
+        target = target.reset_index().set_index("RCMS_SSN_MASK")
+    elif(file_config["USAR_DATA_SOURCE"] == 'rcms'):
+        print(" - Updating UIC, PARA and LN in RCMS Faces with APART data")
+        target = target.reset_index().set_index("SSN_MASK")
     source = source.reset_index().set_index("SSN_MASK")
     print("  - Generating a UIC data association dataframe to update UIC based attributes")
     uic_updates = pd.DataFrame(
@@ -478,6 +477,7 @@ def update_para_ln(target, source, verbose = False, update_unit_data = False):
             target.at[row.Index, "LN"] = row.LN
             target.at[row.Index, "APART_POSN_KEY"] = row.APART_POSN_KEY
             target.at[row.Index, "UIC_PAR_LN"] = (row.UIC + row.PARNO + row.LN)
+            
             if(update_unit_data):
                 if(row.UIC in uic_updates.index.tolist()):
                     target.at[row.Index, "UNITNAME"] = uic_updates.loc[row.UIC].UNITNAME
@@ -491,6 +491,12 @@ def update_para_ln(target, source, verbose = False, update_unit_data = False):
                     target.at[row.Index, "GFC 1 Name"] = "Not in RCMS file"
                     target.at[row.Index, "GFC2"] = "Not in RCMS file"
                     target.at[row.Index, "GFC 2 Name"] = "Not in RCMS file"
+            else:
+                target.at[row.Index, "UNITNAME"] = "AGR from APART"
+                target.at[row.Index, "GFC1"] = "AGR"
+                target.at[row.Index, "GFC 1 Name"] = "Updated from APART file"
+                target.at[row.Index, "GFC2"] = "AGR"
+                target.at[row.Index, "GFC 2 Name"] = "Updated from APART file"
                 
         else:
             rcms_apart_mismatch_count += 1

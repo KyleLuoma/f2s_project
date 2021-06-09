@@ -11,7 +11,7 @@ def unmask_and_return(
     print(" - Unmasking and returning unmasked data to calling function.")
     key_file = pd.read_csv(
         emilpo_key,
-        sep = '|',
+        sep = "|",
         converters = {"SSN_MASK_HASH" : str, "SSN" : str}
     ).set_index("SSN_MASK_HASH")
     key_file = key_file.append(
@@ -21,12 +21,14 @@ def unmask_and_return(
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
     )
+    key_file = key_file.append(
+        pd.read_csv(
+            file_config['AR_KEY_FILE'],
+            sep = '|',
+            converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
+        ).set_index("SSN_MASK_HASH")
+    )  
     key_file.dropna(subset = ["SSN"], inplace = True)
-    for column in key_file.columns:
-        try:
-            key_file[column] = key_file[column].str.strip()
-        except AttributeError:
-            pass
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.join(
         key_file,
         on = "SSN_MASK"        
@@ -66,7 +68,7 @@ def unmask_and_export(
             sep = '|',
             converters = {"SSN_MASK_HASH" : str, "SSN" : str}            
         ).set_index("SSN_MASK_HASH")
-    )
+    )  
     key_file.dropna(subset = ["SSN"], inplace = True)
     for column in key_file.columns:
         try:

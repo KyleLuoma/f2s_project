@@ -43,7 +43,7 @@ def run_face_match_diagnostics(
 def face_space_match_analysis(faces, face_space_match, spaces):
     #Export a join of eMILPO and AOS using face_space_match to connect
     all_faces_to_matched_spaces = faces[[
-        "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", 
+        "SSN_MASK", "UIC", "PARENT_UIC_CD", "STRUC_CMD_CD", "DML_CD", "DMSL_CD", 
         "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name",
         "PARNO", "LN", "MIL_POSN_RPT_NR", "APART_POSN_KEY", "DUTY_ASG_DT", "MOS_AOC1", "MOS_AOC2", 
         "RANK_AB", "GRADE",
@@ -147,7 +147,7 @@ def space_available_analysis(faces, face_space_match, spaces):
     faces_subset = faces[[
         "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name",
         "GRADE", "MOS_AOC_LIST", "SQI_LIST", 
-        "STRUC_CMD_CD", "UIC", "PARNO", "LN", "MIL_POSN_RPT_NR", "SSN_MASK"
+        "STRUC_CMD_CD", "DML", "DMSL", "UIC", "PARNO", "LN", "MIL_POSN_RPT_NR", "SSN_MASK"
     ]].set_index("SSN_MASK")
     all_spaces_to_matched_faces = all_spaces_to_matched_faces.join(
         faces_subset,
@@ -159,7 +159,7 @@ def space_available_analysis(faces, face_space_match, spaces):
     
 def reorder_all_faces_to_matched_spaces_columns(all_faces_to_matched_spaces):
     return all_faces_to_matched_spaces[[
-        'DRRSA_ASGMT', 'STRUC_CMD_CD',
+        'DRRSA_ASGMT', 'STRUC_CMD_CD', 'DML_CD', 'DMSL_CD',
         'GFC1', 'GFC 1 Name', "GFC2", "GFC 2 Name",
         'RCC', 'PARENT_UIC_CD', 
         'UIC', 'UIC_facesfile', 'UIC_aos', 'UNITNAME', 

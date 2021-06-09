@@ -133,11 +133,20 @@ def check_rcms_files_exist(file_config):
     DATA_PATH = file_config['DATA_PATH']
     RCMS_FILE = file_config['RCMS_FILE']
     APART_FILE = file_config['APART_FILE']
+    TAPDBR_FILE_DATE = file_config['TAPDBR_FILE_DATE']
     print("  - Verifying that the RCMS and APART faces files are available")
     exists = True
-    if not path.exists(DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE):
-        exists = False
-        print("     - Missing RCMS file", RCMS_FILE)
+    if(file_config['USAR_DATA_SOURCE'] == 'tapdbr'):
+        if not path.exists(
+            DATA_PATH + "/tapdbr/assignments/TAPDBR_ASSIGNMENTS_" + 
+            TAPDBR_FILE_DATE + ".csv"
+        ):
+            exists = False
+            print("     - Missing TAPDBR file dated", TAPDBR_FILE_DATE)
+    elif(file_config['USAR_DATA_SOURCE'] == 'rcms'):
+        if not path.exists(DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE):
+            exists = False
+            print("     - Missing RCMS file", RCMS_FILE)
     if not path.exists(DATA_PATH + "/rcmsr/assignments/" + APART_FILE):
         exists = False
         print("     - Missing APART file", APART_FILE)
@@ -148,34 +157,35 @@ def check_rcms_columns(file_config):
     RCMS_FILE = file_config['RCMS_FILE']
     APART_FILE = file_config['APART_FILE']
     print("  - Verifying column names in the RCMS faces file")
-    rcms = pd.read_excel(
-        DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
-        converters = {
-            "GFC1" : str,
-            "GFC 1 Name" : str,
-            "GFC2" : str,
-            "GFC 2 Name" : str,
-            "Mask" : str,
-            "Paragraph" : str,
-            "Line Number" : str,
-            "Rank" : str,
-            "PMOS" : str,
-            "SMOS" : str,
-            "AMOS" : str,
-            "Primary ASI" : str,
-            "Secondary ASI" : str,
-            "Additional ASI" : str
-        }
-    )
-    rcms_required_columns = [
-        "STRUC_CMD_CD", "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name", "UPC", "UIC",
-        "Unit Name", "RCC", "Mask", "Grade", "MPC", "Rank", "Position Assigned Date",
-        "Position Number", "Paragraph", "Line Number", "PMOS", "SMOS", "AMOS",
-        "Primary ASI", "Secondary ASI", "Additional ASI"
-    ]
-    print(rcms[rcms_required_columns].head())
-    print("   ...all required RCMS columns present.")
-    print("  - Verifying column names in the APART faces file")
+    if (file_config["USAR_DATA_SOURCE"] == "rcms"):
+        rcms = pd.read_excel(
+            DATA_PATH + "/rcmsr/assignments/" + RCMS_FILE,
+            converters = {
+                "GFC1" : str,
+                "GFC 1 Name" : str,
+                "GFC2" : str,
+                "GFC 2 Name" : str,
+                "Mask" : str,
+                "Paragraph" : str,
+                "Line Number" : str,
+                "Rank" : str,
+                "PMOS" : str,
+                "SMOS" : str,
+                "AMOS" : str,
+                "Primary ASI" : str,
+                "Secondary ASI" : str,
+                "Additional ASI" : str
+            }
+        )
+        rcms_required_columns = [
+            "STRUC_CMD_CD", "GFC1", "GFC 1 Name", "GFC2", "GFC 2 Name", "UPC", "UIC",
+            "Unit Name", "RCC", "Mask", "Grade", "MPC", "Rank", "Position Assigned Date",
+            "Position Number", "Paragraph", "Line Number", "PMOS", "SMOS", "AMOS",
+            "Primary ASI", "Secondary ASI", "Additional ASI"
+        ]
+        print(rcms[rcms_required_columns].head())
+        print("   ...all required RCMS columns present.")
+        print("  - Verifying column names in the APART faces file")
     apart = pd.read_excel(DATA_PATH + "/rcmsr/assignments/" + APART_FILE
     )
     apart_required_columns = [
@@ -251,13 +261,13 @@ def load_and_process_faces(
             
         usar_faces = pd.DataFrame
         print(" - Loading and processing", file_config['USAR_DATA_SOURCE'] ,"file")
-        if(file_config['USAR_DATA_SOURCE'] == "rcmsr"):
+        if(file_config['USAR_DATA_SOURCE'] == "rcms"):
             usar_faces = load_rcms(file_config)
         elif(file_config['USAR_DATA_SOURCE'] == "tapdbr"):
             print(" - Loading and processing tapdbr file")
             usar_faces = load_tapdbr(file_config)
         apart_data = load_apart(file_config)
-        usar_faces = process_data.update_para_ln(target = usar_faces, source = apart_data)
+        usar_faces = process_data.update_para_ln(file_config, target = usar_faces, source = apart_data)
         usar_faces = process_data.process_emilpo_or_rcms_assignments(
             usar_faces,
             rank_grade_xwalk,
@@ -550,6 +560,8 @@ def load_tapdbr(file_config, asgn_date_impute = "20210114"):
             tapdbr[column] = tapdbr[column].str.strip()
         except AttributeError:
             pass
+    tapdbr["TAPDBR_CMD_CD"] = tapdbr["STRUC_CMD_CD"]
+    tapdbr["STRUC_CMD_CD"] = "AR"
     return tapdbr.where(~tapdbr.RANK_AB.isna()).dropna(how = "all")
                 
 def load_rcms(file_config):
@@ -688,7 +700,7 @@ def load_emilpo(file_config):
             ).rename(columns = {"SSN_MASK_HASH" : "SSN_MASK"})
     emilpo_file["EMILPO_FILE_DATE"] = EMILPO_FILE_DATE
     emilpo_file.dropna(subset = ["UIC_CD"], inplace = True)
-    print(" - Stripping white space from eMilpo columns")
+    print("  - Stripping white space from eMilpo columns")
     for column in emilpo_file.columns:
         try:
             emilpo_file[column] = emilpo_file[column].str.strip()

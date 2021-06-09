@@ -23,12 +23,12 @@ def run_export_jobs(
     print(" - Running export jobs")
     if(run_config['EXPORT_F2S']):
         print("  - Exporting all_faces_to_matched_spaces and command metrics")
-        export_matches(face_space_match, all_faces_to_matched_spaces)
-        export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics)
+        export_matches(file_config, face_space_match, all_faces_to_matched_spaces)
+        export_metrics(file_config, cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics)
         
     if(run_config['EXPORT_UNMATCHED']):
         print("  - Exporting unmatched faces")
-        export_unmatched(unmatched_faces)
+        export_unmatched(file_config, unmatched_faces)
         
     if(run_config['UPDATE_CONNECTIONS']):
         print("  - Updating Access DB connection files")
@@ -60,43 +60,50 @@ def run_export_jobs(
             date_time_string = utility.get_file_timestamp()
         )
 
-def export_matches(face_space_match, all_faces_to_matched_spaces):
+def export_matches(file_config, face_space_match, all_faces_to_matched_spaces):
     face_space_match.to_csv(
         "..\export\\face_space_matches" 
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp() 
         + ".csv"
     )
     all_faces_to_matched_spaces.to_csv(
         "..\export\\all_faces_to_matched_spaces" 
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp() 
         + ".csv"
     )
     
-def export_metrics(cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics):
+def export_metrics(file_config, cmd_metrics, ar_cmd_metrics, ac_ar_metrics, curorg_metrics):
     cmd_metrics.to_csv(
         "../export/command_metrics"
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp()
         + ".csv"
     )                
     ar_cmd_metrics.to_csv(
         "../export/ar_command_metrics"
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp()
         + ".csv"
     )
     ac_ar_metrics.to_csv(
         "../export/ac_ar_command_metrics"
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp()
         + ".csv"
     )
     curorg_metrics.to_csv(
         "../export/ar_curorg_rcc_metrics"
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp()
         + ".csv"   
     )
     
-def export_unmatched(unmatched_faces):
+def export_unmatched(file_config, unmatched_faces):
     unmatched_faces.to_csv(
         "..\export\\unmatched_faces" 
+        + file_config["EXPORT_FILENAME_NOTE"]
         + utility.get_file_timestamp() 
         + ".csv"
     )
@@ -109,7 +116,7 @@ def update_connections(all_faces_to_matched_spaces, cmd_metrics, ar_cmd_metrics,
 # =============================================================================
     cmd_metrics.to_csv("..\export\\for_connections\\cmd_metrics.csv")
     ar_cmd_metrics.to_csv("..\export\\for_connections\\ar_cmd_metrics.csv")
-    curorg_metrics.co_csv("..\export\\for_connections\\ar_curorg_metrics.csv")
+    curorg_metrics.to_csv("..\export\\for_connections\\ar_curorg_metrics.csv")
     
     print("  - Generating new excel dashboards in exports folder")
     ac_cmd_metric_dashboard = openpyxl.load_workbook(
