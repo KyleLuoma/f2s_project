@@ -12,10 +12,10 @@ def get_run_config():
         'LOAD_EMILPO_TEMP_ASSIGNMENTS'   : False,
         'LOAD_RCMS_FACES'                : False,
         'VERBOSE'                        : False,
-        'RUN_MATCH'                      : False,
-        'RUN_MATCH_DIAGNOSTICS'          : False,
+        'RUN_MATCH'                      : True,
+        'RUN_MATCH_DIAGNOSTICS'          : True,
         'EXPORT_F2S'                     : False,
-        'GENERATE_CMD_METRICS'           : False,
+        'GENERATE_CMD_METRICS'           : True,
         'EXPORT_UNMATCHED'               : False,
         #Export ONLY to your local drive, not to a network folder:
         'EXPORT_UNMASKED'                : True, 

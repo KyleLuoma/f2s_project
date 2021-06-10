@@ -49,14 +49,19 @@ def unmask_and_export(
         cmd_labels = ""
 ):
     all_faces_to_matched_spaces["ASGN_TYPE"] = "PERM"
-    attached_faces_to_matched_spaces = attached_faces_to_matched_spaces.reset_index()
+    attached_faces_to_matched_spaces = attached_faces_to_matched_spaces.reset_index().dropna(
+        subset = ["FMID"]
+    )
     attached_faces_to_matched_spaces["ASGN_TYPE"] = "TEMP"
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.drop_duplicates(
-        subset = "SSN_MASK"
+        subset = 'SSN_MASK'
     )
     all_faces_to_matched_spaces = all_faces_to_matched_spaces.append(
         attached_faces_to_matched_spaces
     )
+#    all_faces_to_matched_spaces = all_faces_to_matched_spaces.drop_duplicates(
+#        subset = ['SSN_MASK', 'FMID']
+#    )
     key_file = pd.read_csv(
         file_config['AC_KEY_FILE'],
         sep = '|',
@@ -98,7 +103,7 @@ def unmask_and_export(
        'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE', 'DRRSA_ADCON',
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
        'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY', 'ASGN_TYPE'
-    ]].drop_duplicates(subset = ['SSN', 'FMID']).to_csv(
+    ]].to_csv(
         file_config['KEY_PATH'] + 
         cmd_labels 
         + "all_faces_matched_spaces_"

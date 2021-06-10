@@ -187,9 +187,10 @@ def match(criteria, faces, spaces, stage, face_space_match, verbose):
         " Assignment Age Rejects:", str(asgn_age_reject_count)
     )
     
-    return faces.where(
-        ~faces.SSN_MASK.isin(face_space_match.SSN_MASK)
-    ).dropna(how = "all"), spaces, face_space_match# -*- coding: utf-8 -*-
+    return faces, spaces, face_space_match
+#    return faces.where(
+#        ~faces.SSN_MASK.isin(face_space_match.SSN_MASK)
+#    ).dropna(how = "all"), spaces, face_space_match# -*- coding: utf-8 -*-
 
 # =============================================================================
 # Iterates through all rows of match phases and calls the core match function
@@ -422,7 +423,10 @@ def split_population_full_runs(
     #Merge AR matches into AC and AGR matches
     face_space_match = ac_agr_ima_face_space_match.where(
         ~ac_agr_ima_face_space_match.FMID.isin(ar_face_space_match.FMID)
-    ).dropna(how = "all").append(ar_face_space_match) 
+    ).dropna(how = "all").append(ar_face_space_match)
+    assign_face_space_match = face_space_match.where(
+        face_space_match.TEMP_STAGE_MATCHED == 0
+    ).dropna(how = "all")
     
     attach_face_space_match = face_space_match.where(
         face_space_match.TEMP_STAGE_MATCHED > 0
@@ -431,4 +435,4 @@ def split_population_full_runs(
         "TEMP_STAGE_MATCHED" : "stage_matched"        
     })
     
-    return unmatched_faces, remaining_spaces, face_space_match, attach_face_space_match 
+    return unmatched_faces, remaining_spaces, assign_face_space_match, attach_face_space_match 
