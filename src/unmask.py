@@ -98,7 +98,7 @@ def unmask_and_export(
        'AOS_FILE_DATE', 'EMILPO_FILE_DATE', 'RCMS_FILE', 'DRRSA_ADCON',
        'DRRSA_ADCON_IN_AOS', 'DRRSA_ARLOC', 'DRRSA_GEOLOCATIONNAME',
        'DRRSA_HOGEO', 'PPA', 'APART_POSN_KEY', 'ASGN_TYPE'
-    ]].to_csv(
+    ]].drop_duplicates(subset = ['SSN', 'FMID']).to_csv(
         file_config['KEY_PATH'] + 
         cmd_labels 
         + "all_faces_matched_spaces_"

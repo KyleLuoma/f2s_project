@@ -15,11 +15,11 @@ def get_run_config():
         'RUN_MATCH'                      : False,
         'RUN_MATCH_DIAGNOSTICS'          : False,
         'EXPORT_F2S'                     : False,
-        'GENERATE_CMD_METRICS'           : True,
+        'GENERATE_CMD_METRICS'           : False,
         'EXPORT_UNMATCHED'               : False,
         #Export ONLY to your local drive, not to a network folder:
-        'EXPORT_UNMASKED'                : False, 
-        'UPDATE_CONNECTIONS'             : True,
+        'EXPORT_UNMASKED'                : True, 
+        'UPDATE_CONNECTIONS'             : False,
         'EXPORT_CMD_SPECS'               : False,
         'EXPORT_UNMASKED_CMD_SPECS'      : False,
         'COMMAND_EXPORT_LIST' : [] #Leave empty to export all commands
@@ -31,13 +31,13 @@ def get_file_config():
     file_config = {
         'DATA_PATH' : "Y:/AOS/master_files",
         #Update this to reflect the current key files for unmasking
-        'AC_KEY_DATE'           : "5-14-2021",
-        'AR_KEY_DATE'           : "5-14-2021",
+        'AC_KEY_DATE'           : "06-09-2021",
+        'AR_KEY_DATE'           : "06-09-2021",
         'KEY_PATH'              : "C:/f2s_data/unmask/",
         #Update to match dates on faces data queries from emilpo and tapdb-r
-        'TAPDBR_FILE_DATE'      : "5-21-2021",
-        'EMILPO_FILE_DATE'      : "5-19-2021",
-        'EMILPO_TEMP_FILE_DATE' : "5-14-2021",
+        'TAPDBR_FILE_DATE'      : "06-09-2021",
+        'EMILPO_FILE_DATE'      : "06-09-2021",
+        'EMILPO_TEMP_FILE_DATE' : "06-09-2021",
         #Update this if using RCMS data as source
         'USAR_DATA_SOURCE'      : "tapdbr", #select "tapdbr" or "rcms"
         'RCMS_FILE'             : "USAR_BDE_SELRES_F2S_19MAY_FINAL_corrected.xlsx",
@@ -55,7 +55,7 @@ def get_file_config():
         'MASKED_CMD_METRICS_EXPORT_PATH'   : "Y:/AOS/f2s_project/export/cmd_metrics/",
         'UNMASKED_CMD_METRICS_EXPORT_PATH' : "C:/f2s_data/unmask/cmd_metrics/",
         #Export File Name note - addes whatever string value you enter here between the file name and date stamp
-        'EXPORT_FILENAME_NOTE'             : "_FY21Billets_"
+        'EXPORT_FILENAME_NOTE'             : "_MOCK6B_"
     }
     
     file_config['AC_KEY_FILE'] = file_config['KEY_PATH'] \
