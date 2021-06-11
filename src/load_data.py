@@ -645,6 +645,7 @@ def load_apart(file_config):
 def load_emilpo(file_config):
     DATA_PATH = file_config['DATA_PATH']
     EMILPO_FILE_DATE = file_config['EMILPO_FILE_DATE']
+    hrc_uics = pd.read_excel(DATA_PATH + "/command_considerations/HRC_MASTER_UIC_LISTING.xlsx")
     emilpo_file = pd.read_csv(
             DATA_PATH + "/emilpo/EMILPO_ASSIGNMENTS_" + EMILPO_FILE_DATE + ".csv",
             sep = '|',
@@ -706,6 +707,7 @@ def load_emilpo(file_config):
             emilpo_file[column] = emilpo_file[column].str.strip()
         except AttributeError:
             pass
+    emilpo_file = emilpo_file.where(~emilpo_file.UIC_CD.isin(hrc_uics.UIC)).dropna(how = "all")
     return emilpo_file
 
 def load_emilpo_temp_assignments(file_config):

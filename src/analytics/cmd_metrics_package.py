@@ -158,8 +158,8 @@ def create_cmd_metrics_packages(
             ac_columns = cmd_uics_needed.columns.tolist()
             ac_columns.remove("DML_CD")
             ac_columns.remove("DMSL_CD")
-            ac_columns.insert(0, "DML_CD")
             ac_columns.insert(0, "DMSL_CD")
+            ac_columns.insert(0, "DML_CD")
             cmd_uics_needed = cmd_uics_needed[ac_columns]
         
         # create a DF with a list of UICs that require templets
@@ -189,7 +189,7 @@ def create_cmd_metrics_packages(
                 uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
                 lsuffix = "_cmd_templets_needed",
                 rsuffix = "_uic_gfcs"
-            ).reset_index()
+            ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
             ar_columns = cmd_templets_needed.columns.tolist()
             ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
@@ -203,13 +203,25 @@ def create_cmd_metrics_packages(
                 uic_dml_dmsl.reset_index(drop = True).set_index("UIC_facesfile"),
                 lsuffix = "_cmd_templets_needed",
                 rsuffix = "_uic_dml_dmsl"
-            ).reset_index()
+            ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
             ac_columns = cmd_templets_needed.columns.tolist()
             ac_columns.remove("DML_CD")
             ac_columns.remove("DMSL_CD")
-            ac_columns.insert(0, "DML_CD")
             ac_columns.insert(0, "DMSL_CD")
+            ac_columns.insert(0, "DML_CD")
             cmd_templets_needed = cmd_templets_needed[ac_columns]
+            
+        if(cmd_templets_needed.shape[0] > 0):
+            print(cmd_templets_needed.columns)
+            cmd_templets_needed = cmd_templets_needed.reset_index(
+                drop = True        
+            ).set_index("UICs requiring templets").join(
+                address_data.reset_index().set_index("UIC")[[
+                    "STACO", "ARLOC", "PH_CITY_TXT", "PH_GEO_TXT", 
+                    "PH_POSTAL_CODE_TXT", "PH_COUNTRY_TXT"        
+                ]]        
+            ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
+            
       
         # create a DF with a list of positions with assignment age > position age
         cmd_asg_age = cmd_df.where(
