@@ -102,22 +102,29 @@ def create_cmd_metrics_packages(
             as_index = False
         ).count().rename(
             columns = {
-                "UIC_facesfile" : "UIC not in AOS",
-                "SSN_MASK" : "Num Soldiers assigned to UIC"
+                "UIC_facesfile" : "UIC not in AOS"
             }        
         )
+        del cmd_uics_needed["SSN_MASK"]
         
         if(cmd_uics_needed.shape[0] > 0):
+            #Check if UIC is in DRRS-A
             cmd_uics_needed["UIC in DRRSA"] = cmd_uics_needed.apply(
                 lambda row: row["UIC not in AOS"] in drrsa.UIC.tolist(),
                 axis = 1
             )
-            
+            #Join DRRSA UIC data to cmd_uics_needed DF
             cmd_uics_needed = cmd_uics_needed.reset_index().set_index("UIC not in AOS").join(
                 drrsa.reset_index().set_index("UIC")[[
                     "ADCON", "ANAME", "LNAME"
                 ]]
-            ).rename(columns = {"ADCON" : "ADCON_PARENT"})
+            ).rename(columns = {
+                    "ADCON" : "ADCON_PARENT",
+                    "ANAME" : "UIC_ANAME",
+                    "LNAME" : "UIC_LNAME"
+                }
+            )
+            #Join address data to cmd_uics_needed DF
             cmd_uics_needed = cmd_uics_needed.join(
                 address_data.reset_index().set_index("UIC")[[
                     "STACO", "ARLOC", "PH_CITY_TXT", "PH_GEO_TXT", 
@@ -127,69 +134,64 @@ def create_cmd_metrics_packages(
             del cmd_uics_needed["index"]
             
             cmd_uics_needed = analytics.lname_generator.derive_gfm_lname(
-                cmd_uics_needed, acronym_list, from_column = "ANAME"       
+                cmd_uics_needed, acronym_list, from_column = "UIC_ANAME", alt_from_column = "UIC_LNAME"       
             )
             
             cmd_uics_needed = cmd_uics_needed.rename(columns = {
                 "ARLOC" : "HOGEO"        
-            })
+            })         
             
-        if(cmd == "AR"):
-            cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index("UIC not in AOS").join(
-                uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
-                lsuffix = "_cmd_uics_needed",
-                rsuffix = "_uic_gfcs"
-            ).reset_index()
-            #Reorder the AR columns
-            ar_columns = cmd_uics_needed.columns.tolist()
-            ar_columns.remove("GFC1")
-            ar_columns.remove("GFC 1 Name")
-            ar_columns.insert(0, "GFC 1 Name")
-            ar_columns.insert(0, "GFC1")
-            cmd_uics_needed = cmd_uics_needed[ar_columns]
-        else:
-            cmd_uics_needed = cmd_uics_needed.reset_index(drop = True).set_index(
-                "UIC not in AOS"        
-            ).join(
-                uic_dml_dmsl.reset_index(drop = True).set_index("UIC_facesfile"),
-                lsuffix = "_cmd_uics_needed",
-                rsuffix = "_uic_dml_dmsl"
-            ).reset_index()
-            ac_columns = cmd_uics_needed.columns.tolist()
-            ac_columns.remove("DML_CD")
-            ac_columns.remove("DMSL_CD")
-            ac_columns.insert(0, "DMSL_CD")
-            ac_columns.insert(0, "DML_CD")
-            cmd_uics_needed = cmd_uics_needed[ac_columns]
+            if(cmd == "AR"):
+                ar_cmd_uics_needed = cmd_df.where(
+                    cmd_df.ADD_UIC_TO_AOS == 1.0        
+                ).dropna(how = "all")[["UIC_facesfile", "GFC1", "GFC 1 Name", "SSN_MASK"]]
+                ar_cmd_uics_needed = ar_cmd_uics_needed.where(
+                    ~ar_cmd_uics_needed.SSN_MASK.isna()        
+                ).dropna(how = "all")
+                ar_cmd_uics_needed = ar_cmd_uics_needed.groupby(
+                    ["UIC_facesfile", "GFC1", "GFC 1 Name"]
+                ).count().reset_index()
+                cmd_uics_needed = ar_cmd_uics_needed.set_index("UIC_facesfile").join(
+                    cmd_uics_needed.set_index("UIC not in AOS")     
+                ).reset_index().rename(
+                    columns = {
+                        "index" : "UIC",
+                        "SSN_MASK" : "AR Templet Requirement"
+                    }
+                )
+            else:
+                ac_cmd_uics_needed = cmd_df.where(
+                    cmd_df.ADD_UIC_TO_AOS == 1.0        
+                ).dropna(how = "all")[["UIC_facesfile", "DML_CD", "DMSL_CD", "SSN_MASK"]]
+                ac_cmd_uics_needed = ac_cmd_uics_needed.where(
+                    ~ac_cmd_uics_needed.SSN_MASK.isna()        
+                ).dropna(how = "all")
+                ac_cmd_uics_needed = ac_cmd_uics_needed.groupby(
+                    ["UIC_facesfile", "DML_CD", "DMSL_CD"]
+                ).count().reset_index()
+                cmd_uics_needed = ac_cmd_uics_needed.set_index("UIC_facesfile").join(
+                    cmd_uics_needed.set_index("UIC not in AOS")        
+                ).reset_index().rename(
+                    columns = {
+                        "UIC_facesfile" : "UIC",
+                        "SSN_MASK" : "Num Soldiers assigned to UIC"
+                    }
+                )
         
         # create a DF with a list of UICs that require templets
-        cmd_templets_needed = cmd_df.query(
-            'CREATE_TEMPLET == 1.0 and STRUC_CMD_CD == "' + cmd + '"' 
-        )[["UIC_facesfile", "UIC_PATH", "SSN_MASK"]]
-        cmd_templets_needed = cmd_templets_needed.groupby(
-            ["UIC_facesfile", "UIC_PATH"],
-            as_index = False
-        ).count().rename(
-            columns = {
-                "UIC_facesfile" : "UICs requiring templets",
-                "SSN_MASK" : cmd + " Templet Requirement"
-            }        
-        )
-        
-        cmd_templets_needed = cmd_templets_needed.set_index(
-            "UICs requiring templets"
-        ).join(
-            uic_templets_needed.set_index("UIC")
-        ).reset_index()
-        
+        cmd_templets_needed = pd.DataFrame        
         if(cmd == "AR"):
-            cmd_templets_needed = cmd_templets_needed.reset_index(drop = True).set_index(
-                "UICs requiring templets"
-            ).join(
-                uic_gfcs.reset_index(drop = True).set_index("UIC_facesfile"),
-                lsuffix = "_cmd_templets_needed",
-                rsuffix = "_uic_gfcs"
-            ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
+            cmd_templets_needed = cmd_df.query(
+                'CREATE_TEMPLET == 1.0 and STRUC_CMD_CD == "' + cmd + '"' 
+            )[["GFC1", "GFC 1 Name", "UIC_facesfile", "UIC_PATH", "SSN_MASK"]]
+            cmd_templets_needed = cmd_templets_needed.groupby(
+                ["UIC_facesfile", "UIC_PATH", "GFC1", "GFC 1 Name"]
+            ).count().reset_index().rename(
+                columns = {
+                    "UIC_facesfile" : "UICs requiring templets",
+                    "SSN_MASK" : "AR Templet Requirement"
+                }
+            )
             ar_columns = cmd_templets_needed.columns.tolist()
             ar_columns.remove("GFC1")
             ar_columns.remove("GFC 1 Name")
@@ -197,13 +199,17 @@ def create_cmd_metrics_packages(
             ar_columns.insert(0, "GFC1")
             cmd_templets_needed = cmd_templets_needed[ar_columns]
         else:
-            cmd_templets_needed = cmd_templets_needed.reset_index(drop = True).set_index(
-                "UICs requiring templets"        
-            ).join(
-                uic_dml_dmsl.reset_index(drop = True).set_index("UIC_facesfile"),
-                lsuffix = "_cmd_templets_needed",
-                rsuffix = "_uic_dml_dmsl"
-            ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
+            cmd_templets_needed = cmd_df.query(
+                'CREATE_TEMPLET == 1.0 and STRUC_CMD_CD == "' + cmd + '"' 
+            )[["DML_CD", "DMSL_CD", "UIC_facesfile", "UIC_PATH", "SSN_MASK"]]
+            cmd_templets_needed = cmd_templets_needed.groupby(
+                ["UIC_facesfile", "UIC_PATH", "DML_CD", "DMSL_CD"]
+            ).count().reset_index().rename(
+                columns = {
+                    "UIC_facesfile" : "UICs requiring templets",
+                    "SSN_MASK" : "AR Templet Requirement"
+                }
+            )
             ac_columns = cmd_templets_needed.columns.tolist()
             ac_columns.remove("DML_CD")
             ac_columns.remove("DMSL_CD")
@@ -221,30 +227,6 @@ def create_cmd_metrics_packages(
                     "PH_POSTAL_CODE_TXT", "PH_COUNTRY_TXT"        
                 ]]        
             ).reset_index().rename(columns = {"index" : "UICs requiring templets"})
-            
-      
-        # create a DF with a list of positions with assignment age > position age
-        cmd_asg_age = cmd_df.where(
-            cmd_df.ASG_OLDER_THAN_POS == 1.0
-        ).dropna(how = "all")[[
-            "UIC_facesfile",
-            "UIC_PATH",
-            "PARNO_facesfile",
-            "LN_facesfile",
-            "FMID",
-            "S_DATE",
-            "POSITION_AGE",
-            "DUTY_ASG_DT",
-            "ASSIGNMENT_AGE",
-            "SSN_MASK"
-        ]].rename(columns = {
-            "UIC_facesfile" : "UIC",
-            "PARNO_facesfile" : "PARNO",
-            "LN_facesfile" : "LN",
-            "FMID" : "Position FMID",
-            "S_DATE" : "Position Start Date",
-            "DUTY_ASG_DT" : "Assignment Start Date"
-        })
         
         export_path = file_config['MASKED_CMD_METRICS_EXPORT_PATH']
         unmask_file_name_modifier = ""
@@ -276,11 +258,6 @@ def create_cmd_metrics_packages(
             cmd_templets_needed.to_excel(
                 writer, sheet_name = "Templets-to-build"
             )
-#==============================================================================
-#             cmd_asg_age.to_excel(
-#                 writer, sheet_name = "Old-Assignments"        
-#             )
-#==============================================================================
             if cmd == "AR":
                 curorg_metrics.to_excel(
                     writer, sheet_name = "CURORG Metrics"            

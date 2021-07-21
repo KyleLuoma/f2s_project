@@ -1,13 +1,23 @@
 # -*- coding: utf-8 -*-
 
 
-def derive_gfm_lname(target, acronyms, from_column = "ANAME"):
+def derive_gfm_lname(
+        target, acronyms, 
+        from_column = "ANAME", 
+        alt_from_column = "LNAME"
+    ):
     #Split the string
     print("Deriving GFM LNames from DRRSA LName or AName")
+    target = target.rename(
+        columns = {
+                from_column : "col_name", 
+                alt_from_column : "alt_col_name"
+        }
+    )
     for row in target.itertuples():
-        name = str(row.ANAME)
-        if(row.LNAME != "NKN"):
-            name = str(row.LNAME)
+        name = str(row.col_name)
+        if(row.alt_col_name != "NKN"):
+            name = str(row.alt_col_name)
         name = name.replace(".", "")
         name = name.replace(",", "")
         name = name.replace("-", " - ")
@@ -27,4 +37,9 @@ def derive_gfm_lname(target, acronyms, from_column = "ANAME"):
         if(name_list[string_index][0] == '0' and len(name_list[string_index]) == 4):
             name_list[string_index] = name_list[string_index].lstrip('0')  
         target.at[row.Index, "GFM_LNAME"] = " ".join(name_list[string_index:len(name_list)])
-    return target
+    return target.rename(
+        columns = {
+            "col_name" : from_column,
+            "alt_col_name" : alt_from_column
+        }
+    )
