@@ -298,16 +298,23 @@ def split_population_full_runs(
         spaces,
         match_phases,
         rmk_codes,
+        use_agr_flag = True
     ):
     # Full run for AR AGR ABL faces and spaces
     print("### Performing split population full runs ###")
     print("#-- AGR Above the line                    --#")
     agr_faces = faces.where(faces.RCC == "AGR").dropna(how = "all")
-    agr_spaces = spaces.where(spaces.RMK1 == "92").dropna(how = "all")
-    for i in range(2, 5):
-        agr_spaces = agr_spaces.append(
-            spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
-        )
+    agr_spaces = pd.DataFrame()
+    if(use_agr_flag):
+        print(" - Filtering non-AGR positions out using the AGR flag")
+        agr_spaces = spaces.where(spaces.AGR == "Y").dropna(how = "all")
+    else:
+        print(" - Filtering non-AGR positions out using RMK code 92")
+        agr_spaces = spaces.where(spaces.RMK1 == "92").dropna(how = "all")
+        for i in range(2, 5):
+            agr_spaces = agr_spaces.append(
+                spaces.where(spaces["RMK" + str(i)] == "92").dropna(how = "all")        
+            )
     agr_spaces = agr_spaces.append(
         spaces.where(spaces.IS_TEMPLET).dropna(how = "all")        
     )
